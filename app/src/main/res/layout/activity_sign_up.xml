@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/gradient_form_login"
+    android:orientation="vertical">
+
+    <include layout="@layout/include_toolbar" />
+
+    <LinearLayout
+        android:id="@+id/lrlLoginForm"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:weightSum="1">
+
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="?attr/actionBarSize"
+            android:layout_weight=".3"
+            android:contentDescription="@null"
+            android:src="@drawable/ic_logo_app_v1" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="@dimen/_10sdp"
+            android:layout_weight=".7"
+            android:orientation="vertical">
+
+
+            <EditText
+                android:hint="@string/label_user_name"
+                android:id="@+id/edtUserName"
+                style="@style/EditTextSignUpStyle"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/btn_sign_in_height"
+                android:background="@drawable/drawable_round_edt"
+                android:drawableLeft="@drawable/ic_user_2" />
+
+
+            <EditText
+                android:id="@+id/edtPassWord"
+                android:hint="@string/label_pwd"
+                style="@style/EditTextSignUpStyle"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/btn_sign_in_height"
+                android:background="@drawable/drawable_round_edt"
+                android:drawableLeft="@drawable/ic_locked"
+                android:inputType="textPassword" />
+
+
+            <EditText
+                android:id="@+id/edtFullName"
+                style="@style/EditTextSignUpStyle"
+                android:hint="@string/label_full_name"
+                android:layout_width="match_parent"
+                android:inputType="text"
+                android:layout_height="@dimen/btn_sign_in_height"
+                android:background="@drawable/drawable_round_edt"
+                android:drawableLeft="@drawable/ic_edit" />
+
+
+            <EditText
+                android:id="@+id/edtEmail"
+                android:hint="@string/label_email"
+                style="@style/EditTextSignUpStyle"
+                android:layout_width="match_parent"
+                android:inputType="textEmailAddress"
+                android:layout_height="@dimen/btn_sign_in_height"
+                android:background="@drawable/drawable_round_edt"
+                android:drawableLeft="@drawable/ic_email" />
+
+
+            <EditText
+                android:id="@+id/edtPhoneNum"
+                style="@style/EditTextSignUpStyle"
+                android:layout_width="match_parent"
+                android:inputType="phone"
+                android:hint="@string/label_phone"
+                android:layout_height="@dimen/btn_sign_in_height"
+                android:background="@drawable/drawable_round_edt"
+                android:drawableLeft="@drawable/ic_phone_num" />
+
+            <include layout="@layout/include_button_login" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/_20sdp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/already_have_account"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/_12sdp" />
+
+                <TextView
+                    android:id="@+id/txtBackToSignIn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:text="@string/sign_in"
+                    android:textColor="@color/white"
+                    android:textSize="@dimen/_12sdp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+</FrameLayout>

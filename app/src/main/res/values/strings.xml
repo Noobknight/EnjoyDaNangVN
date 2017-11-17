@@ -1,0 +1,235 @@
+<resources>
+    <string name="app_name">EnjoyInĐN</string>
+    <string name="loading">Loading</string>
+    <string name="title_activity_main2">Main2Activity</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+
+
+    <string name="btnSyncProduct">Sync Product</string>
+    <string name="txtClothes">Clothes</string>
+    <string name="txtClothesDes">Favorite Clothes Almost for every girl is very important to have beautiful clothes. For most girl sit is a necessity because it’s a method of self-express</string>
+
+    <string name="history_check_in">History Check-in</string>
+    <string name="personal_information">Personal Information</string>
+    <string name="setting">Setting</string>
+    <string name="logout">Logout</string>
+    <string name="version_1_0_0">Version 1.0.0</string>
+
+
+
+    <string name="change_pwd">Change Password</string>
+    <string name="introduction">Introduction</string>
+    <string name="login">Login</string>
+    <string name="sign_up">Sign Up</string>
+    <string name="user_name_profile_display">UserName</string>
+    <string name="email_profile_display">Email</string>
+
+    <string name="label_save">Save</string>
+
+    <string name="sign_in">Sign In</string>
+
+    <string name="idea_connect">or</string>
+
+
+    <string name="forgot_pwd">Forgot Password</string>
+
+    <string name="create_account">Create Account</string>
+
+
+    <string name="connect_with_us">Connect With Us</string>
+
+
+    <string name="already_have_account">Already have an Account ?</string>
+
+
+    <string name="user_name_temp">Tá Võ</string>
+
+    <string name="user_name_profile">admin</string>
+
+
+    <string name="full_name_profile">Tá Võ</string>
+
+    <string name="email_profile">cheatgame.hit@gmail.com</string>
+
+
+    <string name="phone_profile">01674 873 820</string>
+
+
+    <string name="label_user_name">User name</string>
+
+    <string name="label_full_name">Full name</string>
+
+    <string name="label_email">Email</string>
+
+    <string name="label_phone">Phone</string>
+
+
+    <string name="label_old_pwd">Old Password</string>
+
+    <string name="label_new_pwd">New Password</string>
+
+    <string name="label_reinput_pwd">Re-enter New Password</string>
+
+    <string name="label_pwd">Password</string>
+
+
+    <string name="label_cancel">Cancel</string>
+
+
+    <string name="detail_tab_name">Detail</string>
+
+    <string name="review_tab_name">Review</string>
+
+    <string name="schedule_tab_name">Schedule</string>
+
+    <string name="album_tab_name">Album</string>
+
+    <string name="product_meta">created this recipe</string>
+    
+    
+    <string name="load_fail_footer">Load failed</string>
+
+    <string name="try_again_footer">Try Again</string>
+
+    <string name="end_of_result_footer">No more item</string>
+
+
+    <string name="no_data_available">Haven\'t partner right now !</string>
+
+
+    <string name="exchange_rate">&lt;=&gt;</string>
+    <string name="err_msg_email">Email Invalid</string>
+
+
+    <string-array name="item_menu">
+        <item>INFOMATION</item>
+        <item>Introduction</item>
+        <item>Contact Us</item>
+        <item>Favorite</item>
+        <item>Log Check-in</item>
+        <item>PERSIONAL</item>
+        <item>Change Profile</item>
+        <item>Change Password</item>
+        <item>Log out</item>
+    </string-array>
+
+    <string-array name="item_no_sign_in">
+        <item>INFOMATION</item>
+        <item>Introduction</item>
+        <item>Contact Us</item>
+        <item>PERSIONAL</item>
+        <item>Login</item>
+    </string-array>
+
+    <array name="imgs">
+        <item>@drawable/ic_introduction</item>
+        <item>@drawable/ic_introduction</item>
+        <item>@drawable/ic_contact</item>
+        <item>@drawable/ic_favorite</item>
+        <item>@drawable/ic_log_checkin</item>
+        <item>@drawable/ic_log_checkin</item>
+        <item>@drawable/ic_profile</item>
+        <item>@drawable/ic_change_password</item>
+        <item>@drawable/ic_logout</item>
+    </array>
+
+    <string name="Home_Screen_Title">HOME</string>
+    <string name="Favorite_Screen_Title">FAVORITE</string>
+    <string name="Contact_Screen_Title">CONTACT</string>
+    <string name="Login_Screen_Title">LOGIN</string>
+    <string name="Detail_Screen_Title">DETAIL</string>
+    <string name="Log_Check_Screen_Title">LOG CHECK-IN</string>
+    <string name="Change_Pwd_Screen_Title">CHANGE PASSWORD</string>
+    <string name="Update_Profile_Screen_Title">PROFILE</string>
+    <string name="Edit_Profile_Screen_Title">EDIT PROFILE</string>
+    <string name="Introduction_Screen_Title">Introduction</string>
+    <string name="Search_Screen_Title">SEARCH</string>
+    <string name="Scan_Screen_Title">SCAN</string>
+
+    <string name="action_search">Search</string>
+
+    <string name="action_scan">Scan</string>Edit
+
+    <string name="action_edit">Edit</string>
+
+    <string name="action_write_review">Write Review</string>
+
+
+    <string name="utility_title">Utility</string>
+
+    <string name="empty_data_schedule_utility">Partner currently haven\'t schedule and utility</string>
+
+    <string name="fb_login">Facebook Login</string>
+
+    <string name="google_login">Google Login</string>
+
+    <string name="kakao_login">Kakao Login</string>
+
+    <string name="user_name_hint">User name</string>
+
+    <string name="pwd_hint">Password</string>
+
+    <string name="continue_hint">Continue</string>
+
+    <string name="introduction_description">Find all the recent &amp; trending food recipe below</string>
+
+    <string name="contact_address_label">Address</string>
+
+    <string name="from_date">From Date</string>
+
+    <string name="to_date">To Date</string>
+
+    <string name="contact_email_label">Email</string>
+
+    <string name="contact_phone_label">Phone</string>
+
+    <string name="lbNameContact">Name</string>
+
+    <string name="lbPhoneContact">Phone</string>
+
+    <string name="lbEmailContact">Email</string>
+
+    <string name="lbTitleContact">Title</string>
+
+    <string name="lbContentContact">Content</string>
+
+    <string name="btnSubmitContact">Send</string>
+
+
+    <string name="btnUpdateProfile">Update</string>
+
+    <string name="take_a_photo">Take a photo</string>
+
+    <string name="upload_from_gallery">Upload from Gallery</string>
+
+    <string name="hint_partner_name">Name</string>
+
+    <string name="hint_partner_discount">Discount</string>
+
+
+    <string name="password_updated">Your password updated !</string>
+    <string name="exit">Double tap to exit</string>
+
+
+    <string name="search_partner_hint">Search partner</string>
+
+    <string name="msg_confirm_logout">Do you want logout ?</string>
+
+    <string name="btn_order">Order</string>
+
+    <string name="btn_cancel">Cancel</string>
+
+    <string name="hint_amount">Amount</string>
+
+    <string name="hint_write_your_review">Write your review</string>
+
+    <string name="empty_favorite">No favorites yet!</string>
+
+    <string name="dummy_review_content">Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur, adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid ex ea commodi consequatur?</string>
+</resources>
+
+

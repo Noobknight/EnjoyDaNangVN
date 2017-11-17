@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "730999808259",
+    "project_id": "firebase-enjoyindanang"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:730999808259:android:694783c0766c08cb",
+        "android_client_info": {
+          "package_name": "com.travel.enjoyindanang"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "730999808259-4savi3oao5qcvcfn6p7pf2n2e66jq8eb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.travel.enjoyindanang",
+            "certificate_hash": "d13794290cd4d81f5e198ac260edfd4af926c170"
+          }
+        },
+        {
+          "client_id": "730999808259-21que2qt5gk53655s3cb046ev5n8ublr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSa7T5L9rf_yIc0wzdO4bt1eZ_NGoKjcY"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

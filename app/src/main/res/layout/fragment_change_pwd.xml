@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/lrlChangePwd"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="30dp"
+        android:orientation="vertical"
+        android:paddingLeft="@dimen/_10sdp"
+        android:paddingRight="@dimen/_10sdp">
+
+        <TextView
+            android:id="@+id/lblOldPwd"
+            style="@style/LabelProfileStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Home.Account.ChangePassword.Old" />
+
+        <EditText
+            android:id="@+id/edtOldPwd"
+            style="@style/EditTextProfileStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/border_edittext_normal"
+            android:inputType="textPassword"
+            android:padding="8dp" />
+
+        <TextView
+            android:id="@+id/lblNewPwd"
+            style="@style/LabelProfileStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Home.Account.ChangePassword.New" />
+
+        <EditText
+            android:id="@+id/edtPwd"
+            style="@style/EditTextProfileStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/border_edittext_normal"
+            android:inputType="textPassword"
+            android:padding="8dp" />
+
+        <TextView
+            android:id="@+id/lblReNew"
+            style="@style/LabelProfileStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/Home.Account.ChangePassword.ReNew" />
+
+        <EditText
+            android:id="@+id/edtReEnterPwd"
+            style="@style/EditTextProfileStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/border_edittext_normal"
+            android:inputType="textPassword"
+            android:padding="8dp" />
+
+
+        <android.support.v7.widget.AppCompatButton
+            android:id="@+id/btnSave"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="@dimen/_12sdp"
+            android:background="@color/color_button_login"
+            android:text="@string/Action.Save" />
+
+    </LinearLayout>
+</LinearLayout>

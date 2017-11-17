@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/_150sdp"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    android:gravity="bottom"
+    android:background="@drawable/ic_menu_header"
+    android:theme="@style/ThemeOverlay.AppCompat.Dark">
+
+    <!--<de.hdodenhof.circleimageview.CircleImageView-->
+        <!--android:id="@+id/imgAvatarUser"-->
+        <!--android:layout_width="@dimen/avatar_width"-->
+        <!--android:layout_height="@dimen/avatar_height"-->
+        <!--android:src="@drawable/ic_no_user"-->
+        <!--android:layout_gravity="center"-->
+        <!--app:civ_border_color="#FFFFFF" />-->
+
+    <com.facebook.drawee.view.SimpleDraweeView
+        android:layout_gravity="center"
+        android:id="@+id/imgAvatarUser"
+        android:layout_width="@dimen/_80sdp"
+        android:layout_height="@dimen/_80sdp"
+        fresco:placeholderImageScaleType="centerCrop"
+        fresco:placeholderImage="@drawable/placeholder"
+        fresco:progressBarAutoRotateInterval="1000"
+        fresco:progressBarImage="@drawable/loading"
+        fresco:progressBarImageScaleType="centerInside"
+        fresco:roundAsCircle="true"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_height="50dp">
+
+        <TextView
+            android:id="@+id/txtFullName"
+            android:layout_width="match_parent"
+            android:text="@string/user_name_profile_display"
+            android:textStyle="bold"
+            android:gravity="center_horizontal"
+            android:textSize="@dimen/size_display_username"
+            android:textColor="@color/white"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/txtEmail"
+            android:layout_width="match_parent"
+            android:textColor="@color/white"
+            android:text="@string/email_profile_display"
+            android:gravity="center_horizontal"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+</FrameLayout>
