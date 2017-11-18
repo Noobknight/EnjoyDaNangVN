@@ -34,6 +34,7 @@ import com.travel.enjoyindanang.annotation.DialogType;
 import com.travel.enjoyindanang.constant.Constant;
 import com.travel.enjoyindanang.framework.FragmentTransitionInfo;
 import com.travel.enjoyindanang.model.UserInfo;
+import com.travel.enjoyindanang.ui.activity.login.LoginActivity;
 import com.travel.enjoyindanang.ui.activity.scan.ScanActivity;
 import com.travel.enjoyindanang.ui.fragment.change_password.ChangePwdFragment;
 import com.travel.enjoyindanang.ui.fragment.contact.ContactUsFragment;
@@ -46,7 +47,9 @@ import com.travel.enjoyindanang.ui.fragment.profile.ProfileFragment;
 import com.travel.enjoyindanang.ui.fragment.profile_menu.ProfileMenuFragment;
 import com.travel.enjoyindanang.ui.fragment.search.SearchFragment;
 import com.travel.enjoyindanang.utils.DialogUtils;
+import com.travel.enjoyindanang.utils.SharedPrefsUtils;
 import com.travel.enjoyindanang.utils.Utils;
+import com.travel.enjoyindanang.utils.config.ForceUpdateChecker;
 import com.travel.enjoyindanang.utils.event.OnUpdateProfileSuccess;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 
@@ -63,7 +66,7 @@ import cn.refactor.lib.colordialog.ColorDialog;
 import cn.refactor.lib.colordialog.PromptDialog;
 
 public class MainActivity extends MvpActivity<MainPresenter> implements MainView, AdapterView.OnItemClickListener,
-        NavigationView.OnNavigationItemSelectedListener, OnUpdateProfileSuccess {
+        NavigationView.OnNavigationItemSelectedListener, OnUpdateProfileSuccess, ForceUpdateChecker.OnUpdateNeededListener {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final int PERMISSION_REQUEST_CODE = 200;
@@ -182,6 +185,9 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
     @Override
     protected void onResume() {
         super.onResume();
+        if(GlobalApplication.getGlobalApplicationContext().isHasSessionLogin()){
+            ForceUpdateChecker.with(this).onUpdateNeeded(this).check();
+        }
         validAndUpdateFullName();
     }
 
@@ -286,6 +292,7 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
                                 public void onClick(ColorDialog colorDialog) {
                                     colorDialog.dismiss();
                                     GlobalApplication.setUserInfo(null);
+                                    validRedirectLogin();
                                     finish();
                                 }
                             }, new ColorDialog.OnNegativeListener() {
@@ -438,6 +445,7 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
                                     public void onClick(ColorDialog colorDialog) {
                                         mDrawerLayout.closeDrawer(GravityCompat.START);
                                         GlobalApplication.setUserInfo(null);
+                                        validRedirectLogin();
                                         finish();
                                         overridePendingTransitionExit();
                                     }
@@ -563,18 +571,6 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
         trans.commit();
         manager.popBackStack();
         addFrMenu(tag, true);
-
-//        FragmentTransaction transaction = manager.beginTransaction();
-//        if (fragment != null) {
-//            for (int i = 0; i < manager.getFragments().size(); i++) {
-//                Fragment f = manager.getFragments().get(i);
-//                transaction.hide(f);
-//            }
-//            transaction.show(fragment).commit();
-//            setStateTabSelected();
-//            return true;
-//        }
-//        return false;
     }
 
     public void backToFragment(final Fragment fragment) {
@@ -710,5 +706,25 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             frToolBar.setPadding(0, Utils.getStatusBarHeight(), 0, 0);
         }
+    }
+
+    private void validRedirectLogin(){
+        if(GlobalApplication.getGlobalApplicationContext().isHasSessionLogin()){
+            startActivity(new Intent(this, LoginActivity.class));
+            GlobalApplication.getGlobalApplicationContext().setHasSessionLogin(false);
+            SharedPrefsUtils.clearPrefs(Constant.SHARED_PREFS_NAME);
+        }
+    }
+
+    @Override
+    public void onUpdateNeeded(final String updateUrl) {
+        DialogUtils.showDialog(MainActivity.this, DialogType.WARNING, Utils.getLanguageByResId(R.string.Message_Warning_Version_Title),
+                Utils.getLanguageByResId(R.string.Message_Confirm_Update_Title), new PromptDialog.OnPositiveListener() {
+                    @Override
+                    public void onClick(PromptDialog promptDialog) {
+                        promptDialog.dismiss();
+                        Utils.redirectStore(MainActivity.this, updateUrl);
+                    }
+                });
     }
 }

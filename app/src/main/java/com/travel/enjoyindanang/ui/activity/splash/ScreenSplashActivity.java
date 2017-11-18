@@ -16,9 +16,13 @@ import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.annotation.DialogType;
 import com.travel.enjoyindanang.constant.AppError;
 import com.travel.enjoyindanang.constant.Constant;
+import com.travel.enjoyindanang.model.UserInfo;
 import com.travel.enjoyindanang.ui.activity.login.LoginActivity;
+import com.travel.enjoyindanang.ui.activity.main.MainActivity;
 import com.travel.enjoyindanang.utils.DialogUtils;
 import com.travel.enjoyindanang.utils.FileUtils;
+import com.travel.enjoyindanang.utils.JsonUtils;
+import com.travel.enjoyindanang.utils.SharedPrefsUtils;
 import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 import com.travel.enjoyindanang.utils.network.NetworkUtils;
@@ -78,19 +82,27 @@ public class ScreenSplashActivity extends MvpActivity<SplashScreenPresenter> imp
 
 
     /**
-     * Delay 3s to start Home Activity
+     * Delay 1s to start Home Activity
      */
     private void start() {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                openMainActivity();
+                openNextActivity();
             }
         }, SPLASH_TIME_OUT);
     }
 
-    private void openMainActivity() {
-        Intent i = new Intent(ScreenSplashActivity.this, LoginActivity.class);
+    private void openNextActivity() {
+        if (Utils.hasSessionLogin()) {
+            UserInfo userInfo = JsonUtils.convertJsonToObject(SharedPrefsUtils.getStringFromPrefs(Constant.SHARED_PREFS_NAME,
+                    Constant.KEY_EXTRAS_USER_INFO), UserInfo.class);
+            if (userInfo != null) {
+                GlobalApplication.setUserInfo(userInfo);
+            }
+        }
+        Class<?> nextClass = Utils.hasSessionLogin() ? MainActivity.class : LoginActivity.class;
+        Intent i = new Intent(ScreenSplashActivity.this, nextClass);
         startActivity(i);
         finish();
     }
@@ -110,7 +122,7 @@ public class ScreenSplashActivity extends MvpActivity<SplashScreenPresenter> imp
         if (json != null) {
             FileUtils.saveFilePrivateMode(Constant.FILE_NAME_LANGUAGE, json.toString());
             GlobalApplication.getGlobalApplicationContext().setJsLanguage(json);
-            if(!hasTextContent){
+            if (!hasTextContent) {
                 LanguageHelper.getValueByViewId(txtLoadingContent);
             }
             start();
@@ -125,9 +137,11 @@ public class ScreenSplashActivity extends MvpActivity<SplashScreenPresenter> imp
     @Override
     public void initViewLabel() {
         String value = LanguageHelper.getValueByKey(txtLoadingContent.getText().toString().trim());
-        if(StringUtils.isNotEmpty(value)){
+        if (StringUtils.isNotEmpty(value)) {
             txtLoadingContent.setText(value);
             hasTextContent = true;
         }
     }
+
+
 }

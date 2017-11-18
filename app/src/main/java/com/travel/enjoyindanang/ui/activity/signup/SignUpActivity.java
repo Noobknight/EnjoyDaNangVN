@@ -16,15 +16,19 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.refactor.lib.colordialog.PromptDialog;
+
+import com.google.gson.Gson;
 import com.travel.enjoyindanang.GlobalApplication;
 import com.travel.enjoyindanang.MvpActivity;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.annotation.DialogType;
 import com.travel.enjoyindanang.api.model.Repository;
 import com.travel.enjoyindanang.constant.AppError;
+import com.travel.enjoyindanang.constant.Constant;
 import com.travel.enjoyindanang.model.UserInfo;
 import com.travel.enjoyindanang.ui.activity.login.LoginActivity;
 import com.travel.enjoyindanang.utils.DialogUtils;
+import com.travel.enjoyindanang.utils.SharedPrefsUtils;
 import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.ValidUtils;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
@@ -152,6 +156,7 @@ public class SignUpActivity extends MvpActivity<SignUpPresenter> implements Sign
         if (Utils.isNotEmptyContent(resultCallBack)) {
             UserInfo userInfo = resultCallBack.getData().get(0);
             GlobalApplication.setUserInfo(userInfo);
+            saveUserInfo(userInfo);
             clearFormAfterSuccess();
             DialogUtils.showDialog(SignUpActivity.this, 3, DialogUtils.getTitleDialog(1),
                     Utils.getLanguageByResId(R.string.Message_Register_Success), new PromptDialog.OnPositiveListener() {
@@ -210,6 +215,14 @@ public class SignUpActivity extends MvpActivity<SignUpPresenter> implements Sign
             SoftKeyboardManager.hideSoftKeyboard(this, v.getWindowToken(), 0);
         }
         return true;
+    }
+
+    private void saveUserInfo(UserInfo userInfo) {
+        if (userInfo != null) {
+            Gson gson = new Gson();
+            String strJsonUserInfo = gson.toJson(userInfo);
+            SharedPrefsUtils.addDataToPrefs(Constant.SHARED_PREFS_NAME, Constant.KEY_EXTRAS_USER_INFO, strJsonUserInfo);
+        }
     }
 
 }
