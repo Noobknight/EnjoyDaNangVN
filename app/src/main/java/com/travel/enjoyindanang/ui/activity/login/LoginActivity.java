@@ -18,6 +18,7 @@ import com.facebook.internal.CallbackManagerImpl;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.gson.Gson;
 import com.kakao.auth.Session;
 import com.travel.enjoyindanang.GlobalApplication;
 import com.travel.enjoyindanang.MvpActivity;
@@ -31,6 +32,7 @@ import com.travel.enjoyindanang.model.UserInfo;
 import com.travel.enjoyindanang.ui.activity.main.MainActivity;
 import com.travel.enjoyindanang.ui.activity.signup.SignUpActivity;
 import com.travel.enjoyindanang.utils.DialogUtils;
+import com.travel.enjoyindanang.utils.SharedPrefsUtils;
 import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.config.ForceUpdateChecker;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
@@ -55,11 +57,8 @@ import static com.travel.enjoyindanang.ui.activity.login.LoginViaGoogle.RC_SIGN_
  */
 
 public class LoginActivity extends MvpActivity<LoginPresenter> implements LoginView, LoginCallBack, View.OnTouchListener,
-        ForceUpdateChecker.OnUpdateNeededListener{
+        ForceUpdateChecker.OnUpdateNeededListener {
     private static final String TAG = LoginActivity.class.getSimpleName();
-
-//    @BindView(R.id.toolbar)
-//    public Toolbar toolbar;
 
     @BindView(R.id.edtUserName)
     EditText edtUserName;
@@ -128,13 +127,6 @@ public class LoginActivity extends MvpActivity<LoginPresenter> implements LoginV
 
     @Override
     public void setEvent() {
-//        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                finish();
-//                overridePendingTransitionExit();
-//            }
-//        });
         lrlLogin.setOnTouchListener(this);
     }
 
@@ -169,6 +161,7 @@ public class LoginActivity extends MvpActivity<LoginPresenter> implements LoginV
                 break;
             case R.id.txtContinue:
                 intent = new Intent(this, MainActivity.class);
+                GlobalApplication.getGlobalApplicationContext().setHasSessionLogin(false);
                 break;
         }
         if (intent != null) {
@@ -246,8 +239,17 @@ public class LoginActivity extends MvpActivity<LoginPresenter> implements LoginV
             GlobalApplication.setUserInfo(userInfo);
             SoftKeyboardManager.hideSoftKeyboard(this, btnLoginNormal.getWindowToken(), 0);
             Utils.clearForm(edtUserName, edtPassword);
+            saveUserInfo(userInfo);
             redirectMain();
             hideLoading();
+        }
+    }
+
+    private void saveUserInfo(UserInfo userInfo) {
+        if (userInfo != null) {
+            Gson gson = new Gson();
+            String strJsonUserInfo = gson.toJson(userInfo);
+            SharedPrefsUtils.addDataToPrefs(Constant.SHARED_PREFS_NAME, Constant.KEY_EXTRAS_USER_INFO, strJsonUserInfo);
         }
     }
 
@@ -267,7 +269,7 @@ public class LoginActivity extends MvpActivity<LoginPresenter> implements LoginV
     @Override
     public void onLoginFailure(AppError error) {
         hideLoading();
-        DialogUtils.showDialog(this, DialogType.WRONG, Utils.getLanguageByResId(R.string.Dialog_Title_Wrong), error.getMessage());
+        DialogUtils.showDialog(this, PromptDialog.DIALOG_TYPE_WRONG, Utils.getLanguageByResId(R.string.Dialog_Title_Wrong), error.getMessage());
     }
 
     @Override
@@ -327,4 +329,5 @@ public class LoginActivity extends MvpActivity<LoginPresenter> implements LoginV
                     }
                 });
     }
+
 }

@@ -67,4 +67,6 @@ public class Constant {
     public static final String DISCOUNT_TEMPLATE = "%d%s OFF";
 
     public static final int FETCH_UPDATE_TIME = 0;
+    public static final String KEY_EXTRAS_USER_INFO = "user_data";
+    public static final String SHARED_PREFS_NAME= "EnjoySharedPrefs";
 }

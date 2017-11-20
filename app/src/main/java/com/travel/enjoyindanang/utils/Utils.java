@@ -273,4 +273,8 @@ public class Utils {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         activity.startActivity(intent);
     }
+
+    public static boolean hasSessionLogin(){
+        return SharedPrefsUtils.checkPrefs(Constant.SHARED_PREFS_NAME, Constant.KEY_EXTRAS_USER_INFO);
+    }
 }

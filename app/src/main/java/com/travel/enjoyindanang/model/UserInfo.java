@@ -8,6 +8,8 @@ import org.apache.commons.lang3.StringUtils;
 import com.travel.enjoyindanang.constant.Role;
 import com.travel.enjoyindanang.utils.Utils;
 
+import java.io.Serializable;
+
 /**
  * Author: Tavv
  * Created on 20/10/2017.
@@ -15,7 +17,7 @@ import com.travel.enjoyindanang.utils.Utils;
  * Version : 1.0
  */
 
-public class UserInfo {
+public class UserInfo implements Serializable{
 
     @SerializedName("id")
     @Expose

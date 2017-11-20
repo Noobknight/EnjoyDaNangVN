@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
+import android.content.res.Configuration;
 import android.support.multidex.MultiDex;
 import android.support.multidex.MultiDexApplication;
 import android.util.Base64;
@@ -17,7 +18,10 @@ import com.facebook.imagepipeline.core.ImagePipelineConfig;
 import com.kakao.auth.KakaoSDK;
 import com.travel.enjoyindanang.model.UserInfo;
 import com.travel.enjoyindanang.ui.activity.login.KakaoSDKAdapter;
+import com.travel.enjoyindanang.utils.SharedPrefsUtils;
+import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.config.AppUpdateConfiguration;
+import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 
 import org.json.JSONObject;
 
@@ -30,12 +34,13 @@ import static com.kakao.util.helper.Utility.getPackageInfo;
  * Created by chien on 10/8/17.
  */
 
-public class GlobalApplication extends MultiDexApplication {
+public class GlobalApplication extends MultiDexApplication{
     private static final String TAG = GlobalApplication.class.getSimpleName();
     private static volatile GlobalApplication sInstance = null;
     private static volatile Activity currentActivity = null;
     public JSONObject jsLanguage;
     private static UserInfo userInfo;
+    private boolean hasSessionLogin;
 
     @Override
     public void onCreate() {
@@ -48,6 +53,8 @@ public class GlobalApplication extends MultiDexApplication {
         AppEventsLogger.activateApp(this);
         KakaoSDK.init(new KakaoSDKAdapter());
         new AppUpdateConfiguration().configFirebaseUpdate();
+        SharedPrefsUtils.setContext(this);
+        hasSessionLogin = Utils.hasSessionLogin();
     }
     @Override
     protected void attachBaseContext(Context base) {
@@ -82,23 +89,6 @@ public class GlobalApplication extends MultiDexApplication {
         sInstance = null;
     }
 
-    public static String getKeyHash(final Context context) {
-        PackageInfo packageInfo = getPackageInfo(context, PackageManager.GET_SIGNATURES);
-        if (packageInfo == null)
-            return null;
-
-        for (Signature signature : packageInfo.signatures) {
-            try {
-                MessageDigest md = MessageDigest.getInstance("SHA");
-                md.update(signature.toByteArray());
-                return Base64.encodeToString(md.digest(), Base64.NO_WRAP);
-            } catch (NoSuchAlgorithmException e) {
-                Log.w(TAG, "Unable to get MessageDigest. signature=" + signature, e);
-            }
-        }
-        return null;
-    }
-
     public JSONObject getJsLanguage() {
         return jsLanguage;
     }
@@ -113,5 +103,13 @@ public class GlobalApplication extends MultiDexApplication {
 
     public static void setUserInfo(UserInfo userInfo) {
         GlobalApplication.userInfo = userInfo;
+    }
+
+    public boolean isHasSessionLogin() {
+        return hasSessionLogin;
+    }
+
+    public void setHasSessionLogin(boolean hasSessionLogin) {
+        this.hasSessionLogin = hasSessionLogin;
     }
 }
