@@ -4,13 +4,11 @@ import android.Manifest;
 import android.app.Activity;
 import android.location.Location;
 import android.net.http.SslError;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.NestedScrollView;
-import android.text.Html;
 import android.view.View;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebResourceRequest;
@@ -39,15 +37,6 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.HashMap;
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import com.travel.enjoyindanang.MvpFragment;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.api.model.Repository;
@@ -61,6 +50,15 @@ import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.event.OnFindLastLocationCallback;
 import com.travel.enjoyindanang.utils.helper.LocationHelper;
 import com.travel.enjoyindanang.utils.widget.CustomMapView;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.HashMap;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import pub.devrel.easypermissions.EasyPermissions;
 
 /**
@@ -86,7 +84,7 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
     RatingBar ratingBar;
 
     @BindView(R.id.txtContent)
-    TextView txtContent;
+    WebView txtContent;
 
     @BindView(R.id.imgPartner)
     SimpleDraweeView imgPartner;
@@ -209,11 +207,11 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
             this.detailPartner = detailPartner;
             txtTitle.setText(detailPartner.getName());
             ImageUtils.loadImageWithFreso(imgPartner, detailPartner.getPicture());
-            if (Build.VERSION.SDK_INT >= 24) {
-                txtContent.setText(Html.fromHtml(detailPartner.getDescription(), Html.FROM_HTML_MODE_LEGACY));
-            } else {
-                txtContent.setText(Html.fromHtml(detailPartner.getDescription()));
-            }
+//            if (Build.VERSION.SDK_INT >= 24) {
+//                txtContent.setText(Html.fromHtml(detailPartner.getDescription(), Html.FROM_HTML_MODE_LEGACY));
+//            } else {
+//                txtContent.setText(Html.fromHtml(detailPartner.getDescription()));
+//            }
             ratingBar.setRating(detailPartner.getStarReview());
             ratingBar.setFocusable(false);
 
@@ -511,11 +509,7 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
             this.detailPartner = detailPartner;
             txtTitle.setText(detailPartner.getName());
             ImageUtils.loadImageWithFreso(imgPartner, detailPartner.getPicture());
-            if (Build.VERSION.SDK_INT >= 24) {
-                txtContent.setText(Html.fromHtml(detailPartner.getDescription(), Html.FROM_HTML_MODE_LEGACY));
-            } else {
-                txtContent.setText(Html.fromHtml(detailPartner.getDescription()));
-            }
+            txtContent.loadDataWithBaseURL(null, detailPartner.getDescription(), "text/html", "utf-8", null);
             ratingBar.setRating(detailPartner.getStarReview());
             ratingBar.setFocusable(false);
 
