@@ -8,17 +8,16 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.travel.enjoyindanang.R;
-import com.travel.enjoyindanang.model.Partner;
-import com.travel.enjoyindanang.utils.ImageUtils;
-import com.travel.enjoyindanang.utils.event.OnItemClickListener;
-
 import org.apache.commons.collections.CollectionUtils;
 
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import com.travel.enjoyindanang.R;
+import com.travel.enjoyindanang.model.Partner;
+import com.travel.enjoyindanang.utils.ImageUtils;
+import com.travel.enjoyindanang.utils.event.OnItemClickListener;
 
 /**
  * Author: Tavv

@@ -11,6 +11,13 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Locale;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import com.travel.enjoyindanang.MvpFragment;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.annotation.DialogType;
@@ -21,14 +28,6 @@ import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 import com.travel.enjoyindanang.utils.helper.SoftKeyboardManager;
 
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Locale;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-
 /**
  * Author: Tavv
  * Created on 26/10/2017
@@ -37,7 +36,6 @@ import butterknife.OnClick;
  */
 
 public class ContactUsFragment extends MvpFragment<ContactUsPresenter> implements ContactUsView, View.OnTouchListener {
-
 
     private final String LABEL_REQUIRE_TEMPLATE = "%s (<font color=#e51c23>*</font>)";
 

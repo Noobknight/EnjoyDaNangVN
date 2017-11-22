@@ -20,6 +20,13 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.gson.Gson;
 import com.kakao.auth.Session;
+
+import org.apache.commons.lang3.StringUtils;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import cn.refactor.lib.colordialog.PromptDialog;
 import com.travel.enjoyindanang.GlobalApplication;
 import com.travel.enjoyindanang.MvpActivity;
 import com.travel.enjoyindanang.R;
@@ -39,15 +46,7 @@ import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 import com.travel.enjoyindanang.utils.helper.SoftKeyboardManager;
 import com.travel.enjoyindanang.utils.helper.StatusBarCompat;
 
-import org.apache.commons.lang3.StringUtils;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import cn.refactor.lib.colordialog.PromptDialog;
-
 import static com.travel.enjoyindanang.ui.activity.login.LoginViaGoogle.RC_SIGN_IN;
-
 
 /**
  * Author: Tavv

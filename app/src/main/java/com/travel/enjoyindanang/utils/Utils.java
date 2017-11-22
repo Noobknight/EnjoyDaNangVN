@@ -1,6 +1,8 @@
 package com.travel.enjoyindanang.utils;
 
 import android.app.Activity;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -10,12 +12,6 @@ import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
-
-import com.travel.enjoyindanang.GlobalApplication;
-import com.travel.enjoyindanang.api.model.Repository;
-import com.travel.enjoyindanang.constant.Constant;
-import com.travel.enjoyindanang.model.UserInfo;
-import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +24,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+
+import com.travel.enjoyindanang.GlobalApplication;
+import com.travel.enjoyindanang.api.model.Repository;
+import com.travel.enjoyindanang.constant.Constant;
+import com.travel.enjoyindanang.model.UserInfo;
+import com.travel.enjoyindanang.ui.activity.splash.ScreenSplashActivity;
+import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 
 /**
  * Author: Tavv
@@ -272,6 +275,23 @@ public class Utils {
         final Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(updateUrl));
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         activity.startActivity(intent);
+    }
+
+    public static void restartApp() {
+        Intent i = GlobalApplication.getGlobalApplicationContext().getBaseContext().getPackageManager()
+                .getLaunchIntentForPackage(GlobalApplication.getGlobalApplicationContext().getBaseContext().getPackageName());
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        GlobalApplication.getGlobalApplicationContext().startActivity(i);
+    }
+
+    public static void backToSplashScreen() {
+        Intent mStartActivity = new Intent(GlobalApplication.getGlobalApplicationContext(), ScreenSplashActivity.class);
+        int mPendingIntentId = 123456;
+        PendingIntent mPendingIntent = PendingIntent.getActivity(GlobalApplication.getGlobalApplicationContext(), mPendingIntentId, mStartActivity,
+                PendingIntent.FLAG_CANCEL_CURRENT);
+        AlarmManager mgr = (AlarmManager) GlobalApplication.getGlobalApplicationContext().getSystemService(Context.ALARM_SERVICE);
+        mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 100, mPendingIntent);
+        System.exit(0);
     }
 
     public static boolean hasSessionLogin(){

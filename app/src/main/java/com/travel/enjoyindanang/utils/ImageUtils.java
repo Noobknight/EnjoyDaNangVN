@@ -16,8 +16,6 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.squareup.picasso.Picasso;
-import com.travel.enjoyindanang.R;
-import com.travel.enjoyindanang.utils.helper.RoundedTransformation;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -29,6 +27,10 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 
+import com.travel.enjoyindanang.R;
+import com.travel.enjoyindanang.utils.helper.RoundedTransformation;
+
+;
 
 /**
  * Created by quangphuoc on 10/27/16.

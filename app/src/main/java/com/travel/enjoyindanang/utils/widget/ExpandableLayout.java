@@ -21,7 +21,6 @@ import static com.travel.enjoyindanang.utils.widget.ExpandableLayout.State.COLLA
 import static com.travel.enjoyindanang.utils.widget.ExpandableLayout.State.EXPANDED;
 import static com.travel.enjoyindanang.utils.widget.ExpandableLayout.State.EXPANDING;
 
-
 /**
  * Author: Tavv
  * Created on 06/11/2017

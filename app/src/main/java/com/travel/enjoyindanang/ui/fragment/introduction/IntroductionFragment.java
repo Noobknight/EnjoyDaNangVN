@@ -8,17 +8,16 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import org.apache.commons.lang3.StringUtils;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import com.travel.enjoyindanang.MvpFragment;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.annotation.DialogType;
 import com.travel.enjoyindanang.constant.AppError;
 import com.travel.enjoyindanang.model.Introduction;
 import com.travel.enjoyindanang.utils.DialogUtils;
-
-import org.apache.commons.lang3.StringUtils;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * Author: Tavv

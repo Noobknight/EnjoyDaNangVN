@@ -6,12 +6,11 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.view.ViewPager;
 import android.view.View;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import com.travel.enjoyindanang.MvpFragment;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.model.Partner;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * Author: Tavv

@@ -8,6 +8,13 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.apache.commons.collections.CollectionUtils;
+
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import cn.refactor.lib.colordialog.ColorDialog;
 import com.travel.enjoyindanang.MvpFragment;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.annotation.DialogType;
@@ -23,14 +30,6 @@ import com.travel.enjoyindanang.utils.DialogUtils;
 import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.event.OnItemClickListener;
 import com.travel.enjoyindanang.utils.helper.SeparatorDecoration;
-
-import org.apache.commons.collections.CollectionUtils;
-
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import cn.refactor.lib.colordialog.ColorDialog;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 import rx.subscriptions.CompositeSubscription;

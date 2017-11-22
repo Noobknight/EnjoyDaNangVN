@@ -10,14 +10,14 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+
 import org.apache.commons.lang3.StringUtils;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.refactor.lib.colordialog.PromptDialog;
-
-import com.google.gson.Gson;
 import com.travel.enjoyindanang.GlobalApplication;
 import com.travel.enjoyindanang.MvpActivity;
 import com.travel.enjoyindanang.R;
@@ -224,5 +224,4 @@ public class SignUpActivity extends MvpActivity<SignUpPresenter> implements Sign
             SharedPrefsUtils.addDataToPrefs(Constant.SHARED_PREFS_NAME, Constant.KEY_EXTRAS_USER_INFO, strJsonUserInfo);
         }
     }
-
 }

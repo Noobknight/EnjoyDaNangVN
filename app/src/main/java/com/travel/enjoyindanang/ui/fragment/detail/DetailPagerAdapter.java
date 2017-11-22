@@ -20,7 +20,7 @@ public class DetailPagerAdapter extends FragmentStatePagerAdapter {
     private int tabCount;
     private Partner partner;
     //Constructor to the class
-    public DetailPagerAdapter(FragmentManager fm, int tabCount, Partner partner) {
+    public DetailPagerAdapter(FragmentManager fm, int tabCount,Partner partner) {
         super(fm);
         //Initializing tab count
         this.tabCount= tabCount;

@@ -89,11 +89,6 @@ public class NavigationAdapter extends BaseAdapter {
                 holder.imgIcon.setImageResource(menuItem.getIcon());
             }
         }
-        if(holder.span != null){
-            if(position == lstItem.size() - 1){
-                holder.span.setVisibility(View.INVISIBLE);
-            }
-        }
         return convertView;
     }
 

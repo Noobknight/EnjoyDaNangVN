@@ -17,7 +17,6 @@ import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.ui.activity.BaseActivity;
 import com.travel.enjoyindanang.ui.activity.main.MainActivity;
 import com.travel.enjoyindanang.utils.Utils;
-
 import rx.Subscription;
 import rx.subscriptions.CompositeSubscription;
 
@@ -79,7 +78,7 @@ public abstract class BaseFragment extends Fragment {
     }
     public void switchChildFragmentBackStack(Fragment parentFragment, Fragment childFragment, int viewContainer) {
         String FRAGMENT_TAG = childFragment.getClass().getSimpleName();
-        android.support.v4.app.FragmentManager fragmentManager = parentFragment.getChildFragmentManager();
+        FragmentManager fragmentManager = parentFragment.getChildFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         Fragment childFragmentOnStack = fragmentManager.findFragmentByTag(FRAGMENT_TAG);
         if(childFragmentOnStack!=null){
@@ -93,7 +92,7 @@ public abstract class BaseFragment extends Fragment {
     }
     public void switchChildFragmentReload(Fragment parentFragment, Fragment childFragment, int viewContainer) {
         String FRAGMENT_TAG = childFragment.getClass().getSimpleName();
-        android.support.v4.app.FragmentManager fragmentManager = parentFragment.getChildFragmentManager();
+        FragmentManager fragmentManager = parentFragment.getChildFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         Fragment childFragmentOnStack = fragmentManager.findFragmentByTag(FRAGMENT_TAG);
         if(childFragmentOnStack!=null){

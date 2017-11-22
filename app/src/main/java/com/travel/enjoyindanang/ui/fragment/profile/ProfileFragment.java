@@ -23,8 +23,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.facebook.drawee.view.SimpleDraweeView;
+
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import com.travel.enjoyindanang.BuildConfig;
 import com.travel.enjoyindanang.GlobalApplication;
 import com.travel.enjoyindanang.MvpFragment;
@@ -39,16 +50,6 @@ import com.travel.enjoyindanang.utils.ImageUtils;
 import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 import com.travel.enjoyindanang.utils.helper.PhotoHelper;
-
-import org.apache.commons.lang3.StringUtils;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 import rx.Observable;
@@ -239,7 +240,12 @@ public class ProfileFragment extends MvpFragment<ProfilePresenter> implements Pr
             case SELECT_FROM_GALLERY_CODE:
                 if (data != null) {
                     Uri uri = data.getData();
-                    File file = new File(FileUtils.getFilePath(getContext(), uri));
+                    String realPath = FileUtils.getFilePath(getContext(), uri);
+                    if(StringUtils.isBlank(realPath)){
+                        Toast.makeText(mMainActivity, Utils.getLanguageByResId(R.string.Message_Warning_File), Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    File file = new File(realPath);
                     updateAvatar(file);
                 }
                 break;

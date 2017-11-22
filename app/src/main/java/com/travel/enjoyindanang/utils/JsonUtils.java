@@ -1,5 +1,7 @@
 package com.travel.enjoyindanang.utils;
 
+import com.google.gson.Gson;
+
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -10,7 +12,6 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import com.google.gson.Gson;
 import com.travel.enjoyindanang.constant.Constant;
 
 /**
@@ -43,5 +44,4 @@ public class JsonUtils {
         Gson gson = new Gson();
         return gson.fromJson(json, typeInput);
     }
-
 }

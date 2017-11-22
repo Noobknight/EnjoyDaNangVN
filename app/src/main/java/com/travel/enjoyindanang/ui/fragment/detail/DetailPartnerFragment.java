@@ -37,6 +37,15 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.HashMap;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import com.travel.enjoyindanang.MvpFragment;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.api.model.Repository;
@@ -50,15 +59,6 @@ import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.event.OnFindLastLocationCallback;
 import com.travel.enjoyindanang.utils.helper.LocationHelper;
 import com.travel.enjoyindanang.utils.widget.CustomMapView;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.HashMap;
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import pub.devrel.easypermissions.EasyPermissions;
 
 /**
@@ -205,13 +205,8 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
             mMapView.getMapAsync(this);
             DetailPartner detailPartner = data.getData().get(0);
             this.detailPartner = detailPartner;
-            txtTitle.setText(detailPartner.getName());
             ImageUtils.loadImageWithFreso(imgPartner, detailPartner.getPicture());
-//            if (Build.VERSION.SDK_INT >= 24) {
-//                txtContent.setText(Html.fromHtml(detailPartner.getDescription(), Html.FROM_HTML_MODE_LEGACY));
-//            } else {
-//                txtContent.setText(Html.fromHtml(detailPartner.getDescription()));
-//            }
+            txtTitle.setText(detailPartner.getName());
             ratingBar.setRating(detailPartner.getStarReview());
             ratingBar.setFocusable(false);
 
@@ -258,7 +253,6 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
         mGoogleMap.getUiSettings().setMapToolbarEnabled(false);
         drawRouteToPartner();
         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        prgLoading.setVisibility(View.GONE);
         if (EasyPermissions.hasPermissions(getContext(), Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)) {
             loadMapView(detailPartner, googleMap);
         } else {
@@ -336,6 +330,7 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
             mMapView.setVisibility(View.GONE);
             ex.printStackTrace();
         }
+        prgLoading.setVisibility(View.GONE);
         lrlContentDetail.setVisibility(View.VISIBLE);
     }
 

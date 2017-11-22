@@ -7,6 +7,11 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.apache.commons.lang3.StringUtils;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import com.travel.enjoyindanang.GlobalApplication;
 import com.travel.enjoyindanang.MvpFragment;
 import com.travel.enjoyindanang.R;
@@ -18,12 +23,6 @@ import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.ValidUtils;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 import com.travel.enjoyindanang.utils.helper.SoftKeyboardManager;
-
-import org.apache.commons.lang3.StringUtils;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 /**
  * Author: Tavv

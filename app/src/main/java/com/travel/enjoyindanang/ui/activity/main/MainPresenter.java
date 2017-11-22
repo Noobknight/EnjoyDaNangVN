@@ -5,13 +5,12 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.travel.enjoyindanang.BasePresenter;
 import com.travel.enjoyindanang.GlobalApplication;
 import com.travel.enjoyindanang.model.UserInfo;
 import com.travel.enjoyindanang.utils.ImageUtils;
+
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Created by chientruong on 3/27/17.

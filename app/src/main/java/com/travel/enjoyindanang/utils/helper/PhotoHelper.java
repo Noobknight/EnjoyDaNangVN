@@ -13,15 +13,10 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
 import android.widget.Toast;
-
-import com.travel.enjoyindanang.BuildConfig;
-import com.travel.enjoyindanang.GlobalApplication;
-import com.travel.enjoyindanang.R;
-import com.travel.enjoyindanang.model.ImageData;
-import com.travel.enjoyindanang.utils.Utils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -32,11 +27,15 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import com.travel.enjoyindanang.BuildConfig;
+import com.travel.enjoyindanang.GlobalApplication;
+import com.travel.enjoyindanang.R;
+import com.travel.enjoyindanang.model.ImageData;
+import com.travel.enjoyindanang.utils.Utils;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 import static com.travel.enjoyindanang.utils.ScreenUtils.getPixelsFromDP;
-
 
 /**
  * Author: Tavv
@@ -68,13 +67,12 @@ public class PhotoHelper {
         fragment.startActivityForResult(intent, CAPTURE_IMAGE_REQUEST_CODE);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
     public void startGalleryIntent() {
         Intent intent = new Intent();
         intent.setType("image/*");
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
-        }
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
 
         intent.setAction(Intent.ACTION_GET_CONTENT);
         fragment.startActivityForResult(Intent.createChooser(intent, "android.intent.action.SEND_MULTIPLE"), SELECT_FROM_GALLERY_CODE);

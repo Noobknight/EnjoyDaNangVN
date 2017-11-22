@@ -28,7 +28,6 @@ import com.travel.enjoyindanang.ui.fragment.album.SlideshowDialogFragment;
 
 import static com.travel.enjoyindanang.utils.Utils.getString;
 
-
 /**
  * Author: Tavv
  * Created on 29/10/2017

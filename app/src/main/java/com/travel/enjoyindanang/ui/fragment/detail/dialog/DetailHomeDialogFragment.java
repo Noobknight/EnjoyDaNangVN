@@ -22,6 +22,9 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.annotation.DialogType;
 import com.travel.enjoyindanang.model.Partner;
@@ -30,10 +33,6 @@ import com.travel.enjoyindanang.ui.fragment.detail.DetailPagerAdapter;
 import com.travel.enjoyindanang.utils.DialogUtils;
 import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 /**
  * Author: Tavv
@@ -140,7 +139,7 @@ public class DetailHomeDialogFragment extends DialogFragment implements TabLayou
         // Assign window properties to fill the parent
         params.width = WindowManager.LayoutParams.MATCH_PARENT;
         params.height = WindowManager.LayoutParams.MATCH_PARENT;
-        getDialog().getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
+        getDialog().getWindow().setAttributes((WindowManager.LayoutParams) params);
         // Call super onResume after sizing
         super.onResume();
     }

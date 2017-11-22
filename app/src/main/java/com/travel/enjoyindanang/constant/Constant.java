@@ -9,9 +9,9 @@ import com.travel.enjoyindanang.R;
 
 public class Constant {
 
-    public static final String URL_HOST = "http://enjoyindanang.vn/API/";
-    public static final String URL_HOST_IMAGE = "http://enjoyindanang.vn";
-    public static final String URL_FORGOT_PWD = "http://enjoyindanang.vn/Account/ForgotPassword";
+    public static String URL_HOST = "http://enjoyindanang.vn/API/";
+    public static String URL_HOST_IMAGE = "http://enjoyindanang.vn";
+    public static String URL_FORGOT_PWD = "http://enjoyindanang.vn/Account/ForgotPassword";
 
     public static final String URL_DIRECTION_MAPS = "http://maps.google.com/maps?f=d&hl=en&saddr=%1$,.2f,%1$,.2f&daddr=%1$,.2f,%1$,.2f";
 
@@ -59,8 +59,8 @@ public class Constant {
 
     public static final Integer[] INDEX_HEADER_NO_LOGIN = new Integer[]{0, 3};
 
-    public static final String FROM_DATE  = "FromDate";
-    public static final String TO_DATE  = "ToDate";
+    public static final String FROM_DATE = "FromDate";
+    public static final String TO_DATE = "ToDate";
 
     public static final int MAX_SIZE_GALLERY_SELECT = 3;
 
@@ -68,5 +68,5 @@ public class Constant {
 
     public static final int FETCH_UPDATE_TIME = 0;
     public static final String KEY_EXTRAS_USER_INFO = "user_data";
-    public static final String SHARED_PREFS_NAME= "EnjoySharedPrefs";
+    public static final String SHARED_PREFS_NAME = "EnjoySharedPrefs";
 }

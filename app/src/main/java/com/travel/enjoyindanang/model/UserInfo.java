@@ -5,10 +5,10 @@ import com.google.gson.annotations.SerializedName;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.Serializable;
+
 import com.travel.enjoyindanang.constant.Role;
 import com.travel.enjoyindanang.utils.Utils;
-
-import java.io.Serializable;
 
 /**
  * Author: Tavv

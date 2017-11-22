@@ -7,7 +7,8 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+
+import com.facebook.drawee.view.SimpleDraweeView;
 
 import java.util.List;
 
@@ -28,11 +29,11 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumViewHol
     private Context mContext;
 
     public class AlbumViewHolder extends RecyclerView.ViewHolder {
-        public ImageView thumbnail;
+        public SimpleDraweeView thumbnail;
 
         public AlbumViewHolder(View view) {
             super(view);
-            thumbnail = (ImageView) view.findViewById(R.id.thumbnail);
+            thumbnail = (SimpleDraweeView) view.findViewById(R.id.thumbnail);
         }
     }
 
@@ -45,7 +46,7 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumViewHol
     @Override
     public AlbumViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View itemView = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.gallery_thumbnail, parent, false);
+                .inflate(R.layout.item_album, parent, false);
 
         return new AlbumViewHolder(itemView);
     }
@@ -54,7 +55,8 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumViewHol
     public void onBindViewHolder(AlbumViewHolder holder, int position) {
         PartnerAlbum model = images.get(position);
 
-        ImageUtils.loadImageNoRadius(mContext, holder.thumbnail, model.getPicture());
+//        ImageUtils.loadImageNoRadius(mContext, holder.thumbnail, model.getPicture());
+        ImageUtils.loadImageWithFreso(holder.thumbnail, model.getPicture());
 
 //
 //        Glide.with(mContext).load(model.getImage())

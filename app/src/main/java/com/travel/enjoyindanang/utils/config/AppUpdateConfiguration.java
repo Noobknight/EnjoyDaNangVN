@@ -6,11 +6,12 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
-import com.travel.enjoyindanang.BuildConfig;
-import com.travel.enjoyindanang.constant.Constant;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import com.travel.enjoyindanang.BuildConfig;
+import com.travel.enjoyindanang.constant.Constant;
 
 /**
  * Author: Tavv

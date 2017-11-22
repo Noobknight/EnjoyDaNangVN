@@ -1,21 +1,23 @@
 package com.travel.enjoyindanang.ui.fragment.profile_menu;
 
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
-import com.travel.enjoyindanang.MvpFragment;
-import com.travel.enjoyindanang.R;
-import com.travel.enjoyindanang.model.UserInfo;
-import com.travel.enjoyindanang.utils.ImageUtils;
-import com.travel.enjoyindanang.utils.Utils;
-import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 
 import org.apache.commons.lang3.StringUtils;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import com.travel.enjoyindanang.MvpFragment;
+import com.travel.enjoyindanang.R;
+import com.travel.enjoyindanang.model.UserInfo;
+import com.travel.enjoyindanang.utils.ImageUtils;
+import com.travel.enjoyindanang.utils.Utils;
+import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 
 /**
  * Created by chientruong on 1/5/17.
@@ -53,7 +55,21 @@ public class ProfileMenuFragment extends MvpFragment<ProfileMenuPresenter> imple
     private UserInfo userInfo;
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+
+    }
+    @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+//        MenuItem editItem = menu.findItem(R.id.menu_edit);
+//        MenuItem scanItem = menu.findItem(R.id.menu_scan);
+//        editItem.setVisible(false);
+//        editItem.setVisible(true);
+        super.onPrepareOptionsMenu(menu);
+    }
+    @Override
     protected void init(View view) {
+//        setHasOptionsMenu(true);
         userInfo = Utils.getUserInfo();
         if (userInfo!= null){initData();};
     }

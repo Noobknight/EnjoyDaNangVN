@@ -26,7 +26,19 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import cn.refactor.lib.colordialog.PromptDialog;
 import com.travel.enjoyindanang.GlobalApplication;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.annotation.DialogType;
@@ -34,6 +46,7 @@ import com.travel.enjoyindanang.api.ApiCallback;
 import com.travel.enjoyindanang.api.ApiStores;
 import com.travel.enjoyindanang.api.model.Repository;
 import com.travel.enjoyindanang.api.module.AppClient;
+import com.travel.enjoyindanang.constant.AppError;
 import com.travel.enjoyindanang.constant.Constant;
 import com.travel.enjoyindanang.model.ImageData;
 import com.travel.enjoyindanang.model.Partner;
@@ -47,18 +60,6 @@ import com.travel.enjoyindanang.utils.event.OnBackFragmentListener;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 import com.travel.enjoyindanang.utils.helper.PhotoHelper;
 import com.travel.enjoyindanang.utils.helper.SoftKeyboardManager;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import cn.refactor.lib.colordialog.PromptDialog;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -242,6 +243,7 @@ public class WriteReviewDialog extends DialogFragment implements View.OnTouchLis
         }
         if (partner != null) {
             showSending();
+            boolean hasErrorConvertImg = false;
             long userId = Utils.hasLogin() ? userInfo.getUserId() : 0;
             List<String> lstImageBase64 = new ArrayList<>();
             if (mPreviewAdapter != null) {
@@ -254,9 +256,15 @@ public class WriteReviewDialog extends DialogFragment implements View.OnTouchLis
                         if (item.getUri() != null) {
                             count++;
                             File file = new File(FileUtils.getFilePath(getContext(), item.getUri()));
-                            String strConvert = ImageUtils.encodeTobase64(file);
-                            lstImageBase64.set(count, strConvert);
+                            hasErrorConvertImg = file == null;
+                            if(file != null){
+                                String strConvert = ImageUtils.encodeTobase64(file);
+                                lstImageBase64.set(count, strConvert);
+                            }
                         }
+                    }
+                    if(hasErrorConvertImg){
+                        Toast.makeText(getContext(), AppError.DEFAULT_ERROR_MESSAGE, Toast.LENGTH_SHORT).show();
                     }
                 }
             }

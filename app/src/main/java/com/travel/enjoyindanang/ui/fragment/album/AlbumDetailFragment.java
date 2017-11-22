@@ -2,7 +2,7 @@ package com.travel.enjoyindanang.ui.fragment.album;
 
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
@@ -18,7 +18,8 @@ import com.travel.enjoyindanang.constant.AppError;
 import com.travel.enjoyindanang.model.Partner;
 import com.travel.enjoyindanang.model.PartnerAlbum;
 import com.travel.enjoyindanang.utils.DialogUtils;
-import com.travel.enjoyindanang.utils.helper.SpacesItemDecoration;
+import com.travel.enjoyindanang.utils.Utils;
+import com.travel.enjoyindanang.utils.helper.SeparatorDecoration;
 
 /**
  * Author: Tavv
@@ -31,6 +32,8 @@ public class AlbumDetailFragment extends MvpFragment<AlbumDetailPresenter> imple
     private static final String TAG = AlbumDetailFragment.class.getSimpleName();
 
     private AlbumAdapter mAdapter;
+
+    private static final int VERTICAL_ITEM_SPACE = 5;
 
     @BindView(R.id.rcv_album)
     RecyclerView recyclerView;
@@ -54,9 +57,10 @@ public class AlbumDetailFragment extends MvpFragment<AlbumDetailPresenter> imple
     @Override
     protected void init(View view) {
         images = new ArrayList<>();
-        RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(mMainActivity.getApplicationContext(), 2);
-        int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.spacing);
-        recyclerView.addItemDecoration(new SpacesItemDecoration(spacingInPixels));
+//        RecyclerView.LayoutManager mLayoutManager = new GridLayoutManager(mMainActivity.getApplicationContext(), 2);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
+//        int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.spacing);
+        recyclerView.addItemDecoration(new SeparatorDecoration(getContext(), Utils.getColorRes(R.color.material_grey_300), VERTICAL_ITEM_SPACE));
         recyclerView.setHasFixedSize(false);
         recyclerView.setLayoutManager(mLayoutManager);
         recyclerView.setItemAnimator(new DefaultItemAnimator());

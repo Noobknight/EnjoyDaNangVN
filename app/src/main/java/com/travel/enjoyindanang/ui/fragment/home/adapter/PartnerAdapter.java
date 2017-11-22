@@ -10,17 +10,17 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
-import com.travel.enjoyindanang.R;
-import com.travel.enjoyindanang.constant.Constant;
-import com.travel.enjoyindanang.model.Partner;
-import com.travel.enjoyindanang.utils.ImageUtils;
-import com.travel.enjoyindanang.utils.event.OnItemClickListener;
 
 import java.util.List;
 import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import com.travel.enjoyindanang.R;
+import com.travel.enjoyindanang.constant.Constant;
+import com.travel.enjoyindanang.model.Partner;
+import com.travel.enjoyindanang.utils.ImageUtils;
+import com.travel.enjoyindanang.utils.event.OnItemClickListener;
 
 /**
  * Author: Tavv

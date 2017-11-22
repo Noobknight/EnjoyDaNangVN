@@ -1,5 +1,8 @@
 package com.travel.enjoyindanang.utils.helper;
 
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.os.Build;
 import android.support.v7.widget.SearchView;
 import android.view.View;
 import android.widget.Button;
@@ -9,6 +12,8 @@ import android.widget.TextView;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Locale;
 
 import com.travel.enjoyindanang.GlobalApplication;
 import com.travel.enjoyindanang.constant.AppLanguage;
@@ -111,5 +116,29 @@ public class LanguageHelper {
             ;
         }
         return null;
+    }
+
+    public static String getSystemLanguage(){
+        Locale locale = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            locale = Resources.getSystem().getConfiguration().getLocales().get(0);
+        } else {
+            locale = Resources.getSystem().getConfiguration().locale;
+        }
+        return locale.getLanguage();
+    }
+
+
+    public static String getSystemLanguage(Configuration configs){
+        if (configs != null) {
+            Locale locale = null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                locale = configs.getLocales().get(0);
+            } else {
+                locale = configs.locale;
+            }
+            return locale.getLanguage();
+        }
+        return "";
     }
 }

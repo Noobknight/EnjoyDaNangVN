@@ -20,14 +20,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
-
-import java.util.List;
-
-import butterknife.ButterKnife;
 import com.travel.enjoyindanang.LogApp;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.api.ApiStores;
@@ -37,6 +29,14 @@ import com.travel.enjoyindanang.model.NetworkStatus;
 import com.travel.enjoyindanang.ui.activity.main.MainActivity;
 import com.travel.enjoyindanang.utils.ConnectionUltils;
 import com.travel.enjoyindanang.utils.helper.FragmentHelper;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import java.util.List;
+
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import rx.Observable;
 import rx.Subscriber;
@@ -414,6 +414,7 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     public void initToolbar(Toolbar toolbar) {
         if (toolbar != null) {
+            toolbar.setTitle("");
             setSupportActionBar(toolbar);
             ActionBar actionBar = getSupportActionBar();
             actionBar.setHomeButtonEnabled(true);
