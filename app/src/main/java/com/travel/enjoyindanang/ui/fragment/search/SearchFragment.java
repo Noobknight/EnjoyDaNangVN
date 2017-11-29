@@ -102,11 +102,13 @@ public class SearchFragment extends MvpFragment<SearchPresenter> implements iSea
     protected SearchPresenter createPresenter() {
         return new SearchPresenter(this);
     }
+
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
 
     }
+
     @Override
     protected void init(View view) {
         mBaseActivity.setTitle(Utils.getLanguageByResId(R.string.Home_Search));
@@ -142,7 +144,7 @@ public class SearchFragment extends MvpFragment<SearchPresenter> implements iSea
     @Override
     public void onResume() {
         super.onResume();
-        if(mMapView != null){
+        if (mMapView != null) {
             mMapView.onResume();
             mLocationHelper.checkPlayServices();
         }
@@ -152,7 +154,7 @@ public class SearchFragment extends MvpFragment<SearchPresenter> implements iSea
     @Override
     public void onPause() {
         super.onPause();
-        if(mMapView != null){
+        if (mMapView != null) {
             mMapView.onPause();
         }
     }
@@ -160,7 +162,7 @@ public class SearchFragment extends MvpFragment<SearchPresenter> implements iSea
     @Override
     public void onStop() {
         super.onStop();
-        if(mMapView != null){
+        if (mMapView != null) {
             mMapView.onStop();
         }
     }
@@ -168,18 +170,22 @@ public class SearchFragment extends MvpFragment<SearchPresenter> implements iSea
     @Override
     public void onLowMemory() {
         super.onLowMemory();
-        if(mMapView != null){
+        if (mMapView != null && mGoogleMap != null) {
             mMapView.onLowMemory();
             mGoogleMap.clear();
         }
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        if(mGoogleMap != null){
+    public void onDestroyView() {
+        if (mGoogleMap != null) {
             mGoogleMap.clear();
         }
+        if (mMapView != null) {
+            mMapView.onDestroy();
+            mMapView = null;
+        }
+        super.onDestroyView();
     }
 
     @Override

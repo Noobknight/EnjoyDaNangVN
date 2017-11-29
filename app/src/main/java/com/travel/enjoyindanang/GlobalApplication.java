@@ -1,34 +1,31 @@
 package com.travel.enjoyindanang;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
-import android.content.pm.Signature;
-import android.content.res.Configuration;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.support.multidex.MultiDex;
 import android.support.multidex.MultiDexApplication;
-import android.util.Base64;
-import android.util.Log;
 
+import com.crashlytics.android.Crashlytics;
 import com.facebook.appevents.AppEventsLogger;
 import com.facebook.drawee.backends.pipeline.DraweeConfig;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
 import com.kakao.auth.KakaoSDK;
 import com.travel.enjoyindanang.model.UserInfo;
+import com.travel.enjoyindanang.receiver.LanguageReceiver;
 import com.travel.enjoyindanang.ui.activity.login.KakaoSDKAdapter;
 import com.travel.enjoyindanang.utils.SharedPrefsUtils;
 import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.config.AppUpdateConfiguration;
+import com.travel.enjoyindanang.utils.helper.DomainHelper;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 
 import org.json.JSONObject;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-
-import static com.kakao.util.helper.Utility.getPackageInfo;
+import io.fabric.sdk.android.Fabric;
 
 /**
  * Created by chien on 10/8/17.
@@ -40,21 +37,32 @@ public class GlobalApplication extends MultiDexApplication{
     private static volatile Activity currentActivity = null;
     public JSONObject jsLanguage;
     private static UserInfo userInfo;
+    private String strLanguage;
     private boolean hasSessionLogin;
+    private BroadcastReceiver mBroadcastReceiver = null;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        ImagePipelineConfig frescoConfig = ImagePipelineConfig.newBuilder(getApplicationContext()) .setDownsampleEnabled(true).build();
+        ImagePipelineConfig frescoConfig = ImagePipelineConfig.newBuilder(getApplicationContext()).setDownsampleEnabled(true).build();
         DraweeConfig draweeConfig = DraweeConfig.newBuilder()
                 .build();
         Fresco.initialize(this, frescoConfig, draweeConfig);
         sInstance = this;
         AppEventsLogger.activateApp(this);
         KakaoSDK.init(new KakaoSDKAdapter());
+        if(!BuildConfig.DEBUG_MODE){
+            final Fabric fabric = new Fabric.Builder(this)
+                    .kits(new Crashlytics())
+                    .debuggable(BuildConfig.DEBUG_MODE)
+                    .build();
+            Fabric.with(fabric);
+        }
         new AppUpdateConfiguration().configFirebaseUpdate();
         SharedPrefsUtils.setContext(this);
         hasSessionLogin = Utils.hasSessionLogin();
+//        setUpLangReceiver();
+//        checkLanguage();
     }
     @Override
     protected void attachBaseContext(Context base) {
@@ -76,7 +84,7 @@ public class GlobalApplication extends MultiDexApplication{
      */
     public static GlobalApplication getGlobalApplicationContext() {
         if(sInstance == null)
-            throw new IllegalStateException("this application does not inherit com.kakao.GlobalApplication");
+            throw new IllegalStateException("this application does not inherit com.travel.enjoyindanang.GlobalApplication");
         return sInstance;
     }
 
@@ -87,6 +95,9 @@ public class GlobalApplication extends MultiDexApplication{
     public void onTerminate() {
         super.onTerminate();
         sInstance = null;
+        if(mBroadcastReceiver != null){
+            unregisterReceiver(mBroadcastReceiver);
+        }
     }
 
     public JSONObject getJsLanguage() {
@@ -105,11 +116,38 @@ public class GlobalApplication extends MultiDexApplication{
         GlobalApplication.userInfo = userInfo;
     }
 
+    private void checkLanguage(){
+        strLanguage = LanguageHelper.getSystemLanguage();
+        if(strLanguage.equalsIgnoreCase("vi")){
+            new DomainHelper(DomainHelper.DomainType.VN);
+        }else{
+            new DomainHelper(DomainHelper.DomainType.KR);
+        }
+    }
+
     public boolean isHasSessionLogin() {
         return hasSessionLogin;
     }
 
     public void setHasSessionLogin(boolean hasSessionLogin) {
         this.hasSessionLogin = hasSessionLogin;
+    }
+
+
+    public BroadcastReceiver setUpLangReceiver() {
+        if (mBroadcastReceiver == null) {
+            mBroadcastReceiver = new LanguageReceiver();
+            IntentFilter filter = new IntentFilter(Intent.ACTION_LOCALE_CHANGED);
+            registerReceiver(mBroadcastReceiver, filter);
+        }
+        return mBroadcastReceiver;
+    }
+
+    public String getStrLanguage() {
+        return strLanguage;
+    }
+
+    public void setStrLanguage(String strLanguage) {
+        this.strLanguage = strLanguage;
     }
 }

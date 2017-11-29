@@ -10,8 +10,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,9 +27,12 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.annotation.DialogType;
+import com.travel.enjoyindanang.constant.Constant;
 import com.travel.enjoyindanang.model.Partner;
+import com.travel.enjoyindanang.ui.activity.main.MainActivity;
 import com.travel.enjoyindanang.ui.activity.scan.ScanActivity;
 import com.travel.enjoyindanang.ui.fragment.detail.DetailPagerAdapter;
+import com.travel.enjoyindanang.ui.fragment.home.PartnerCategoryFragment;
 import com.travel.enjoyindanang.utils.DialogUtils;
 import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
@@ -51,8 +54,10 @@ public class DetailHomeDialogFragment extends DialogFragment implements TabLayou
 
     private Partner partner = null;
 
-    @BindView(R.id.toolbar)
-    Toolbar mToolbar;
+//    @BindView(R.id.toolbar)
+//    Toolbar mToolbar;
+    @BindView(R.id.imgLogo)
+    ImageView imgLogo;
     @BindView(R.id.name)
     TextView toolbarName;
     @BindView(R.id.edit_profile)
@@ -61,6 +66,8 @@ public class DetailHomeDialogFragment extends DialogFragment implements TabLayou
     ImageView imgScan;
     @BindView(R.id.frToolBar)
     FrameLayout frToolBar;
+
+    private MainActivity mMainActivity;
 
     public static DetailHomeDialogFragment newInstance(Partner partner) {
         DetailHomeDialogFragment fragment = new DetailHomeDialogFragment();
@@ -78,9 +85,23 @@ public class DetailHomeDialogFragment extends DialogFragment implements TabLayou
         mViewPager = (ViewPager) rootView.findViewById(R.id.viewpager);
         mTabLayout = (TabLayout) rootView.findViewById(R.id.tabs);
         initToolbar();
+        mMainActivity = (MainActivity) getActivity();
         return rootView;
     }
 
+    @OnClick(R.id.img_back)
+    public void onClick(View view) {
+        if(mMainActivity != null){
+            Fragment fragment = mMainActivity.getActiveFragment();
+            if(fragment instanceof PartnerCategoryFragment){
+                dismiss();
+            }else{
+                mMainActivity.setShowMenuItem(Constant.SHOW_QR_CODE);
+                dismiss();
+            }
+        }
+
+    }
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -150,17 +171,18 @@ public class DetailHomeDialogFragment extends DialogFragment implements TabLayou
         setHeightToolbar();
         tvProfile.setVisibility(View.GONE);
         imgScan.setVisibility(View.VISIBLE);
+        toolbarName.setVisibility(View.GONE);
     }
 
     private void setEvents() {
         mTabLayout.addOnTabSelectedListener(this);
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabLayout));
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dismiss();
-            }
-        });
+//        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                dismiss();
+//            }
+//        });
     }
 
     @Override

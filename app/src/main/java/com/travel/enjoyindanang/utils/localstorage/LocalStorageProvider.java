@@ -19,7 +19,6 @@ import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Root;
 import android.provider.DocumentsProvider;
 import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.os.EnvironmentCompat;
 import android.text.TextUtils;
@@ -40,7 +39,6 @@ import com.travel.enjoyindanang.R;
  * Version : 1.0
  */
 
-@RequiresApi(api = Build.VERSION_CODES.KITKAT)
 public class LocalStorageProvider extends DocumentsProvider {
 
     /**

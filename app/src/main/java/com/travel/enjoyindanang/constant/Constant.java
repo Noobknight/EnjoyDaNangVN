@@ -17,6 +17,8 @@ public class Constant {
 
     public static String EXCHANGE_RATE_FORMAT = "1$ = %s VND";
 
+    public static String DISCOUNT_TEMPLATE = "%d%s OFF";
+
     public static final String DATE_SERVER_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
 
     public static final int SPLASH_TIME_OUT = 1000;
@@ -25,12 +27,15 @@ public class Constant {
 
     public static final String REGEX_URL = "((http)[s]?(://).*)";
 
+    public static final String REGEX_NUMBER = "[0-9]+";
+
     public static final String API_OK = "200";
     public static final String API_401 = "401";
     public static final String API_402 = "402";
     public static final String API_403 = "403";
     public static final String API_404 = "404";
     public static final String API_405 = "405";
+    public static final String API_500 = "500";
     public static final String API_501 = "501";
     public static final String API_502 = "502";
     public static final String MSG_SUCCESS = "success";
@@ -64,9 +69,21 @@ public class Constant {
 
     public static final int MAX_SIZE_GALLERY_SELECT = 3;
 
-    public static final String DISCOUNT_TEMPLATE = "%d%s OFF";
+    public static final int FETCH_UPDATE_TIME = 0; // fetch every 1h
 
-    public static final int FETCH_UPDATE_TIME = 0;
     public static final String KEY_EXTRAS_USER_INFO = "user_data";
-    public static final String SHARED_PREFS_NAME = "EnjoySharedPrefs";
+    public static final String KEY_EXTRAS_CLOSE_POPUP = "popup_close_home";
+    public static final String KEY_EXTRAS_DATE_CLOSE_POPUP = "date_close_popup";
+    public static final String SHARED_PREFS_NAME= "EnjoyDNSharedPrefs";
+
+    public static final int  SHOW_BACK_ICON = 1;
+    public static final int  HIDE_BACK_ICON = 2;
+    public static final int  SHOW_QR_CODE = 1;
+    public static final int  SHOW_EDIT_PROFILE = 2;
+    public static final int  HIDE_ALL_ITEM_MENU = 3;
+    public static final int  SHOW_MENU_BACK = 4;
+
+    public static final int DEFAULT_ITEM_EACH_FETCH = 6;
+
+    public static final String TITLE_HOME_VN = "TRANG CHỦ";
 }

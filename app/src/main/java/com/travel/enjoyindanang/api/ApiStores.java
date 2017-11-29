@@ -14,6 +14,7 @@ import com.travel.enjoyindanang.model.Introduction;
 import com.travel.enjoyindanang.model.Language;
 import com.travel.enjoyindanang.model.Partner;
 import com.travel.enjoyindanang.model.PartnerAlbum;
+import com.travel.enjoyindanang.model.Popup;
 import com.travel.enjoyindanang.model.Reply;
 import com.travel.enjoyindanang.model.Review;
 import com.travel.enjoyindanang.model.Schedule;
@@ -170,7 +171,10 @@ public interface ApiStores {
 
     @FormUrlEncoded
     @POST("GlobalApi.asmx/CheckIn")
-    Observable<Repository<HistoryCheckin>> checkIn(@Field("partnerId") int partnerId, @Field("customerId") long customerId, @Field("amount") int amount);
+    Observable<Repository<HistoryCheckin>> checkIn(@Field("partnerId") int partnerId,
+                                                   @Field("customerId") long customerId,
+                                                   @Field("amount") int amount,
+                                                   @Field("passcode") String passCode);
 
     @FormUrlEncoded
     @POST("GlobalApi.asmx/HistoryCheckIn")
@@ -203,6 +207,9 @@ public interface ApiStores {
                                                 @Field("image1") String image1,
                                                 @Field("image2") String image2,
                                                 @Field("image3") String image3);
+
+    @GET("GlobalApi.asmx/PopupAds")
+    Observable<Repository<Popup>> getPopupInformation();
 
 //    @FormUrlEncoded
 //    @POST("/login")

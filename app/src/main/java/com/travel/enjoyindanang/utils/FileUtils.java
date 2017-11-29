@@ -16,10 +16,6 @@ import android.support.v4.content.CursorLoader;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
-import com.travel.enjoyindanang.BuildConfig;
-import com.travel.enjoyindanang.GlobalApplication;
-import com.travel.enjoyindanang.utils.localstorage.LocalStorageProvider;
-
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
@@ -30,6 +26,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Comparator;
+
+import com.travel.enjoyindanang.BuildConfig;
+import com.travel.enjoyindanang.GlobalApplication;
+import com.travel.enjoyindanang.utils.localstorage.LocalStorageProvider;
 
 import static com.travel.enjoyindanang.GlobalApplication.getGlobalApplicationContext;
 

@@ -10,7 +10,6 @@ import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatButton;
-import android.support.v7.widget.Toolbar;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -60,8 +59,8 @@ public class ScanActivity extends MvpActivity<ScanQRCodePresenter> implements Sc
     private ZXingScannerView mScannerView;
 
     private UserInfo userInfo;
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
+//    @BindView(R.id.toolbar)
+//    Toolbar toolbar;
 
     @BindView(R.id.scan_container)
     ViewGroup contentFrame;
@@ -80,13 +79,6 @@ public class ScanActivity extends MvpActivity<ScanQRCodePresenter> implements Sc
         // * Wait 2 seconds to resume the preview.
         // * On older devices continuously stopping and resuming camera preview can result in freezing the app.
         // * I don't know why this is the case but I don't have the time to figure out.
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mScannerView.resumeCameraPreview(ScanActivity.this);
-            }
-        }, 1000);
     }
 
     @Override
@@ -119,7 +111,8 @@ public class ScanActivity extends MvpActivity<ScanQRCodePresenter> implements Sc
         ImageView imgPartner = (ImageView) dialogView.findViewById(R.id.imgPartner);
         TextView txtDiscount = (TextView) dialogView.findViewById(R.id.txtDiscount);
         final EditText edtAmount = (EditText) dialogView.findViewById(R.id.edtAmount);
-        LanguageHelper.getValueByViewId(edtAmount, txtPartnerName, txtDiscount, btnCancel, btnOk);
+        final EditText edtPwd = (EditText) dialogView.findViewById(R.id.edtPassWord);
+        LanguageHelper.getValueByViewId(edtAmount, txtPartnerName, txtDiscount, btnCancel, btnOk, edtPwd);
         edtAmount.addTextChangedListener(new NumberTextWatcher(edtAmount));
         txtPartnerName.setText(String.format(Locale.getDefault(), formatPartnerName, partner.getName()));
         txtDiscount.setText(Utils.getLanguageByResId(R.string.Discount) + ": " + partner.getDiscount() + " (%)");
@@ -128,24 +121,25 @@ public class ScanActivity extends MvpActivity<ScanQRCodePresenter> implements Sc
             @Override
             public void onClick(View v) {
                 int amount;
+                String strPwd;
                 try {
                     amount = Integer.parseInt(getNumber(edtAmount.getText().toString()));
+                    strPwd = String.valueOf(edtPwd.getText());
                 } catch (Exception e) {
                     DialogUtils.showDialog(ScanActivity.this, DialogType.WARNING, Utils.getLanguageByResId(R.string.Dialog_Title_Warning),
                             Utils.getLanguageByResId(R.string.Message_Wrong_Amount));
                     return;
                 }
-                if (amount != 0) {
+                if (amount != 0 && StringUtils.isNotBlank(strPwd)) {
+                    v.setEnabled(false);
                     if (Utils.hasLogin()) {
-                        v.setEnabled(false);
-                        mvpPresenter.requestOrder(partner.getId(), userInfo.getUserId(), amount);
+                        mvpPresenter.requestOrder(partner.getId(), userInfo.getUserId(), amount, strPwd);
                     } else {
-                        v.setEnabled(false);
-                        mvpPresenter.requestOrder(partner.getId(), 0, amount);
+                        mvpPresenter.requestOrder(partner.getId(), 0, amount, strPwd);
                     }
                 } else {
                     DialogUtils.showDialog(ScanActivity.this, DialogType.WARNING, Utils.getLanguageByResId(R.string.Dialog_Title_Warning),
-                            Utils.getLanguageByResId(R.string.Message_Wrong_Amount_Empty));
+                            Utils.getLanguageByResId(R.string.Validate_Message_All_Field_Empty));
                 }
             }
         });
@@ -153,6 +147,7 @@ public class ScanActivity extends MvpActivity<ScanQRCodePresenter> implements Sc
             @Override
             public void onClick(View v) {
                 alertDialog.dismiss();
+                mScannerView.resumeCameraPreview(ScanActivity.this);
             }
         });
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
@@ -185,6 +180,7 @@ public class ScanActivity extends MvpActivity<ScanQRCodePresenter> implements Sc
                         promptDialog.dismiss();
                         if (alertDialog != null && alertDialog.isShowing()) {
                             alertDialog.dismiss();
+                            mScannerView.resumeCameraPreview(ScanActivity.this);
                         }
                     }
                 });
@@ -227,7 +223,7 @@ public class ScanActivity extends MvpActivity<ScanQRCodePresenter> implements Sc
     @Override
     public void init() {
         userInfo = Utils.getUserInfo();
-        initToolbar(toolbar);
+//        initToolbar(toolbar);
         mScannerView = new ZXingScannerView(this) {
             @Override
             protected IViewFinder createViewFinderView(Context context) {
@@ -263,13 +259,13 @@ public class ScanActivity extends MvpActivity<ScanQRCodePresenter> implements Sc
 
     @Override
     public void setEvent() {
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-                overridePendingTransitionExit();
-            }
-        });
+//        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                finish();
+//                overridePendingTransitionExit();
+//            }
+//        });
     }
 
 
@@ -310,5 +306,15 @@ public class ScanActivity extends MvpActivity<ScanQRCodePresenter> implements Sc
             }
             canvas.drawText(StringUtils.EMPTY, tradeMarkLeft, tradeMarkTop, PAINT);
         }
+    }
+
+    private void resumeScan() {
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mScannerView.resumeCameraPreview(ScanActivity.this);
+            }
+        }, 1000);
     }
 }

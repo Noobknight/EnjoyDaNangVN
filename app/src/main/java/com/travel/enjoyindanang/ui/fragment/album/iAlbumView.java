@@ -1,10 +1,10 @@
 package com.travel.enjoyindanang.ui.fragment.album;
 
-import java.util.List;
-
 import com.travel.enjoyindanang.constant.AppError;
 import com.travel.enjoyindanang.iBaseView;
 import com.travel.enjoyindanang.model.PartnerAlbum;
+
+import java.util.List;
 
 /**
  * Author: Tavv

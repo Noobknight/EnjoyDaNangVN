@@ -36,6 +36,7 @@ import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.annotation.DialogType;
 import com.travel.enjoyindanang.api.model.Repository;
 import com.travel.enjoyindanang.constant.AppError;
+import com.travel.enjoyindanang.constant.Constant;
 import com.travel.enjoyindanang.framework.FragmentTransitionInfo;
 import com.travel.enjoyindanang.model.Banner;
 import com.travel.enjoyindanang.model.Category;
@@ -299,7 +300,7 @@ public class HomeFragment extends MvpFragment<HomePresenter> implements iHomeVie
 //        nestedScrollView.setOnScrollChangeListener(loadmorePartner);
 //        countCategoryClick++;
 //        lstPartner.clear();
-        mMainActivity.enableBackButton(true);
+//        mMainActivity.enableBackButton(true);
         Category category = (Category) parent.getItemAtPosition(position);
         FragmentTransitionInfo transitionInfo = new FragmentTransitionInfo(R.anim.slide_up_in, R.anim.slide_to_left, R.anim.slide_up_in, R.anim.slide_to_left);
         mMainActivity.addFragment(PartnerCategoryFragment.newInstance(category.getId(), category.getName()),
@@ -364,6 +365,7 @@ public class HomeFragment extends MvpFragment<HomePresenter> implements iHomeVie
         } else {
             MainActivity activity = (MainActivity) getActivity();
             activity.currentTab = HomeTab.None;
+            activity.setShowMenuItem(Constant.SHOW_MENU_BACK);
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -404,6 +406,7 @@ public class HomeFragment extends MvpFragment<HomePresenter> implements iHomeVie
     @Override
     public void onFetchFailure(AppError error) {
         Log.e(TAG, "onFetchFailure " + error.getMessage());
+        DialogUtils.showDialog(getContext(), DialogType.WRONG, DialogUtils.getTitleDialog(3), error.getMessage());
     }
 
     private void clearFirstTimeData() {

@@ -17,10 +17,14 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.Toolbar;
+import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.AppCompatButton;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -29,32 +33,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.drawee.view.SimpleDraweeView;
-import com.travel.enjoyindanang.GlobalApplication;
-import com.travel.enjoyindanang.MvpActivity;
-import com.travel.enjoyindanang.R;
-import com.travel.enjoyindanang.annotation.DialogType;
-import com.travel.enjoyindanang.constant.Constant;
-import com.travel.enjoyindanang.framework.FragmentTransitionInfo;
-import com.travel.enjoyindanang.model.NavigationItem;
-import com.travel.enjoyindanang.model.UserInfo;
-import com.travel.enjoyindanang.ui.activity.login.LoginActivity;
-import com.travel.enjoyindanang.ui.activity.scan.ScanActivity;
-import com.travel.enjoyindanang.ui.fragment.change_password.ChangePwdFragment;
-import com.travel.enjoyindanang.ui.fragment.contact.ContactUsFragment;
-import com.travel.enjoyindanang.ui.fragment.favorite.FavoriteFragment;
-import com.travel.enjoyindanang.ui.fragment.home.HomeFragment;
-import com.travel.enjoyindanang.ui.fragment.home.HomeTab;
-import com.travel.enjoyindanang.ui.fragment.introduction.IntroductionFragment;
-import com.travel.enjoyindanang.ui.fragment.logcheckin.CheckinHistoryFragment;
-import com.travel.enjoyindanang.ui.fragment.profile.ProfileFragment;
-import com.travel.enjoyindanang.ui.fragment.profile_menu.ProfileMenuFragment;
-import com.travel.enjoyindanang.ui.fragment.search.SearchFragment;
-import com.travel.enjoyindanang.utils.DialogUtils;
-import com.travel.enjoyindanang.utils.SharedPrefsUtils;
-import com.travel.enjoyindanang.utils.Utils;
-import com.travel.enjoyindanang.utils.config.ForceUpdateChecker;
-import com.travel.enjoyindanang.utils.event.OnUpdateProfileSuccess;
-import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -70,6 +48,37 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.refactor.lib.colordialog.ColorDialog;
 import cn.refactor.lib.colordialog.PromptDialog;
+import com.travel.enjoyindanang.GlobalApplication;
+import com.travel.enjoyindanang.MvpActivity;
+import com.travel.enjoyindanang.R;
+import com.travel.enjoyindanang.annotation.DialogType;
+import com.travel.enjoyindanang.api.model.Repository;
+import com.travel.enjoyindanang.constant.AppError;
+import com.travel.enjoyindanang.constant.Constant;
+import com.travel.enjoyindanang.framework.FragmentTransitionInfo;
+import com.travel.enjoyindanang.model.NavigationItem;
+import com.travel.enjoyindanang.model.Popup;
+import com.travel.enjoyindanang.model.UserInfo;
+import com.travel.enjoyindanang.ui.activity.login.LoginActivity;
+import com.travel.enjoyindanang.ui.activity.scan.ScanActivity;
+import com.travel.enjoyindanang.ui.fragment.change_password.ChangePwdFragment;
+import com.travel.enjoyindanang.ui.fragment.contact.ContactUsFragment;
+import com.travel.enjoyindanang.ui.fragment.favorite.FavoriteFragment;
+import com.travel.enjoyindanang.ui.fragment.home.HomeFragment;
+import com.travel.enjoyindanang.ui.fragment.home.HomeTab;
+import com.travel.enjoyindanang.ui.fragment.introduction.IntroductionFragment;
+import com.travel.enjoyindanang.ui.fragment.logcheckin.CheckinHistoryFragment;
+import com.travel.enjoyindanang.ui.fragment.profile.ProfileFragment;
+import com.travel.enjoyindanang.ui.fragment.profile_menu.ProfileMenuFragment;
+import com.travel.enjoyindanang.ui.fragment.search.SearchFragment;
+import com.travel.enjoyindanang.utils.DateUtils;
+import com.travel.enjoyindanang.utils.DialogUtils;
+import com.travel.enjoyindanang.utils.ImageUtils;
+import com.travel.enjoyindanang.utils.SharedPrefsUtils;
+import com.travel.enjoyindanang.utils.Utils;
+import com.travel.enjoyindanang.utils.config.ForceUpdateChecker;
+import com.travel.enjoyindanang.utils.event.OnUpdateProfileSuccess;
+import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 
 public class MainActivity extends MvpActivity<MainPresenter> implements MainView, AdapterView.OnItemClickListener,
         NavigationView.OnNavigationItemSelectedListener, OnUpdateProfileSuccess, ForceUpdateChecker.OnUpdateNeededListener {
@@ -87,14 +96,17 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
     private final int LOGIN = 4;
     private boolean isOpen;
     private final String IS_OPEN = "IS_OPEN";
-    @BindView(R.id.toolbar)
-    Toolbar toolbar;
+
     @BindView(R.id.name)
     TextView toolbarName;
-    @BindView(R.id.edit_profile)
-    TextView tvProfile;
     @BindView(R.id.img_scan)
     ImageView imgScan;
+
+    @BindView(R.id.img_back)
+    ImageView imgBack;
+
+    @BindView(R.id.imgLogo)
+    ImageView imgLogo;
 
     @BindView(R.id.frToolBar)
     FrameLayout frToolBar;
@@ -110,8 +122,8 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
     @BindView(R.id.img_search)
     ImageView imgSearch;
 
-    @BindView(R.id.img_profile)
-    ImageView imgProfile;
+    @BindView(R.id.img_menu)
+    ImageView imgMenu;
 
     @BindView(R.id.lv_drawer_nav)
     ListView lvDrawerNav;
@@ -141,13 +153,11 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
         setContentView(R.layout.activity_main);
     }
 
-
     @Override
     public void init() {
-        settingToolbar();
-        LanguageHelper.getValueByViewId(tvProfile);
+        setHeightToolbar();
         mDrawerToggle = new ActionBarDrawerToggle(
-                this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
+                this, mDrawerLayout, null, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
             @Override
             public void onDrawerOpened(View drawerView) {
             }
@@ -161,8 +171,11 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
         mNavigationView.setNavigationItemSelectedListener(this);
         currentTab = HomeTab.getCurrentTab(0);
         setStateTabSelected();
-        setShowMenuItem(3);
+        setShowMenuItem(Constant.HIDE_ALL_ITEM_MENU);
         mvpPresenter.loadInfoUserMenu(this, imgAvatarUser, txtFullName, txtEmail);
+        if (!disableShowPopup()) {
+            mvpPresenter.getPopup();
+        }
         if (!checkPermission()) {
             requestPermission();
         }
@@ -196,7 +209,7 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
         int[] icons;
         String[] titles;
         List<NavigationItem> navigationItems = null;
-        try{
+        try {
             lstIndexHeaders = new ArrayList<>(Arrays.asList(hasLogin ? Constant.INDEX_HEADER_NORMAL : Constant.INDEX_HEADER_NO_LOGIN));
 
             icons = hasLogin ? Constant.ICON_MENU_NORMAL : Constant.ICON_MENU_NO_LOGIN;
@@ -206,19 +219,22 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
             navigationItems = NavigationListItem.getNavigationAdapter(this, lstIndexHeaders, null, icons, titles);
 
             if (CollectionUtils.isNotEmpty(navigationItems)) {
-                NavigationAdapter mNavigationAdapter = new NavigationAdapter(this,navigationItems);
+                NavigationAdapter mNavigationAdapter = new NavigationAdapter(this, navigationItems);
                 lvDrawerNav.setAdapter(mNavigationAdapter);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             lstIndexHeaders = new ArrayList<>(Arrays.asList(this.hasLogin ? Constant.INDEX_HEADER_NORMAL : Constant.INDEX_HEADER_NO_LOGIN));
             icons = this.hasLogin ? Constant.ICON_MENU_NORMAL : Constant.ICON_MENU_NO_LOGIN;
             titles = this.hasLogin ? LanguageHelper.getTitleMenuNormal() : LanguageHelper.getTitleMenuNoLogin();
-            if(ArrayUtils.isNotEmpty(titles)){
+            if (ArrayUtils.isNotEmpty(titles) && ArrayUtils.isNotEmpty(icons)) {
                 navigationItems = NavigationListItem.getNavigationAdapter(this, lstIndexHeaders, null, icons, titles);
                 if (CollectionUtils.isNotEmpty(navigationItems)) {
-                    NavigationAdapter mNavigationAdapter = new NavigationAdapter(this,navigationItems);
+                    NavigationAdapter mNavigationAdapter = new NavigationAdapter(this, navigationItems);
                     lvDrawerNav.setAdapter(mNavigationAdapter);
                 }
+            } else {
+                finish();
+                startActivity(getIntent());
             }
         }
 
@@ -254,24 +270,20 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
                 if (fragment != null) {
                     String tag = fragment.getTag();
                     if (tag.equals(HomeFragment.class.getName())) {
-                        setShowMenuItem(1);
+                        setShowMenuItem(Constant.SHOW_QR_CODE);
                         EventBus.getDefault().post("hasBackFragment");
                         currentTab = HomeTab.Home;
                         lvDrawerNav.clearChoices();
                     } else if (tag.equals(SearchFragment.class.getName())) {
-                        setShowMenuItem(3);
+                        setShowMenuItem(Constant.HIDE_ALL_ITEM_MENU);
                         currentTab = HomeTab.Search;
-                        lvDrawerNav.clearChoices();
-                    } else if (tag.equals(ProfileMenuFragment.class.getName())) {
-                        setShowMenuItem(2);
-                        currentTab = HomeTab.Profile;
                         lvDrawerNav.clearChoices();
                     } else {
                         currentTab = HomeTab.None;
                         if (tag.equals(ProfileFragment.class.getName())) {
-                            setShowMenuItem(3);
                             lvDrawerNav.setSelection(7);
                         }
+                        setShowMenuItem(Constant.SHOW_MENU_BACK);
                     }
                     setStateTabSelected();
                     lvDrawerNav.requestLayout();
@@ -302,7 +314,8 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
                     }
                 }
                 getSupportFragmentManager().popBackStack();
-                enableBackButton(false);
+//                enableBackButton(false);
+                setShowMenuItem(Constant.SHOW_MENU_BACK);
             } else {
                 if (Utils.hasLogin()) {
                     if (isExit) {
@@ -364,9 +377,8 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
 
     }
 
-    @OnClick({R.id.img_home, R.id.img_profile, R.id.img_search, R.id.img_scan, R.id.edit_profile})
+    @OnClick({R.id.img_home, R.id.img_search, R.id.img_scan, R.id.img_menu, R.id.edit_profile, R.id.img_back})
     public void onClick(View view) {
-        enableBackButton(true);
         switch (view.getId()) {
             case R.id.img_home:
                 if (currentTab != HomeTab.Home) {
@@ -390,20 +402,13 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
                     }
                 }
                 break;
-            case R.id.img_profile:
-                if (currentTab != HomeTab.Profile) {
-                    if (Utils.hasLogin()) {
-                        Fragment fragment = getSupportFragmentManager().findFragmentByTag(ProfileMenuFragment.class.getName());
-                        if (fragment == null) {
-                            addFrMenu(ProfileMenuFragment.class.getName(), true);
-                        } else {
-                            currentTab = HomeTab.Profile;
-                            resurfaceFragment(fragment, ProfileMenuFragment.class.getName());
-                        }
-                    } else {
-                        DialogUtils.showDialog(MainActivity.this, DialogType.WARNING, DialogUtils.getTitleDialog(2), Utils.getLanguageByResId(R.string.Message_You_Need_Login));
-                    }
+            case R.id.img_menu:
+                if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+                    mDrawerLayout.closeDrawer(GravityCompat.START);
+                } else {
+                    mDrawerLayout.openDrawer(GravityCompat.START);
                 }
+
                 break;
             case R.id.img_scan:
                 if (Utils.hasLogin()) {
@@ -416,6 +421,9 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
             case R.id.edit_profile:
                 addFr(ProfileFragment.class.getName(), CHANGE_PROFILE);
                 currentTab = HomeTab.None;
+                break;
+            case R.id.img_back:
+                this.onBackPressed();
                 break;
         }
     }
@@ -431,7 +439,9 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
     public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
         if (Utils.hasLogin()) {
             if (StringUtils.isNotEmpty(Utils.getUserInfo().getFullName())) {
-                enableBackButton(true);
+                if (position != LOGOUT) {
+                    setShowMenuItem(Constant.SHOW_BACK_ICON);
+                }
                 setShowMenuItem(1);
                 switch (position) {
                     case 0:
@@ -486,7 +496,7 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
                         Utils.getLanguageByResId(R.string.Home_Account_Fullname_NotEmpty));
             }
         } else {
-            enableBackButton(true);
+            setShowMenuItem(Constant.SHOW_BACK_ICON);
             switch (position) {
                 case 0:
                     break;
@@ -536,25 +546,16 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
             case Home:
                 imgHome.setImageResource(R.drawable.tab1_selected_3x);
                 imgSearch.setImageResource(R.drawable.tab2_default_3x);
-                imgProfile.setImageResource(R.drawable.tab3_default_3x);
                 setNameToolbar(Utils.getLanguageByResId(R.string.Home).toUpperCase());
                 break;
             case Search:
                 imgHome.setImageResource(R.drawable.tab1_default_3x);
                 imgSearch.setImageResource(R.drawable.tab2_selected_3x);
-                imgProfile.setImageResource(R.drawable.tab3_default_3x);
                 setNameToolbar(Utils.getLanguageByResId(R.string.Home_Search).toUpperCase());
-                break;
-            case Profile:
-                imgHome.setImageResource(R.drawable.tab1_default_3x);
-                imgSearch.setImageResource(R.drawable.tab2_default_3x);
-                imgProfile.setImageResource(R.drawable.tab3_selected_3x);
-                setNameToolbar(Utils.getLanguageByResId(R.string.Home_Account_Profile).toUpperCase());
                 break;
             case None:
                 imgHome.setImageResource(R.drawable.tab1_default_3x);
                 imgSearch.setImageResource(R.drawable.tab2_default_3x);
-                imgProfile.setImageResource(R.drawable.tab3_default_3x);
                 break;
             default:
                 break;
@@ -623,15 +624,19 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
         int resultCamera = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA);
         int resultWrite = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
         int resultRead = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE);
-
+        int resultLocation = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION);
+        int resultCroarse = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION);
         return resultCamera == PackageManager.PERMISSION_GRANTED &&
-                resultWrite == PackageManager.PERMISSION_GRANTED && resultRead == PackageManager.PERMISSION_GRANTED;
+                resultWrite == PackageManager.PERMISSION_GRANTED && resultRead == PackageManager.PERMISSION_GRANTED
+                && resultLocation == PackageManager.PERMISSION_GRANTED &&
+                resultCroarse == PackageManager.PERMISSION_GRANTED;
     }
 
     private void requestPermission() {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_CODE);
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                PERMISSION_REQUEST_CODE);
 
     }
 
@@ -703,11 +708,6 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
     }
 
 
-    public void showMenuOptions(){
-        imgScan.setVisibility(View.VISIBLE);
-        tvProfile.setVisibility(View.GONE);
-    }
-
     /**
      * 1:Show Scan Menu Item
      * 2: Show Edit Menu Item
@@ -717,17 +717,39 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
      */
     public void setShowMenuItem(int type) {
         switch (type) {
-            case 1:
+            case Constant.SHOW_MENU_BACK:
                 imgScan.setVisibility(View.VISIBLE);
-                tvProfile.setVisibility(View.GONE);
+                installNav(Constant.SHOW_BACK_ICON);
                 break;
-            case 2:
-                imgScan.setVisibility(View.GONE);
-                tvProfile.setVisibility(View.VISIBLE);
+            case Constant.SHOW_QR_CODE:
+                imgScan.setVisibility(View.VISIBLE);
+                installNav(Constant.HIDE_BACK_ICON);
                 break;
-            case 3:
+            case Constant.HIDE_ALL_ITEM_MENU:
                 imgScan.setVisibility(View.GONE);
-                tvProfile.setVisibility(View.GONE);
+                installNav(Constant.SHOW_BACK_ICON);
+                break;
+        }
+    }
+
+    /**
+     * Show/hide back icon
+     *
+     * @param type
+     */
+    public void installNav(int type) {
+        switch (type) {
+            case Constant.HIDE_BACK_ICON:
+                imgBack.setVisibility(View.GONE);
+                if(toolbarName.getText().toString().equalsIgnoreCase(Constant.TITLE_HOME_VN)){
+                    toolbarName.setVisibility(View.GONE);
+                }else {
+                    toolbarName.setVisibility(View.VISIBLE);
+                }
+                break;
+            case Constant.SHOW_BACK_ICON:
+                imgBack.setVisibility(View.VISIBLE);
+                toolbarName.setVisibility(View.GONE);
                 break;
         }
     }
@@ -740,9 +762,9 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
 
     private void validRedirectLogin() {
         if (GlobalApplication.getGlobalApplicationContext().isHasSessionLogin()) {
-            startActivity(new Intent(this, LoginActivity.class));
             GlobalApplication.getGlobalApplicationContext().setHasSessionLogin(false);
-            SharedPrefsUtils.clearPrefs(Constant.SHARED_PREFS_NAME);
+            SharedPrefsUtils.removeVariableFromPrefs(Constant.SHARED_PREFS_NAME, Constant.KEY_EXTRAS_USER_INFO);
+            startActivity(new Intent(this, LoginActivity.class));
         }
     }
 
@@ -758,17 +780,17 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
                 });
     }
 
-    public void enableBackButton(boolean enable){
-        if(enable) {
+    public void enableBackButton(boolean enable) {
+        if (enable) {
             // Remove hamburger
             mDrawerToggle.setDrawerIndicatorEnabled(false);
             // Show back button
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+//            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             // when DrawerToggle is disabled i.e. setDrawerIndicatorEnabled(false), navigation icon
             // clicks are disabled i.e. the UP button will not work.
             // We need to add a listener, as in below, so DrawerToggle will forward
             // click events to this listener.
-            if(!mToolBarNavigationListenerIsRegistered) {
+            if (!mToolBarNavigationListenerIsRegistered) {
                 mDrawerToggle.setToolbarNavigationClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -782,7 +804,7 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
 
         } else {
             // Remove back button
-            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+//            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             // Show hamburger
             mDrawerToggle.setDrawerIndicatorEnabled(true);
             // Remove the/any drawer toggle listener
@@ -792,10 +814,71 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
 
     }
 
-    private void settingToolbar(){
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayShowTitleEnabled(false);
-        setHeightToolbar();
+    @Override
+    public void onShowPopup(Repository<Popup> response) {
+        showPopupMain(response.getData().get(0));
     }
 
+    @Override
+    public void onError(AppError error) {
+        Log.e(TAG, "onError " + error.getMessage());
+    }
+
+    private void showPopupMain(final Popup popup) {
+        if (popup == null) return;
+        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        final View dialogView = inflater.inflate(R.layout.dialog_home, null);
+        dialogBuilder.setView(dialogView);
+//        AppCompatButton btnViewDetail = (AppCompatButton) dialogView.findViewById(R.id.btnPopupLeft);
+        final AppCompatButton btnHide = (AppCompatButton) dialogView.findViewById(R.id.btnPopupCenter);
+        AppCompatButton btnClose = (AppCompatButton) dialogView.findViewById(R.id.btnPopupRight);
+
+//        btnViewDetail.setText(popup.getTextButtonLeft());
+        btnHide.setText(popup.getTextButtonCenter());
+        btnClose.setText(popup.getTextButtonRight());
+
+        SimpleDraweeView imgPopup = (SimpleDraweeView) dialogView.findViewById(R.id.imgPopup);
+
+        ImageUtils.loadImageWithFreso(imgPopup, popup.getImage());
+
+        final AlertDialog alertDialog = dialogBuilder.create();
+
+        alertDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        alertDialog.setCancelable(false);
+
+//        btnViewDetail.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                if(popup.getHref().length() > 1){
+//                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(popup.getHref()));
+//                    startActivity(intent);
+//                }
+//            }
+//        });
+
+        btnHide.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                SharedPrefsUtils.addDataToPrefs(Constant.SHARED_PREFS_NAME, Constant.KEY_EXTRAS_CLOSE_POPUP, false);
+                alertDialog.dismiss();
+            }
+        });
+        btnClose.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String currentTime = DateUtils.getCurrentTime();
+                SharedPrefsUtils.addDataToPrefs(Constant.SHARED_PREFS_NAME, Constant.KEY_EXTRAS_CLOSE_POPUP, true);
+                SharedPrefsUtils.addDataToPrefs(Constant.SHARED_PREFS_NAME, Constant.KEY_EXTRAS_DATE_CLOSE_POPUP, currentTime);
+                alertDialog.dismiss();
+            }
+        });
+        alertDialog.show();
+    }
+
+    private boolean disableShowPopup() {
+        String strTimeClosePopup = SharedPrefsUtils.getStringFromPrefs(Constant.SHARED_PREFS_NAME, Constant.KEY_EXTRAS_DATE_CLOSE_POPUP);
+        boolean hasClose = SharedPrefsUtils.getBooleanFromPrefs(Constant.SHARED_PREFS_NAME, Constant.KEY_EXTRAS_CLOSE_POPUP);
+        return hasClose && (StringUtils.isNotBlank(strTimeClosePopup) && !DateUtils.dayIsYesterday(strTimeClosePopup));
+    }
 }

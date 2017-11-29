@@ -2,9 +2,10 @@ package com.travel.enjoyindanang.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.travel.enjoyindanang.utils.Utils;
 
 import java.io.Serializable;
+
+import com.travel.enjoyindanang.utils.Utils;
 
 /**
  * Author: Tavv
