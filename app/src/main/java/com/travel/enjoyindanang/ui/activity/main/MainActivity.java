@@ -742,14 +742,14 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
             case Constant.HIDE_BACK_ICON:
                 imgBack.setVisibility(View.GONE);
                 if(toolbarName.getText().toString().equalsIgnoreCase(Constant.TITLE_HOME_VN)){
-                    toolbarName.setVisibility(View.GONE);
+                    toolbarName.setText(StringUtils.EMPTY);
                 }else {
                     toolbarName.setVisibility(View.VISIBLE);
                 }
                 break;
             case Constant.SHOW_BACK_ICON:
                 imgBack.setVisibility(View.VISIBLE);
-                toolbarName.setVisibility(View.GONE);
+                toolbarName.setVisibility(View.INVISIBLE);
                 break;
         }
     }

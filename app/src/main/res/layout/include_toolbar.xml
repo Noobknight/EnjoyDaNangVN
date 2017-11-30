@@ -39,8 +39,8 @@
             android:layout_alignParentLeft="true"
             android:textColor="@color/white"
             android:textSize="@dimen/_15ssp"
-            android:textStyle="bold"
-            android:visibility="visible" />
+            android:visibility="gone"
+            android:textStyle="bold" />
 
         <ImageView
             android:id="@+id/imgLogo"
