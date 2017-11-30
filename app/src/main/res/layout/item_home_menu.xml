@@ -2,8 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:fresco="http://schemas.android.com/apk/res-auto"
     android:id="@+id/ll_root"
-    android:layout_width="@dimen/_80sdp"
-    android:layout_height="@dimen/_82sdp"
+    android:layout_width="@dimen/_85sdp"
+    android:layout_height="@dimen/_85sdp"
     android:background="@color/white"
     android:gravity="center"
     android:orientation="vertical"
@@ -27,6 +27,7 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:ellipsize="end"
+        android:paddingBottom="@dimen/_3sdp"
         android:textColor="@color/color_title_category"
         android:textSize="@dimen/_12ssp" />
 
