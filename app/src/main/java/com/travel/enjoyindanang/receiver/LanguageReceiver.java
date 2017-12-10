@@ -4,11 +4,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import com.travel.enjoyindanang.GlobalApplication;
-import com.travel.enjoyindanang.utils.helper.LanguageHelper;
-
 import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
+
+import com.travel.enjoyindanang.GlobalApplication;
+import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 
 /**
  * Author: Tavv

@@ -11,6 +11,13 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.google.gson.Gson;
+
+import org.apache.commons.lang3.StringUtils;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import cn.refactor.lib.colordialog.PromptDialog;
 import com.travel.enjoyindanang.GlobalApplication;
 import com.travel.enjoyindanang.MvpActivity;
 import com.travel.enjoyindanang.R;
@@ -26,13 +33,6 @@ import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.ValidUtils;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 import com.travel.enjoyindanang.utils.helper.SoftKeyboardManager;
-
-import org.apache.commons.lang3.StringUtils;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import cn.refactor.lib.colordialog.PromptDialog;
 
 /**
  * Author: Tavv

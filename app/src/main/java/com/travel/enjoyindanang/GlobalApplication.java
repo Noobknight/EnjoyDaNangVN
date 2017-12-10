@@ -14,6 +14,10 @@ import com.facebook.drawee.backends.pipeline.DraweeConfig;
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
 import com.kakao.auth.KakaoSDK;
+
+import org.json.JSONObject;
+
+import io.fabric.sdk.android.Fabric;
 import com.travel.enjoyindanang.model.UserInfo;
 import com.travel.enjoyindanang.receiver.LanguageReceiver;
 import com.travel.enjoyindanang.ui.activity.login.KakaoSDKAdapter;
@@ -22,10 +26,6 @@ import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.config.AppUpdateConfiguration;
 import com.travel.enjoyindanang.utils.helper.DomainHelper;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
-
-import org.json.JSONObject;
-
-import io.fabric.sdk.android.Fabric;
 
 /**
  * Created by chien on 10/8/17.

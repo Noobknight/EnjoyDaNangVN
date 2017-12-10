@@ -12,6 +12,8 @@ import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.List;
 import java.util.Locale;
 
@@ -21,7 +23,9 @@ import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.constant.Constant;
 import com.travel.enjoyindanang.model.Partner;
 import com.travel.enjoyindanang.utils.ImageUtils;
+import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.event.OnItemClickListener;
+import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 
 /**
  * Author: Tavv
@@ -76,6 +80,12 @@ public class PartnerAdapter extends RecyclerView.Adapter {
         if (holder instanceof ViewHolder) {
             Partner partner = partners.get(position);
             ((ViewHolder) holder).tvTitle.setText(partner.getName());
+            if (StringUtils.isNotBlank(partner.getDistance())) {
+                String distance = LanguageHelper.getValueByKey(Utils.getString(R.string.Partner_Distance)) + ": " + partner.getDistance();
+                ((ViewHolder) holder).txtDistance.setText(distance);
+            } else {
+                ((ViewHolder) holder).txtDistance.setVisibility(View.GONE);
+            }
             ImageUtils.loadImageWithFreso(((ViewHolder) holder).imgPhoto, partner.getPicture());
             boolean isFavorite = partner.getFavorite() > 0;
             ((ViewHolder) holder).fabFavorite.setImageResource(isFavorite ? R.drawable.follow : R.drawable.unfollow);
@@ -123,6 +133,8 @@ public class PartnerAdapter extends RecyclerView.Adapter {
         SimpleDraweeView imgPhoto;
         @BindView(R.id.tv_partner_name)
         TextView tvTitle;
+        @BindView(R.id.txtDistance)
+        TextView txtDistance;
         @BindView(R.id.fabFavorite)
         FloatingActionButton fabFavorite;
 
@@ -215,7 +227,7 @@ public class PartnerAdapter extends RecyclerView.Adapter {
         }
     }
 
-    public Partner getItem(int position){
+    public Partner getItem(int position) {
         return partners.get(position);
     }
 

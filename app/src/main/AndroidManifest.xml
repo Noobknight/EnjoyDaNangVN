@@ -77,15 +77,16 @@
 
         <activity android:name=".ui.activity.scan.QRCodeScanActivity" />
 
-        <!--<provider-->
-        <!--android:name="android.support.v4.content.Provider"-->
-        <!--android:authorities="${applicationId}.provider"-->
-        <!--android:exported="false"-->
-        <!--android:grantUriPermissions="true">-->
-        <!--<meta-data-->
-        <!--android:name="android.support.FILE_PROVIDER_PATHS"-->
-        <!--android:resource="@xml/provider_paths"/>-->
-        <!--</provider>-->
+        <service android:name=".service.LocationService" />
+
+        <receiver
+            android:name=".receiver.LocationReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.travel.enjoyindanang.location.listener" />
+            </intent-filter>
+        </receiver>
 
 
     </application>

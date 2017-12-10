@@ -1,12 +1,17 @@
 package com.travel.enjoyindanang.ui.activity.main;
 
 import android.Manifest;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -14,6 +19,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -55,10 +61,13 @@ import com.travel.enjoyindanang.annotation.DialogType;
 import com.travel.enjoyindanang.api.model.Repository;
 import com.travel.enjoyindanang.constant.AppError;
 import com.travel.enjoyindanang.constant.Constant;
+import com.travel.enjoyindanang.constant.Extras;
 import com.travel.enjoyindanang.framework.FragmentTransitionInfo;
 import com.travel.enjoyindanang.model.NavigationItem;
 import com.travel.enjoyindanang.model.Popup;
 import com.travel.enjoyindanang.model.UserInfo;
+import com.travel.enjoyindanang.receiver.LocationReceiver;
+import com.travel.enjoyindanang.service.LocationService;
 import com.travel.enjoyindanang.ui.activity.login.LoginActivity;
 import com.travel.enjoyindanang.ui.activity.scan.ScanActivity;
 import com.travel.enjoyindanang.ui.fragment.change_password.ChangePwdFragment;
@@ -79,6 +88,7 @@ import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.config.ForceUpdateChecker;
 import com.travel.enjoyindanang.utils.event.OnUpdateProfileSuccess;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
+import com.travel.enjoyindanang.utils.helper.LocationHelper;
 
 public class MainActivity extends MvpActivity<MainPresenter> implements MainView, AdapterView.OnItemClickListener,
         NavigationView.OnNavigationItemSelectedListener, OnUpdateProfileSuccess, ForceUpdateChecker.OnUpdateNeededListener {
@@ -148,6 +158,19 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
 
     private boolean mToolBarNavigationListenerIsRegistered;
 
+
+    private Location mLastLocation;
+
+    private LocationReceiver mLocationReceiver;
+
+    private Intent locationService;
+
+    public LocationService mLocationService;
+
+    private boolean isServiceConnected;
+
+    public LocationHelper mLocationHelper;
+
     @Override
     public void setContentView() {
         setContentView(R.layout.activity_main);
@@ -156,6 +179,9 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
     @Override
     public void init() {
         setHeightToolbar();
+        if (mLocationReceiver == null) {
+            mLocationReceiver = new LocationReceiver();
+        }
         mDrawerToggle = new ActionBarDrawerToggle(
                 this, mDrawerLayout, null, R.string.navigation_drawer_open, R.string.navigation_drawer_close) {
             @Override
@@ -178,6 +204,8 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
         }
         if (!checkPermission()) {
             requestPermission();
+        } else {
+            startTrackLocation();
         }
         settingLeftMenu(Utils.hasLogin());
         hasLogin = Utils.hasLogin();
@@ -196,6 +224,24 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
             ForceUpdateChecker.with(this).onUpdateNeeded(this).check();
         }
         validAndUpdateFullName();
+        IntentFilter intentFilter = new IntentFilter(Extras.KEY_RECEIVER_LOCATION_FILTER);
+        LocalBroadcastManager
+                .getInstance(MainActivity.this).registerReceiver(mLocationReceiver, intentFilter);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mLocationReceiver != null) {
+            LocalBroadcastManager
+                    .getInstance(MainActivity.this).unregisterReceiver(mLocationReceiver);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        stopTrackingService();
     }
 
     @Override
@@ -551,7 +597,6 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
             case Search:
                 imgHome.setImageResource(R.drawable.tab1_default_3x);
                 imgSearch.setImageResource(R.drawable.tab2_selected_3x);
-                setNameToolbar(Utils.getLanguageByResId(R.string.Home_Search).toUpperCase());
                 break;
             case None:
                 imgHome.setImageResource(R.drawable.tab1_default_3x);
@@ -651,7 +696,7 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
                     boolean readAccepted = grantResults[2] == PackageManager.PERMISSION_GRANTED;
 
                     if (cameraAccepted && writeAccepted && readAccepted) {
-                        //TODO : do nothing
+                        startTrackLocation();
                     } else {
                         DialogUtils.showDialog(MainActivity.this, DialogType.WARNING, DialogUtils.getTitleDialog(2),
                                 Utils.getLanguageByResId(R.string.Permission_Request_CAMERA_WRITE_READ));
@@ -741,15 +786,15 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
         switch (type) {
             case Constant.HIDE_BACK_ICON:
                 imgBack.setVisibility(View.GONE);
-                if(toolbarName.getText().toString().equalsIgnoreCase(Constant.TITLE_HOME_VN)){
-                    toolbarName.setText(StringUtils.EMPTY);
-                }else {
+                if (toolbarName.getText().toString().equalsIgnoreCase(Constant.TITLE_HOME_VN)) {
+                    toolbarName.setVisibility(View.GONE);
+                } else {
                     toolbarName.setVisibility(View.VISIBLE);
                 }
                 break;
             case Constant.SHOW_BACK_ICON:
                 imgBack.setVisibility(View.VISIBLE);
-                toolbarName.setVisibility(View.INVISIBLE);
+                toolbarName.setVisibility(View.GONE);
                 break;
         }
     }
@@ -826,26 +871,27 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
 
     private void showPopupMain(final Popup popup) {
         if (popup == null) return;
-        AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-        LayoutInflater inflater = this.getLayoutInflater();
-        final View dialogView = inflater.inflate(R.layout.dialog_home, null);
-        dialogBuilder.setView(dialogView);
+        if (popup.getIsPublish() == 1) {
+            AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+            LayoutInflater inflater = this.getLayoutInflater();
+            final View dialogView = inflater.inflate(R.layout.dialog_home, null);
+            dialogBuilder.setView(dialogView);
 //        AppCompatButton btnViewDetail = (AppCompatButton) dialogView.findViewById(R.id.btnPopupLeft);
-        final AppCompatButton btnHide = (AppCompatButton) dialogView.findViewById(R.id.btnPopupCenter);
-        AppCompatButton btnClose = (AppCompatButton) dialogView.findViewById(R.id.btnPopupRight);
+            final AppCompatButton btnHide = (AppCompatButton) dialogView.findViewById(R.id.btnPopupCenter);
+            AppCompatButton btnClose = (AppCompatButton) dialogView.findViewById(R.id.btnPopupRight);
 
 //        btnViewDetail.setText(popup.getTextButtonLeft());
-        btnHide.setText(popup.getTextButtonCenter());
-        btnClose.setText(popup.getTextButtonRight());
+            btnHide.setText(popup.getTextButtonCenter());
+            btnClose.setText(popup.getTextButtonRight());
 
-        SimpleDraweeView imgPopup = (SimpleDraweeView) dialogView.findViewById(R.id.imgPopup);
+            SimpleDraweeView imgPopup = (SimpleDraweeView) dialogView.findViewById(R.id.imgPopup);
 
-        ImageUtils.loadImageWithFreso(imgPopup, popup.getImage());
+            ImageUtils.loadImageWithFreso(imgPopup, popup.getImage());
 
-        final AlertDialog alertDialog = dialogBuilder.create();
+            final AlertDialog alertDialog = dialogBuilder.create();
 
-        alertDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-        alertDialog.setCancelable(false);
+            alertDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+            alertDialog.setCancelable(false);
 
 //        btnViewDetail.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -857,23 +903,24 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
 //            }
 //        });
 
-        btnHide.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                SharedPrefsUtils.addDataToPrefs(Constant.SHARED_PREFS_NAME, Constant.KEY_EXTRAS_CLOSE_POPUP, false);
-                alertDialog.dismiss();
-            }
-        });
-        btnClose.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String currentTime = DateUtils.getCurrentTime();
-                SharedPrefsUtils.addDataToPrefs(Constant.SHARED_PREFS_NAME, Constant.KEY_EXTRAS_CLOSE_POPUP, true);
-                SharedPrefsUtils.addDataToPrefs(Constant.SHARED_PREFS_NAME, Constant.KEY_EXTRAS_DATE_CLOSE_POPUP, currentTime);
-                alertDialog.dismiss();
-            }
-        });
-        alertDialog.show();
+            btnHide.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    SharedPrefsUtils.addDataToPrefs(Constant.SHARED_PREFS_NAME, Constant.KEY_EXTRAS_CLOSE_POPUP, false);
+                    alertDialog.dismiss();
+                }
+            });
+            btnClose.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    String currentTime = DateUtils.getCurrentTime();
+                    SharedPrefsUtils.addDataToPrefs(Constant.SHARED_PREFS_NAME, Constant.KEY_EXTRAS_CLOSE_POPUP, true);
+                    SharedPrefsUtils.addDataToPrefs(Constant.SHARED_PREFS_NAME, Constant.KEY_EXTRAS_DATE_CLOSE_POPUP, currentTime);
+                    alertDialog.dismiss();
+                }
+            });
+            alertDialog.show();
+        }
     }
 
     private boolean disableShowPopup() {
@@ -881,4 +928,52 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
         boolean hasClose = SharedPrefsUtils.getBooleanFromPrefs(Constant.SHARED_PREFS_NAME, Constant.KEY_EXTRAS_CLOSE_POPUP);
         return hasClose && (StringUtils.isNotBlank(strTimeClosePopup) && !DateUtils.dayIsYesterday(strTimeClosePopup));
     }
+
+
+    public Location getLastLocation() {
+        return mLastLocation;
+    }
+
+    public void setLastLocation(Location mLastLocation) {
+        this.mLastLocation = mLastLocation;
+    }
+
+    private void startTrackLocation() {
+        if (isServiceConnected)
+            return;
+        if (locationService == null) {
+            if (mLocationHelper == null) {
+                mLocationHelper = new LocationHelper(this);
+                mLocationHelper.checkpermission();
+            }
+        }
+        if (mLocationHelper.isPermissionGranted()) {
+            locationService = new Intent(this, LocationService.class);
+            bindService(locationService, serviceConnection, BIND_AUTO_CREATE);
+        }
+    }
+
+    private void stopTrackingService() {
+        if (!isServiceConnected)
+            return;
+        if (locationService != null) {
+            unbindService(serviceConnection);
+        }
+    }
+
+    private ServiceConnection serviceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            LocationService.LocalBinder binder = (LocationService.LocalBinder) service;
+            mLocationService = binder.getService();
+            isServiceConnected = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            isServiceConnected = false;
+        }
+    };
+
 }
