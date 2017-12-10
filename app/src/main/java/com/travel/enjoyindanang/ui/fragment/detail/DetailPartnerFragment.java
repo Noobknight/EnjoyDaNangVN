@@ -30,15 +30,6 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.model.LatLng;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.HashMap;
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 import com.travel.enjoyindanang.MvpFragment;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.common.Common;
@@ -50,6 +41,14 @@ import com.travel.enjoyindanang.utils.ImageUtils;
 import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.event.OnFindLastLocationCallback;
 import com.travel.enjoyindanang.utils.helper.LocationHelper;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.HashMap;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * Author: Tavv
@@ -97,7 +96,6 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
     @BindView(R.id.scrollDetailPartner)
     NestedScrollView scrollDetailPartner;
 
-
     private Location mLastLocation;
 
     private LocationHelper locationHelper;
@@ -134,6 +132,12 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
         webSettings.setLoadWithOverviewMode(true);
         mWebView.setWebViewClient(new WebClient(getActivity()));
         webSettings.setBuiltInZoomControls(true);
+
+        WebSettings wvContent = txtContent.getSettings();
+        wvContent.setJavaScriptEnabled(true);
+        wvContent.setLoadWithOverviewMode(true);
+        txtContent.setWebViewClient(new WebClient(getActivity()));
+        webSettings.setBuiltInZoomControls(false);
     }
 
     @Override
@@ -307,12 +311,12 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         if (mWebView != null) {
             mWebView.loadUrl("about:blank");
             mWebView.destroy();
             mWebView = null;
         }
+        super.onDestroy();
     }
 
     @Override
@@ -414,6 +418,4 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
         }
 
     }
-
-
 }

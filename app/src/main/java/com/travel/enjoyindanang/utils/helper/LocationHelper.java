@@ -35,6 +35,9 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.travel.enjoyindanang.utils.JsonUtils;
+import com.travel.enjoyindanang.utils.PermissionUtils;
+import com.travel.enjoyindanang.utils.event.OnFindLastLocationCallback;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
@@ -46,9 +49,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import com.travel.enjoyindanang.utils.JsonUtils;
-import com.travel.enjoyindanang.utils.PermissionUtils;
-import com.travel.enjoyindanang.utils.event.OnFindLastLocationCallback;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscriber;
@@ -581,6 +581,5 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
             super.onLocationAvailability(locationAvailability);
         }
     };
-
 
 }
