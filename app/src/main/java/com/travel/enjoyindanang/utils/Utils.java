@@ -314,4 +314,12 @@ public class Utils {
     public static Context getContext(){
         return GlobalApplication.getGlobalApplicationContext();
     }
+
+     public static void saveUserInfo(UserInfo userInfo) {
+        if (userInfo != null) {
+            Gson gson = new Gson();
+            String strJsonUserInfo = gson.toJson(userInfo);
+            SharedPrefsUtils.addDataToPrefs(Constant.SHARED_PREFS_NAME, Constant.KEY_EXTRAS_USER_INFO, strJsonUserInfo);
+        }
+    }
 }

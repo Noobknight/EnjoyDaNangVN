@@ -14,5 +14,10 @@ import com.travel.enjoyindanang.iBaseView;
 
 public interface SplashScreenView extends iBaseView {
     void onLoadLanguageSuccess(JSONObject json);
-    void onLoadFailre(AppError appError);
+
+    void onLoadFailure(AppError appError);
+
+    void onGetUserInfoSuccess(UserInfo userInfo);
+
+    void onFailure(AppError appError);
 }
