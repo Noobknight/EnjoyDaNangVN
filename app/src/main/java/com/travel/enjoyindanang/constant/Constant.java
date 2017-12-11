@@ -86,4 +86,5 @@ public class Constant {
     public static final int DEFAULT_ITEM_EACH_FETCH = 6;
 
     public static final String TITLE_HOME_VN = "TRANG CHỦ";
+    public static final String LOCATION_NOT_FOUND = "Location_Not_Found";
 }

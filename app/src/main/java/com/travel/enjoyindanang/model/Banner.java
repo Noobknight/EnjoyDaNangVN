@@ -3,10 +3,9 @@ package com.travel.enjoyindanang.model;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.travel.enjoyindanang.constant.Constant;
 
 import org.apache.commons.lang3.StringUtils;
-
-import com.travel.enjoyindanang.constant.Constant;
 
 public class Banner {
 

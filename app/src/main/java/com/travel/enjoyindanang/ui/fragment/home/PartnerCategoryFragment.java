@@ -11,13 +11,6 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import org.apache.commons.collections.CollectionUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import com.travel.enjoyindanang.MvpFragment;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.annotation.DialogType;
@@ -36,6 +29,15 @@ import com.travel.enjoyindanang.utils.helper.EndlessScrollListener;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 import com.travel.enjoyindanang.utils.helper.SeparatorDecoration;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Author: Tavv
  * Created on 22/11/2017.
@@ -44,7 +46,7 @@ import com.travel.enjoyindanang.utils.helper.SeparatorDecoration;
  */
 
 public class PartnerCategoryFragment extends MvpFragment<PartnerCategoryPresenter> implements PartnerCategoryView, OnItemClickListener,
-        BaseRecyclerViewAdapter.ItemClickListener{
+        BaseRecyclerViewAdapter.ItemClickListener {
     private static final String TAG = PartnerCategoryFragment.class.getSimpleName();
     private static final String KEY_EXTRAS_TITLE = "title_category";
     private static final String KEY_EXTRAS_LOCATION = "current_location";
@@ -91,9 +93,15 @@ public class PartnerCategoryFragment extends MvpFragment<PartnerCategoryPresente
         super.onViewCreated(view, savedInstanceState);
         mvpPresenter = createPresenter();
         userInfo = Utils.getUserInfo();
-        if (categoryId != -1 && mLocation != null) {
-            mvpPresenter.getPartnerByCategory(categoryId, START_PAGE, userInfo.getUserId());
-//            mvpPresenter.getListByLocation(categoryId, userInfo.getUserId(), START_PAGE, mLocation.getLatitude(), mLocation.getLongitude());
+        if (categoryId != -1) {
+//            mvpPresenter.getPartnerByCategory(categoryId, START_PAGE, userInfo.getUserId());
+            if (mLocation == null) {
+                mvpPresenter.getListByLocation(categoryId, userInfo.getUserId(), START_PAGE, StringUtils.EMPTY, StringUtils.EMPTY);
+            } else {
+                String strGeoLat = String.valueOf(mLocation.getLatitude());
+                String strGeoLng = String.valueOf(mLocation.getLongitude());
+                mvpPresenter.getListByLocation(categoryId, userInfo.getUserId(), START_PAGE, strGeoLat, strGeoLng);
+            }
         }
     }
 
@@ -154,8 +162,14 @@ public class PartnerCategoryFragment extends MvpFragment<PartnerCategoryPresente
             public void onLoadMore(int page) {
                 hasLoadmore = true;
                 partnerCategoryAdapter.startLoadMore();
-                mvpPresenter.getPartnerByCategory(categoryId, page, userInfo.getUserId());
-//                mvpPresenter.getListByLocation(categoryId, userInfo.getUserId(), START_PAGE, mLocation.getLatitude(), mLocation.getLongitude());
+//                mvpPresenter.getPartnerByCategory(categoryId, page, userInfo.getUserId());
+                if (mLocation == null) {
+                    mvpPresenter.getListByLocation(categoryId, userInfo.getUserId(), page, StringUtils.EMPTY, StringUtils.EMPTY);
+                } else {
+                    String strGeoLat = String.valueOf(mLocation.getLatitude());
+                    String strGeoLng = String.valueOf(mLocation.getLongitude());
+                    mvpPresenter.getListByLocation(categoryId, userInfo.getUserId(), page, strGeoLat, strGeoLng);
+                }
             }
         });
     }
@@ -217,9 +231,7 @@ public class PartnerCategoryFragment extends MvpFragment<PartnerCategoryPresente
         Bundle bundle = getArguments();
         if (bundle != null) {
             categoryId = bundle.getInt(TAG, -1);
-            String title = bundle.getString(KEY_EXTRAS_TITLE);
-            mLocation =  bundle.getParcelable(KEY_EXTRAS_LOCATION);
-            mMainActivity.setNameToolbar(title);
+            mLocation = bundle.getParcelable(KEY_EXTRAS_LOCATION);
         }
     }
 

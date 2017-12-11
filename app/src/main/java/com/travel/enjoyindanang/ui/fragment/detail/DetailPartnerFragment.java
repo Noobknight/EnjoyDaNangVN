@@ -5,9 +5,6 @@ import android.location.Location;
 import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.widget.NestedScrollView;
 import android.view.View;
 import android.webkit.SslErrorHandler;
@@ -26,10 +23,7 @@ import com.daimajia.slider.library.SliderLayout;
 import com.daimajia.slider.library.SliderTypes.BaseSliderView;
 import com.daimajia.slider.library.SliderTypes.DefaultSliderView;
 import com.facebook.drawee.view.SimpleDraweeView;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.model.LatLng;
-
 import com.travel.enjoyindanang.MvpFragment;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.common.Common;
@@ -39,8 +33,8 @@ import com.travel.enjoyindanang.model.Partner;
 import com.travel.enjoyindanang.model.PartnerAlbum;
 import com.travel.enjoyindanang.utils.ImageUtils;
 import com.travel.enjoyindanang.utils.Utils;
-import com.travel.enjoyindanang.utils.event.OnFindLastLocationCallback;
 import com.travel.enjoyindanang.utils.helper.LocationHelper;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -57,10 +51,7 @@ import butterknife.ButterKnife;
  * Version : 1.0
  */
 
-public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> implements iDetailPartnerView,
-        GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, ActivityCompat.OnRequestPermissionsResultCallback,
-        OnFindLastLocationCallback {
+public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> implements iDetailPartnerView{
     private static final String TAG = DetailPartnerFragment.class.getSimpleName();
     private static final int REQUEST_PERMISSION_RESULT = 0x2;
     private static final float INIT_ZOOM_LEVEL = 17.0f;
@@ -98,7 +89,7 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
 
     private Location mLastLocation;
 
-    private LocationHelper locationHelper;
+    private LocationHelper mLocationHelper;
 
     private Partner partner;
 
@@ -117,7 +108,10 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
 
     @Override
     protected void init(View view) {
-        mBaseActivity.setTitle(Utils.getLanguageByResId(R.string.Tab_Detail));
+        if(mMainActivity != null){
+            mLastLocation = mMainActivity.mLocationService.getLastLocation();
+            mLocationHelper = mMainActivity.mLocationHelper;
+        }
     }
 
 
@@ -132,12 +126,6 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
         webSettings.setLoadWithOverviewMode(true);
         mWebView.setWebViewClient(new WebClient(getActivity()));
         webSettings.setBuiltInZoomControls(true);
-
-        WebSettings wvContent = txtContent.getSettings();
-        wvContent.setJavaScriptEnabled(true);
-        wvContent.setLoadWithOverviewMode(true);
-        txtContent.setWebViewClient(new WebClient(getActivity()));
-        webSettings.setBuiltInZoomControls(false);
     }
 
     @Override
@@ -153,13 +141,6 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
                     if (partner != null) {
                         initWebView();
                         mvpPresenter.getAllDataHome(partner.getId());
-                        locationHelper = new LocationHelper(getActivity(), DetailPartnerFragment.this);
-                        locationHelper.checkpermission();
-                        if (locationHelper.isPermissionGranted()) {
-                            locationHelper.buildGoogleApiClient(DetailPartnerFragment.this, DetailPartnerFragment.this);
-                        } else {
-
-                        }
                     }
                 }
             }
@@ -198,27 +179,6 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
     public void onFetchAllData(List<DetailPartner> lstDetailPartner, List<PartnerAlbum> lstAlbum) {
         setDataAlbum(lstAlbum);
         setDataDetail(lstDetailPartner);
-    }
-
-
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        mLastLocation = locationHelper.getLocation();
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        locationHelper.connectApiClient();
-    }
-
-    @Override
-    public void onFound(Location location) {
-        mLastLocation = location;
     }
 
     private class WebClient extends WebViewClient {
@@ -261,7 +221,7 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
             if (detailPartner != null) {
                 double longtitude = Double.parseDouble(StringUtils.trim(detailPartner.getGeoLng()));
                 double latitude = Double.parseDouble(StringUtils.trim(detailPartner.getGeoLat()));
-                String strImage = locationHelper.getUrlThumbnailLocation(longtitude, latitude);
+                String strImage = mLocationHelper.getUrlThumbnailLocation(longtitude, latitude);
                 Uri uri = Uri.parse(strImage);
                 if (StringUtils.isNotBlank(strImage)) {
                     ImageUtils.loadImageWithFresoURI(imgMapView, uri);
@@ -279,9 +239,6 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
         if (mWebView != null) {
             mWebView.resumeTimers();
             mWebView.onResume();
-        }
-        if (locationHelper != null) {
-            locationHelper.checkPlayServices();
         }
     }
 
@@ -311,12 +268,12 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
 
     @Override
     public void onDestroy() {
+        super.onDestroy();
         if (mWebView != null) {
             mWebView.loadUrl("about:blank");
             mWebView.destroy();
             mWebView = null;
         }
-        super.onDestroy();
     }
 
     @Override
@@ -348,7 +305,6 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
 
 
     private LatLng getCurrentLocation() {
-        mLastLocation = locationHelper.getLocation();
         if (mLastLocation != null) {
             double latitude = mLastLocation.getLatitude();
             double longitude = mLastLocation.getLongitude();
@@ -358,16 +314,6 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
             return null;
         }
     }
-
-    // Permission check functions
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        // redirects to utils
-        locationHelper.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-    }
-
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {

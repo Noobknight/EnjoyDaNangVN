@@ -224,14 +224,22 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
             ForceUpdateChecker.with(this).onUpdateNeeded(this).check();
         }
         validAndUpdateFullName();
-        IntentFilter intentFilter = new IntentFilter(Extras.KEY_RECEIVER_LOCATION_FILTER);
-        LocalBroadcastManager
-                .getInstance(MainActivity.this).registerReceiver(mLocationReceiver, intentFilter);
+        registerReceiver();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        unregisterReceiver();
+    }
+
+    private void registerReceiver() {
+        IntentFilter intentFilter = new IntentFilter(Extras.KEY_RECEIVER_LOCATION_FILTER);
+        LocalBroadcastManager
+                .getInstance(MainActivity.this).registerReceiver(mLocationReceiver, intentFilter);
+    }
+
+    private void unregisterReceiver() {
         if (mLocationReceiver != null) {
             LocalBroadcastManager
                     .getInstance(MainActivity.this).unregisterReceiver(mLocationReceiver);

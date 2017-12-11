@@ -258,7 +258,6 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
 
                         } catch (IntentSender.SendIntentException e) {
                             // Ignore the error.
-                            e.printStackTrace();
                         }
                         break;
                     case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
@@ -584,5 +583,6 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
             super.onLocationAvailability(locationAvailability);
         }
     };
+
 
 }
