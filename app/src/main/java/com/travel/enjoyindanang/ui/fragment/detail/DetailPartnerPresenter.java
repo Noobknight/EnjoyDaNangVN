@@ -8,7 +8,6 @@ import com.travel.enjoyindanang.model.DetailPartner;
 import com.travel.enjoyindanang.model.DetailPartnerCombined;
 import com.travel.enjoyindanang.model.PartnerAlbum;
 import com.travel.enjoyindanang.utils.Utils;
-
 import rx.Observable;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func2;

@@ -98,6 +98,7 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
     public LocationHelper(Context context, OnFindLastLocationCallback findCallback) {
         this.context = context;
         this.findCallback = findCallback;
+        this.current_activity = (Activity) context;
         permissionUtils = new PermissionUtils(context, this);
         permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
         permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
@@ -106,6 +107,7 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
 
     public LocationHelper(Context context) {
         this.context = context;
+        this.current_activity = (Activity) context;
         permissionUtils = new PermissionUtils(context, this);
         permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
         permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
@@ -255,7 +257,6 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
 
                         } catch (IntentSender.SendIntentException e) {
                             // Ignore the error.
-                            e.printStackTrace();
                         }
                         break;
                     case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
@@ -581,5 +582,6 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
             super.onLocationAvailability(locationAvailability);
         }
     };
+
 
 }
