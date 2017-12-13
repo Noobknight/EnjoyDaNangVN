@@ -72,7 +72,7 @@ public class DetailHomeDialogFragment extends DialogFragment implements TabLayou
     public static DetailHomeDialogFragment newInstance(Partner partner) {
         DetailHomeDialogFragment fragment = new DetailHomeDialogFragment();
         Bundle bundle = new Bundle();
-        bundle.putSerializable(TAG, partner);
+        bundle.putParcelable(TAG, partner);
         fragment.setArguments(bundle);
         return fragment;
     }

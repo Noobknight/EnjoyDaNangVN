@@ -40,7 +40,7 @@ public class GlobalApplication extends MultiDexApplication{
     private String strLanguage;
     private boolean hasSessionLogin;
     private BroadcastReceiver mBroadcastReceiver = null;
-
+    private boolean hasClickedUpdate;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -149,5 +149,13 @@ public class GlobalApplication extends MultiDexApplication{
 
     public void setStrLanguage(String strLanguage) {
         this.strLanguage = strLanguage;
+    }
+
+    public boolean isHasClickedUpdate() {
+        return hasClickedUpdate;
+    }
+
+    public void setHasClickedUpdate(boolean hasClickedUpdate) {
+        this.hasClickedUpdate = hasClickedUpdate;
     }
 }

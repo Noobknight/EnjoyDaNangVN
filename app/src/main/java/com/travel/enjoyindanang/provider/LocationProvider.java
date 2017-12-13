@@ -4,6 +4,7 @@ import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.travel.enjoyindanang.service.ILocationProvider;
@@ -16,7 +17,7 @@ import com.travel.enjoyindanang.utils.event.OnFindLastLocationCallback;
  * Version : 1.0
  */
 
-public class LocationProvider implements ILocationProvider{
+public class LocationProvider implements ILocationProvider {
     private static final String TAG = LocationProvider.class.getSimpleName();
 
     private final LocationListener locationListener;
@@ -56,7 +57,7 @@ public class LocationProvider implements ILocationProvider{
             Location lastKnownNWLocation = null;
             Location lastKnownGPSLocation = null;
             if (this.networkProviderEnabled) {
-               lastKnownNWLocation = this.locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+                lastKnownNWLocation = this.locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                 if (lastKnownNWLocation != null && lastKnownNWLocation.getTime() > System.currentTimeMillis() - LOCATION_OUTDATED_WHEN_OLDER_MS) {
                     locationListener.onLocationChanged(lastKnownNWLocation);
                 }
@@ -78,8 +79,9 @@ public class LocationProvider implements ILocationProvider{
             onFindLastLocationCallback.onFound(lastKnownGPSLocation != null ? lastKnownGPSLocation : lastKnownNWLocation);
 
             if (!this.gpsProviderEnabled || !this.networkProviderEnabled) {
-                Toast.makeText(this.context, "No Location Provider Found Check Your Code", Toast.LENGTH_LONG).show();
+                Log.e(TAG, "GPS is Disable in your device");
             }
         }
     }
+
 }

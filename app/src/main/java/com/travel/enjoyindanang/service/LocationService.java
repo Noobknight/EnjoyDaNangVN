@@ -109,6 +109,7 @@ public class LocationService extends Service implements LocationListener, OnFind
         updateOnFoundLocationBroadcast(mLastLocation);
     }
 
+
     public class LocalBinder extends Binder {
 
         public LocationService getService() {

@@ -1,6 +1,9 @@
 
 package com.travel.enjoyindanang.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -10,7 +13,7 @@ import java.io.Serializable;
 
 import com.travel.enjoyindanang.constant.Constant;
 
-public class Partner implements Serializable{
+public class Partner implements Parcelable {
 
     @SerializedName("Id")
     @Expose
@@ -44,6 +47,22 @@ public class Partner implements Serializable{
     @SerializedName("Distance")
     @Expose
     private String distance;
+
+    @SerializedName("DisplayDistance")
+    @Expose
+    private int displayDistance;
+
+    @SerializedName("GeoLat")
+    @Expose
+    private String geoLat;
+
+    @SerializedName("GeoLng")
+    @Expose
+    private String geoLng;
+
+    @SerializedName("GeoLocation")
+    @Expose
+    private String geoLocation;
 
 
     public int getId() {
@@ -125,4 +144,96 @@ public class Partner implements Serializable{
     public void setDistance(String distance) {
         this.distance = distance;
     }
+
+    public int getDisplayDistance() {
+        return displayDistance;
+    }
+
+    public void setDisplayDistance(int displayDistance) {
+        this.displayDistance = displayDistance;
+    }
+
+    public boolean isDisplayDistance() {
+        return displayDistance == 1;
+    }
+
+    public String getGeoLat() {
+        return geoLat;
+    }
+
+    public void setGeoLat(String geoLat) {
+        this.geoLat = geoLat;
+    }
+
+    public String getGeoLng() {
+        return geoLng;
+    }
+
+    public void setGeoLng(String geoLng) {
+        this.geoLng = geoLng;
+    }
+
+    public String getGeoLocation() {
+        return geoLocation;
+    }
+
+    public void setGeoLocation(String geoLocation) {
+        this.geoLocation = geoLocation;
+    }
+
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(this.id);
+        dest.writeString(this.name);
+        dest.writeString(this.picture);
+        dest.writeString(this.phone);
+        dest.writeString(this.address);
+        dest.writeInt(this.starReview);
+        dest.writeInt(this.discount);
+        dest.writeInt(this.favorite);
+        dest.writeString(this.date);
+        dest.writeString(this.distance);
+        dest.writeInt(this.displayDistance);
+        dest.writeString(this.geoLat);
+        dest.writeString(this.geoLng);
+        dest.writeString(this.geoLocation);
+    }
+
+    public Partner() {
+    }
+
+    protected Partner(Parcel in) {
+        this.id = in.readInt();
+        this.name = in.readString();
+        this.picture = in.readString();
+        this.phone = in.readString();
+        this.address = in.readString();
+        this.starReview = in.readInt();
+        this.discount = in.readInt();
+        this.favorite = in.readInt();
+        this.date = in.readString();
+        this.distance = in.readString();
+        this.displayDistance = in.readInt();
+        this.geoLat = in.readString();
+        this.geoLng = in.readString();
+        this.geoLocation = in.readString();
+    }
+
+    public static final Creator<Partner> CREATOR = new Creator<Partner>() {
+        @Override
+        public Partner createFromParcel(Parcel source) {
+            return new Partner(source);
+        }
+
+        @Override
+        public Partner[] newArray(int size) {
+            return new Partner[size];
+        }
+    };
 }

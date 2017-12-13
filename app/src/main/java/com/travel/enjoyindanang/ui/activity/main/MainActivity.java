@@ -1,13 +1,16 @@
 package com.travel.enjoyindanang.ui.activity.main;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -68,6 +71,7 @@ import com.travel.enjoyindanang.ui.fragment.search.SearchFragment;
 import com.travel.enjoyindanang.utils.DateUtils;
 import com.travel.enjoyindanang.utils.DialogUtils;
 import com.travel.enjoyindanang.utils.ImageUtils;
+import com.travel.enjoyindanang.utils.LocationUtils;
 import com.travel.enjoyindanang.utils.SharedPrefsUtils;
 import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.config.ForceUpdateChecker;
@@ -95,6 +99,9 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final int PERMISSION_REQUEST_CODE = 200;
+
+    private static final String BROADCAST_ACTION = "android.location.PROVIDERS_CHANGED";
+
     private Menu mMenu;
     private final int INTRODUCTION = 1;
     private final int CONTACT_US = 2;
@@ -165,7 +172,7 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
 
     private Intent locationService;
 
-    public LocationService mLocationService;
+    private LocationService mLocationService;
 
     private boolean isServiceConnected;
 
@@ -224,22 +231,15 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
             ForceUpdateChecker.with(this).onUpdateNeeded(this).check();
         }
         validAndUpdateFullName();
-        registerReceiver();
+        IntentFilter intentFilter = new IntentFilter(Extras.KEY_RECEIVER_LOCATION_FILTER);
+        LocalBroadcastManager
+                .getInstance(MainActivity.this).registerReceiver(mLocationReceiver, intentFilter);
+        registerReceiver(gpsLocationReceiver, new IntentFilter(BROADCAST_ACTION));
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver();
-    }
-
-    private void registerReceiver() {
-        IntentFilter intentFilter = new IntentFilter(Extras.KEY_RECEIVER_LOCATION_FILTER);
-        LocalBroadcastManager
-                .getInstance(MainActivity.this).registerReceiver(mLocationReceiver, intentFilter);
-    }
-
-    private void unregisterReceiver() {
         if (mLocationReceiver != null) {
             LocalBroadcastManager
                     .getInstance(MainActivity.this).unregisterReceiver(mLocationReceiver);
@@ -250,6 +250,8 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
     protected void onDestroy() {
         super.onDestroy();
         stopTrackingService();
+        if (gpsLocationReceiver != null)
+            unregisterReceiver(gpsLocationReceiver);
     }
 
     @Override
@@ -623,7 +625,6 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
     }
 
     public void addFrMenu(String fragmentTag, boolean isBackStack) {
-//        FragmentTransitionInfo transitionInfo = new FragmentTransitionInfo(R.anim.slide_up_in, 0, 0, 0);
         addFragment(R.id.container_fragment, fragmentTag, isBackStack, null, null);
     }
 
@@ -823,31 +824,25 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
 
     @Override
     public void onUpdateNeeded(final String updateUrl) {
-        DialogUtils.showDialog(MainActivity.this, DialogType.WARNING, Utils.getLanguageByResId(R.string.Message_Warning_Version_Title),
-                Utils.getLanguageByResId(R.string.Message_Confirm_Update_Title), new PromptDialog.OnPositiveListener() {
-                    @Override
-                    public void onClick(PromptDialog promptDialog) {
-                        promptDialog.dismiss();
-                        Utils.redirectStore(MainActivity.this, updateUrl);
-                    }
-                });
+        if (!GlobalApplication.getGlobalApplicationContext().isHasClickedUpdate()) {
+            DialogUtils.showDialog(MainActivity.this, DialogType.WARNING, Utils.getLanguageByResId(R.string.Message_Warning_Version_Title),
+                    Utils.getLanguageByResId(R.string.Message_Confirm_Update_Title), new PromptDialog.OnPositiveListener() {
+                        @Override
+                        public void onClick(PromptDialog promptDialog) {
+                            promptDialog.dismiss();
+                            Utils.redirectStore(MainActivity.this, updateUrl);
+                        }
+                    });
+        }
     }
 
     public void enableBackButton(boolean enable) {
         if (enable) {
-            // Remove hamburger
             mDrawerToggle.setDrawerIndicatorEnabled(false);
-            // Show back button
-//            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            // when DrawerToggle is disabled i.e. setDrawerIndicatorEnabled(false), navigation icon
-            // clicks are disabled i.e. the UP button will not work.
-            // We need to add a listener, as in below, so DrawerToggle will forward
-            // click events to this listener.
             if (!mToolBarNavigationListenerIsRegistered) {
                 mDrawerToggle.setToolbarNavigationClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        // Doesn't have to be onBackPressed
                         onBackPressed();
                     }
                 });
@@ -856,11 +851,7 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
             }
 
         } else {
-            // Remove back button
-//            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-            // Show hamburger
             mDrawerToggle.setDrawerIndicatorEnabled(true);
-            // Remove the/any drawer toggle listener
             mDrawerToggle.setToolbarNavigationClickListener(null);
             mToolBarNavigationListenerIsRegistered = false;
         }
@@ -884,11 +875,9 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
             LayoutInflater inflater = this.getLayoutInflater();
             final View dialogView = inflater.inflate(R.layout.dialog_home, null);
             dialogBuilder.setView(dialogView);
-//        AppCompatButton btnViewDetail = (AppCompatButton) dialogView.findViewById(R.id.btnPopupLeft);
             final AppCompatButton btnHide = (AppCompatButton) dialogView.findViewById(R.id.btnPopupCenter);
             AppCompatButton btnClose = (AppCompatButton) dialogView.findViewById(R.id.btnPopupRight);
 
-//        btnViewDetail.setText(popup.getTextButtonLeft());
             btnHide.setText(popup.getTextButtonCenter());
             btnClose.setText(popup.getTextButtonRight());
 
@@ -900,16 +889,6 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
 
             alertDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
             alertDialog.setCancelable(false);
-
-//        btnViewDetail.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                if(popup.getHref().length() > 1){
-//                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(popup.getHref()));
-//                    startActivity(intent);
-//                }
-//            }
-//        });
 
             btnHide.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -949,15 +928,18 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
     private void startTrackLocation() {
         if (isServiceConnected)
             return;
-        if (locationService == null) {
-            if (mLocationHelper == null) {
-                mLocationHelper = new LocationHelper(this);
-                mLocationHelper.checkpermission();
-            }
+        if (mLocationHelper == null) {
+            mLocationHelper = new LocationHelper(MainActivity.this);
+            mLocationHelper.checkpermission();
+            mLocationHelper.simpleBuildGoogleApi();
         }
-        if (mLocationHelper.isPermissionGranted()) {
-            locationService = new Intent(this, LocationService.class);
-            bindService(locationService, serviceConnection, BIND_AUTO_CREATE);
+        if (mLocationHelper.isPermissionGranted() && LocationUtils.isGpsEnabled()) {
+            if(locationService == null){
+                locationService = new Intent(this, LocationService.class);
+                bindService(locationService, serviceConnection, BIND_AUTO_CREATE);
+            }
+        } else {
+            mLocationHelper.showSettingDialog();
         }
     }
 
@@ -984,4 +966,56 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
         }
     };
 
+
+    public LocationService getLocationService() {
+        return mLocationService;
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            // Check for the integer request code originally supplied to startResolutionForResult().
+            case LocationHelper.REQUEST_CHECK_SETTINGS:
+                switch (resultCode) {
+                    case RESULT_OK:
+                        startTrackLocation();
+                        break;
+                    case RESULT_CANCELED:
+                        EventBus.getDefault().post(Constant.LOCATION_NOT_FOUND);
+                        break;
+                }
+                break;
+        }
+    }
+
+    /* Broadcast receiver to check status of GPS */
+    private BroadcastReceiver gpsLocationReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            //If Action is Location
+            if (intent.getAction().matches(BROADCAST_ACTION)) {
+                LocationManager locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+                //Check if GPS is turned ON or OFF
+                if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    startTrackLocation();
+                } else {
+                    //If GPS turned OFF show Location Dialog
+                    new Handler().postDelayed(sendUpdatesToUI, 10);
+                    Log.e("About GPS", "GPS is Disabled in your device");
+                }
+
+            }
+        }
+    };
+
+    private Runnable sendUpdatesToUI = new Runnable() {
+        public void run() {
+            if (mLocationHelper != null) {
+                mLocationHelper.showSettingDialog();
+            }
+        }
+    };
 }

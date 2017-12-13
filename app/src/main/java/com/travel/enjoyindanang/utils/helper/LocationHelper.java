@@ -28,16 +28,18 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.travel.enjoyindanang.utils.JsonUtils;
-import com.travel.enjoyindanang.utils.PermissionUtils;
-import com.travel.enjoyindanang.utils.event.OnFindLastLocationCallback;
 
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONException;
@@ -49,6 +51,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import com.travel.enjoyindanang.utils.JsonUtils;
+import com.travel.enjoyindanang.utils.PermissionUtils;
+import com.travel.enjoyindanang.utils.event.OnFindLastLocationCallback;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscriber;
@@ -91,7 +96,7 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
     private GoogleMap mGoogleMap;
 
     private final static int PLAY_SERVICES_REQUEST = 1000;
-    private final static int REQUEST_CHECK_SETTINGS = 2000;
+    public final static int REQUEST_CHECK_SETTINGS = 2000;
 
     private OnFindLastLocationCallback findCallback;
 
@@ -138,7 +143,7 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
         return isPermissionGranted;
     }
 
-    public void setPermissionGranted(boolean hasPermission){
+    public void setPermissionGranted(boolean hasPermission) {
         this.isPermissionGranted = hasPermission;
     }
 
@@ -196,7 +201,6 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
         try {
             addresses = geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
             return addresses.get(0);
-
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -213,10 +217,26 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
         return StringUtils.EMPTY;
     }
 
+    public String getFullInfoAddress(Address address) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
+            sb.append(address.getAddressLine(i)).append(", ");
+        }
+        return sb.toString();
+    }
+
 
     /**
      * Method used to build GoogleApiClient
      */
+
+
+    public void simpleBuildGoogleApi() {
+        mGoogleApiClient = new GoogleApiClient.Builder(context)
+                .addApi(LocationServices.API)
+                .build();
+        mGoogleApiClient.connect();
+    }
 
     public void buildGoogleApiClient(GoogleApiClient.ConnectionCallbacks connectionCallbacks,
                                      GoogleApiClient.OnConnectionFailedListener connectionFailedListener) {
@@ -234,6 +254,7 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
 
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
                 .addLocationRequest(mLocationRequest);
+        builder.setAlwaysShow(true);
 
         PendingResult<LocationSettingsResult> result =
                 LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder.build());
@@ -246,9 +267,6 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
 
                 switch (status.getStatusCode()) {
                     case LocationSettingsStatusCodes.SUCCESS:
-                        // All location settings are satisfied. The client can initialize location requests here
-                        mLastLocation = getLocation();
-                        findCallback.onFound(getLocation());
                         break;
                     case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
                         try {
@@ -267,6 +285,47 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
         });
 
 
+    }
+
+    /* Show Location Access Dialog */
+    public void showSettingDialog() {
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);//Setting priotity of Location request to high
+        locationRequest.setInterval(30 * 1000);
+        locationRequest.setFastestInterval(5 * 1000);//5 sec Time interval for location update
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest);
+        builder.setAlwaysShow(true); //this is the key ingredient to show dialog always when GPS is off
+
+        PendingResult<LocationSettingsResult> result =
+                LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder.build());
+        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+            @Override
+            public void onResult(LocationSettingsResult result) {
+                final Status status = result.getStatus();
+                final LocationSettingsStates state = result.getLocationSettingsStates();
+                switch (status.getStatusCode()) {
+                    case LocationSettingsStatusCodes.SUCCESS:
+                        break;
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        // Location settings are not satisfied. But could be fixed by showing the user
+                        // a dialog.
+                        try {
+                            // Show the dialog by calling startResolutionForResult(),
+                            // and check the result in onActivityResult().
+                            status.startResolutionForResult(current_activity, REQUEST_CHECK_SETTINGS);
+                        } catch (IntentSender.SendIntentException e) {
+                            e.printStackTrace();
+                            // Ignore the error.
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        // Location settings are not satisfied. However, we have no way to fix the
+                        // settings so we won't show the dialog.
+                        break;
+                }
+            }
+        });
     }
 
 
@@ -584,5 +643,21 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
         }
     };
 
+    public void updateMarkerWithCircle(Circle circle, Marker marker, LatLng position) {
+        circle.setCenter(position);
+        marker.setPosition(position);
+    }
+
+    public void drawMarkerWithCircle(Circle circle, Marker marker, LatLng position) {
+        double radiusInMeters = 100.0;
+        int strokeColor = 0xffff0000; //red outline
+        int shadeColor = 0x44ff0000; //opaque red fill
+
+        CircleOptions circleOptions = new CircleOptions().center(position).radius(radiusInMeters).fillColor(shadeColor).strokeColor(strokeColor).strokeWidth(8);
+        circle = mGoogleMap.addCircle(circleOptions);
+
+        MarkerOptions markerOptions = new MarkerOptions().position(position);
+        marker = mGoogleMap.addMarker(markerOptions);
+    }
 
 }

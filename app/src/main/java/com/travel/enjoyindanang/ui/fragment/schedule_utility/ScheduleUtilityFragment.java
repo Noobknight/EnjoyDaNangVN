@@ -49,7 +49,7 @@ public class ScheduleUtilityFragment extends MvpFragment<ScheduleUtilityPresente
     public static ScheduleUtilityFragment newInstance(Partner partner) {
         ScheduleUtilityFragment fragment = new ScheduleUtilityFragment();
         Bundle bundle = new Bundle();
-        bundle.putSerializable(TAG, partner);
+        bundle.putParcelable(TAG, partner);
         fragment.setArguments(bundle);
         return fragment;
     }

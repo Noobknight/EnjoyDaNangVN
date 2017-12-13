@@ -138,7 +138,7 @@ public class WriteReviewDialog extends DialogFragment implements View.OnTouchLis
     public static WriteReviewDialog newInstance(Partner partner) {
         WriteReviewDialog fragment = new WriteReviewDialog();
         Bundle bundle = new Bundle();
-        bundle.putSerializable(TAG, partner);
+        bundle.putParcelable(TAG, partner);
         fragment.setArguments(bundle);
         return fragment;
     }

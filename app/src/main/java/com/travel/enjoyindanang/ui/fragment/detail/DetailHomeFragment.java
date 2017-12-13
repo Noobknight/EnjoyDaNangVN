@@ -33,7 +33,7 @@ public class DetailHomeFragment extends MvpFragment<DetailHomePresenter> impleme
     public static DetailHomeFragment newInstance(Partner partner) {
         DetailHomeFragment fragment = new DetailHomeFragment();
         Bundle bundle = new Bundle();
-        bundle.putSerializable(TAG, partner);
+        bundle.putParcelable(TAG, partner);
         fragment.setArguments(bundle);
         return fragment;
     }

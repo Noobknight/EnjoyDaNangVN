@@ -44,7 +44,7 @@ public class AlbumDetailFragment extends MvpFragment<AlbumDetailPresenter> imple
     public static AlbumDetailFragment newInstance(Partner partner) {
         AlbumDetailFragment fragment = new AlbumDetailFragment();
         Bundle bundle = new Bundle();
-        bundle.putSerializable(TAG, partner);
+        bundle.putParcelable(TAG, partner);
         fragment.setArguments(bundle);
         return fragment;
     }

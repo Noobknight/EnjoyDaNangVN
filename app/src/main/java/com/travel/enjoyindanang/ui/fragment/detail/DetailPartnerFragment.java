@@ -96,7 +96,7 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
     public static DetailPartnerFragment newInstance(Partner partner) {
         DetailPartnerFragment fragment = new DetailPartnerFragment();
         Bundle bundle = new Bundle();
-        bundle.putSerializable(TAG, partner);
+        bundle.putParcelable(TAG, partner);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -108,8 +108,11 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
 
     @Override
     protected void init(View view) {
+        mBaseActivity.setTitle(Utils.getLanguageByResId(R.string.Tab_Detail));
         if(mMainActivity != null){
-            mLastLocation = mMainActivity.mLocationService.getLastLocation();
+            if(mMainActivity.getLocationService() != null){
+                mLastLocation = mMainActivity.getLocationService().getLastLocation();
+            }
             mLocationHelper = mMainActivity.mLocationHelper;
         }
     }
@@ -137,7 +140,7 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
             public void run() {
                 Bundle bundle = getArguments();
                 if (bundle != null) {
-                    partner = (Partner) bundle.getSerializable(TAG);
+                    partner = (Partner) bundle.getParcelable(TAG);
                     if (partner != null) {
                         initWebView();
                         mvpPresenter.getAllDataHome(partner.getId());
@@ -305,6 +308,7 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
 
 
     private LatLng getCurrentLocation() {
+        retryGetLastLocation();
         if (mLastLocation != null) {
             double latitude = mLastLocation.getLatitude();
             double longitude = mLastLocation.getLongitude();
@@ -312,6 +316,12 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
         } else {
             showToast("Couldn't get the location. Make sure location is enabled on the device");
             return null;
+        }
+    }
+
+    private void retryGetLastLocation(){
+        if(mLastLocation == null && mMainActivity.getLocationService() != null){
+            mLastLocation = mMainActivity.getLocationService().getLastLocation();
         }
     }
 

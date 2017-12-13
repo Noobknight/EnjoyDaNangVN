@@ -64,7 +64,7 @@ public class WriteReviewFragment extends MvpFragment<WriteReviewPresenter> imple
     public static WriteReviewFragment newInstance(Partner partner) {
         WriteReviewFragment fragment = new WriteReviewFragment();
         Bundle bundle = new Bundle();
-        bundle.putSerializable(TAG, partner);
+        bundle.putParcelable(TAG, partner);
         fragment.setArguments(bundle);
         return fragment;
     }
