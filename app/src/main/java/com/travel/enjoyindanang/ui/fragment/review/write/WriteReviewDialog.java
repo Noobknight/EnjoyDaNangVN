@@ -170,7 +170,7 @@ public class WriteReviewDialog extends DialogFragment implements View.OnTouchLis
         }
         Bundle bundle = getArguments();
         if (bundle != null) {
-            partner = (Partner) bundle.getSerializable(TAG);
+            partner = (Partner) bundle.getParcelable(TAG);
         }
         edtAriaContent.setOnTouchListener(this);
         lrlWriteReview.setOnTouchListener(this);

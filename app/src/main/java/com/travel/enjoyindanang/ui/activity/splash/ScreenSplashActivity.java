@@ -3,13 +3,9 @@ package com.travel.enjoyindanang.ui.activity.splash;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.TextView;
 
-import org.apache.commons.lang3.StringUtils;
-import org.json.JSONObject;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import com.travel.enjoyindanang.GlobalApplication;
 import com.travel.enjoyindanang.MvpActivity;
 import com.travel.enjoyindanang.R;
@@ -26,6 +22,12 @@ import com.travel.enjoyindanang.utils.SharedPrefsUtils;
 import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 import com.travel.enjoyindanang.utils.network.NetworkUtils;
+
+import org.apache.commons.lang3.StringUtils;
+import org.json.JSONObject;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 import static com.travel.enjoyindanang.constant.Constant.SPLASH_TIME_OUT;
 

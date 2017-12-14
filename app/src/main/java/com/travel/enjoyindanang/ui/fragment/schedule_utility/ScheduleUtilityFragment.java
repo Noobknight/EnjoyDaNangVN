@@ -75,7 +75,7 @@ public class ScheduleUtilityFragment extends MvpFragment<ScheduleUtilityPresente
         mvpPresenter = createPresenter();
         Bundle bundle = getArguments();
         if (bundle != null) {
-            Partner partner = (Partner) bundle.getSerializable(TAG);
+            Partner partner = (Partner) bundle.getParcelable(TAG);
             mvpPresenter.getSchedule(partner.getId());
 //            mvpPresenter.getUtility(partnerId);
         }

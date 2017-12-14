@@ -7,11 +7,6 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import com.travel.enjoyindanang.MvpFragment;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.constant.AppError;
@@ -20,6 +15,12 @@ import com.travel.enjoyindanang.model.PartnerAlbum;
 import com.travel.enjoyindanang.utils.DialogUtils;
 import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.helper.SeparatorDecoration;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * Author: Tavv
@@ -73,7 +74,7 @@ public class AlbumDetailFragment extends MvpFragment<AlbumDetailPresenter> imple
         mvpPresenter = createPresenter();
         Bundle bundle = getArguments();
         if (bundle != null) {
-            Partner partner = (Partner) bundle.getSerializable(TAG);
+            Partner partner = (Partner) bundle.getParcelable(TAG);
             if (partner != null) {
                 mvpPresenter.getAlbum(partner.getId());
             }

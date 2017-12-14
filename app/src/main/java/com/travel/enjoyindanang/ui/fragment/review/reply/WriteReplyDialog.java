@@ -29,18 +29,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import cn.refactor.lib.colordialog.PromptDialog;
 import com.travel.enjoyindanang.GlobalApplication;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.annotation.DialogType;
@@ -68,6 +56,18 @@ import com.travel.enjoyindanang.utils.helper.PhotoHelper;
 import com.travel.enjoyindanang.utils.helper.SeparatorDecoration;
 import com.travel.enjoyindanang.utils.helper.SoftKeyboardManager;
 import com.travel.enjoyindanang.utils.widget.DividerItemDecoration;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import cn.refactor.lib.colordialog.PromptDialog;
 import okhttp3.MultipartBody;
 import rx.Observable;
 import rx.Subscriber;

@@ -1,9 +1,10 @@
 package com.travel.enjoyindanang.ui.activity.splash;
 
-import org.json.JSONObject;
-
 import com.travel.enjoyindanang.constant.AppError;
 import com.travel.enjoyindanang.iBaseView;
+import com.travel.enjoyindanang.model.UserInfo;
+
+import org.json.JSONObject;
 
 /**
  * Author: Tavv

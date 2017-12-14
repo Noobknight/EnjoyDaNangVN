@@ -92,7 +92,7 @@ public class WriteReviewFragment extends MvpFragment<WriteReviewPresenter> imple
         }
         Bundle bundle = getArguments();
         if (bundle != null) {
-            partner = (Partner) bundle.getSerializable(TAG);
+            partner = (Partner) bundle.getParcelable(TAG);
         }
     }
 

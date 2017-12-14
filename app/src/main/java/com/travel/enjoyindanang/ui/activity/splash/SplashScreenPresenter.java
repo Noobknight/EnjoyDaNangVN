@@ -1,17 +1,18 @@
 package com.travel.enjoyindanang.ui.activity.splash;
 
-import org.json.JSONObject;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.travel.enjoyindanang.BasePresenter;
 import com.travel.enjoyindanang.api.ApiCallback;
 import com.travel.enjoyindanang.api.model.Repository;
 import com.travel.enjoyindanang.constant.AppError;
 import com.travel.enjoyindanang.model.Language;
+import com.travel.enjoyindanang.model.UserInfo;
 import com.travel.enjoyindanang.utils.Utils;
+
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Author: Tavv
