@@ -136,6 +136,9 @@ public class ScreenSplashActivity extends MvpActivity<SplashScreenPresenter> imp
                 LanguageHelper.getValueByViewId(txtLoadingContent);
             }
         }
+        if(!Utils.hasSessionLogin()){
+            start();
+        }
     }
 
     @Override
