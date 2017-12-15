@@ -30,6 +30,7 @@ import java.util.List;
 
 import butterknife.ButterKnife;
 import cn.refactor.lib.colordialog.PromptDialog;
+
 import com.travel.enjoyindanang.LogApp;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.annotation.DialogType;

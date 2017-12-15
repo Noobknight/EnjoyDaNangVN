@@ -11,6 +11,14 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import com.travel.enjoyindanang.MvpFragment;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.annotation.DialogType;
@@ -28,15 +36,6 @@ import com.travel.enjoyindanang.utils.event.OnItemClickListener;
 import com.travel.enjoyindanang.utils.helper.EndlessScrollListener;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 import com.travel.enjoyindanang.utils.helper.SeparatorDecoration;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * Author: Tavv

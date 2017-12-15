@@ -1,35 +1,22 @@
 package com.travel.enjoyindanang.ui.fragment.search;
 
-import android.location.Address;
 import android.location.Location;
+import android.os.Bundle;
 import android.os.Handler;
+import android.support.design.widget.TabLayout;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.view.Menu;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
-
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.travel.enjoyindanang.MvpFragment;
-import com.travel.enjoyindanang.R;
-import com.travel.enjoyindanang.annotation.DialogType;
-import com.travel.enjoyindanang.model.Partner;
-import com.travel.enjoyindanang.ui.fragment.detail.dialog.DetailHomeDialogFragment;
-import com.travel.enjoyindanang.utils.DialogUtils;
-import com.travel.enjoyindanang.utils.LocationUtils;
-import com.travel.enjoyindanang.utils.Utils;
-import com.travel.enjoyindanang.utils.event.OnItemClickListener;
-import com.travel.enjoyindanang.utils.helper.LanguageHelper;
-import com.travel.enjoyindanang.utils.helper.LocationHelper;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -38,6 +25,19 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import com.travel.enjoyindanang.MvpFragment;
+import com.travel.enjoyindanang.R;
+import com.travel.enjoyindanang.annotation.DialogType;
+import com.travel.enjoyindanang.constant.AppError;
+import com.travel.enjoyindanang.model.Partner;
+import com.travel.enjoyindanang.model.UserInfo;
+import com.travel.enjoyindanang.ui.fragment.detail.dialog.DetailHomeDialogFragment;
+import com.travel.enjoyindanang.utils.DialogUtils;
+import com.travel.enjoyindanang.utils.LocationUtils;
+import com.travel.enjoyindanang.utils.Utils;
+import com.travel.enjoyindanang.utils.event.OnFetchSearchResult;
+import com.travel.enjoyindanang.utils.event.OnItemClickListener;
+import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 
 
 /**
@@ -47,36 +47,51 @@ import butterknife.ButterKnife;
  * Version 1.0
  */
 
-public class SearchFragment extends MvpFragment<SearchPresenter> implements iSearchView, OnMapReadyCallback,
-        SearchView.OnQueryTextListener, OnItemClickListener {
+public class SearchFragment extends MvpFragment<SearchPresenter> implements iSearchView,
+        SearchView.OnQueryTextListener, OnItemClickListener, OnFetchSearchResult {
+
     private static final String TAG = SearchFragment.class.getSimpleName();
-    private static final float INIT_ZOOM_LEVEL = 17f;
+
+    private static final int DELAY_INTERVAL = 1000;
 
     @BindView(R.id.search)
     SearchView searchView;
 
-    @BindView(R.id.mapView)
-    MapView mMapView;
+    @BindView(R.id.progress_bar)
+    ProgressBar progressBar;
 
-    private GoogleMap mGoogleMap;
+    @BindView(R.id.frame)
+    FrameLayout frame;
 
     @BindView(R.id.rcvSearchResult)
     RecyclerView rcvSearchResult;
 
     @BindView(R.id.lnlSearch)
-    LinearLayout lnlSearch;
+    RelativeLayout lnlSearch;
 
-    @BindView(R.id.progress_bar)
-    ProgressBar progressBar;
+    @BindView(R.id.rlrContent)
+    LinearLayout rlrContent;
 
+    @BindView(R.id.searchResultPager)
+    ViewPager searchResultPager;
 
-    private LocationHelper mLocationHelper;
+    @BindView(R.id.tabs)
+    TabLayout tabLayout;
 
-    private Location mLastLocation;
+    @BindView(R.id.txtSearching)
+    TextView txtSearching;
 
     private SearchResultAdapter mAdapter;
 
     private List<Partner> lstPartner;
+
+    private UserInfo userInfo;
+
+    private Location currentLocation;
+
+    private static final int DEFAULT_DISTANCE = 1;
+
+    private ArrayList<String> tabNameChilds;
 
     @Override
     public void showToast(String desc) {
@@ -96,79 +111,48 @@ public class SearchFragment extends MvpFragment<SearchPresenter> implements iSea
     @Override
     protected void init(View view) {
         progressBar.setVisibility(View.VISIBLE);
-        if (mMainActivity != null) {
-            if (mMainActivity.getLocationService() != null) {
-                mLastLocation = mMainActivity.getLocationService().getLastLocation();
+        frame.setVisibility(View.INVISIBLE);
+        tabNameChilds = new ArrayList<>();
+        if (LocationUtils.isGpsEnabled() && LocationUtils.isLocationEnabled()) {
+            userInfo = Utils.getUserInfo();
+            if (mMainActivity != null && mMainActivity.getLocationService() != null) {
+                currentLocation = mMainActivity.getLocationService().getLastLocation();
             }
-            mLocationHelper = mMainActivity.mLocationHelper;
-        }
-        try {
-            if (mMapView != null) {
-                mMapView.onCreate(null);
-                mMapView.getMapAsync(this);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        initRecyclerView();
-    }
-
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        if(mMapView != null){
-            mMapView.onResume();
+            initRecyclerView();
+        } else {
+            lnlSearch.setOnTouchListener(new View.OnTouchListener() {
+                public boolean onTouch(View v, MotionEvent event) {
+                    return true;
+                }
+            });
+            DialogUtils.showDialog(getContext(), DialogType.INFO, Utils.getLanguageByResId(R.string.Permisstion_Title),
+                    Utils.getLanguageByResId(R.string.Map_Location_NotFound));
         }
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        if(mMapView != null){
-            mMapView.onPause();
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        mvpPresenter = createPresenter();
+        if (LocationUtils.isGpsEnabled() && LocationUtils.isLocationEnabled()) {
+            fetchNearPlace();
+        }
+    }
+
+    private void fetchNearPlace() {
+        if (currentLocation != null) {
+            String geoLat = String.valueOf(currentLocation.getLatitude());
+            String geoLng = String.valueOf(currentLocation.getLongitude());
+            mvpPresenter.searchPlaceByCurrentLocation(userInfo.getUserId(), DEFAULT_DISTANCE, geoLat, geoLng);
         }
     }
 
     private void initRecyclerView() {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         rcvSearchResult.setLayoutManager(layoutManager);
-        rcvSearchResult.setHasFixedSize(false);
         lstPartner = new ArrayList<>();
         mAdapter = new SearchResultAdapter(getContext(), lstPartner, this);
         rcvSearchResult.setAdapter(mAdapter);
-    }
-
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (mMapView != null) {
-            mMapView.onStop();
-        }
-    }
-
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-        if (mMapView != null && mGoogleMap != null) {
-            mMapView.onLowMemory();
-            mGoogleMap.clear();
-            System.gc();
-        }
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        if (mGoogleMap != null) {
-            mGoogleMap.clear();
-        }
-        if (mMapView != null) {
-            mMapView.onDestroy();
-            mMapView = null;
-        }
-        System.gc();
     }
 
     @Override
@@ -187,47 +171,44 @@ public class SearchFragment extends MvpFragment<SearchPresenter> implements iSea
         customSearchView();
     }
 
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mGoogleMap = googleMap;
-        mLocationHelper.setGoogleMap(mGoogleMap);
-        mGoogleMap.getUiSettings().setMapToolbarEnabled(false);
-        mGoogleMap.setMyLocationEnabled(true);
-        googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-        if (LocationUtils.isGpsEnabled() && LocationUtils.isLocationEnabled()) {
-            loadMapView(mLastLocation);
-        } else {
-            DialogUtils.showDialog(getContext(), DialogType.INFO, Utils.getLanguageByResId(R.string.Permisstion_Title),
-                    Utils.getLanguageByResId(R.string.Map_Location_NotFound));
-        }
-    }
-
     private void customSearchView() {
         EditText searchEditText = (EditText) searchView.findViewById(android.support.v7.appcompat.R.id.search_src_text);
         searchEditText.setTextColor(Utils.getColorRes(R.color.color_title_category));
         searchEditText.setHintTextColor(Utils.getColorRes(R.color.material_grey_200));
     }
 
-    private void loadMapView(Location currentLocation) {
-        if (currentLocation != null) {
-            LatLng point = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-            MarkerOptions marker = new MarkerOptions();
-            Address address = mLocationHelper.getAddress(currentLocation.getLatitude(), currentLocation.getLongitude());
-            String titleMarker = mLocationHelper.getFullInfoAddress(address);
-            if (mGoogleMap != null) {
-                marker.position(point).title(titleMarker).draggable(false)
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
-                CameraPosition cameraPosition = CameraPosition.builder().target(point).zoom(INIT_ZOOM_LEVEL).bearing(0).tilt(45).build();
-                mGoogleMap.addMarker(marker);
-                mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-            }
-        }
-    }
-
     @Override
     public void OnQuerySearchResult(List<Partner> lstPartner) {
         mAdapter.updateResult(lstPartner);
         progressBar.setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onResultPlaceByRange(List<Partner> lstPartner) {
+        //String strJsonData = JsonUtils.convertObjectToJson(lstPartner);
+        mvpPresenter.getAddressByGeoLocation(lstPartner);
+        this.lstPartner = lstPartner;
+    }
+
+    @Override
+    public void onGetLocationAddress(List<String> lstAddress) {
+        for (int i = 0; i < lstAddress.size(); i++) {
+            lstPartner.get(i).setLocationAddress(lstAddress.get(i));
+        }
+        ArrayList<Partner> data = new ArrayList<>();
+        data.addAll(lstPartner);
+        String strTab1 = Utils.getLanguageByResId(R.string.Search_Tab1_Title);
+        String strTab2 = Utils.getLanguageByResId(R.string.Search_Tab2_Title);
+        final String[] tabTitles = new String[]{strTab1, strTab2};
+        SearchTabAdapter mSearchTabAdapter = new SearchTabAdapter(getChildFragmentManager(), tabTitles, this, data);
+        searchResultPager.setAdapter(mSearchTabAdapter);
+        tabLayout.setupWithViewPager(searchResultPager);
+    }
+
+
+    @Override
+    public void onError(AppError error) {
+        DialogUtils.showDialog(getContext(), DialogType.WRONG, DialogUtils.getTitleDialog(3), error.getMessage());
     }
 
     @Override
@@ -256,9 +237,18 @@ public class SearchFragment extends MvpFragment<SearchPresenter> implements iSea
 
 
     @Override
+    public void onPrepareOptionsMenu(Menu menu) {
+    }
+
+    @Override
+    protected void setHasOptionMenu() {
+        setHasOptionsMenu(true);
+    }
+
+    @Override
     public void onClick(View view, int position) {
         DetailHomeDialogFragment dialog = DetailHomeDialogFragment.newInstance(lstPartner.get(position));
-        DialogUtils.openDialogFragment(mFragmentManager, dialog);
+        dialog.show(mFragmentManager, TAG);
     }
 
     private void showResultContainer(final boolean isShow) {
@@ -266,14 +256,24 @@ public class SearchFragment extends MvpFragment<SearchPresenter> implements iSea
             @Override
             public void run() {
                 rcvSearchResult.setVisibility(isShow ? View.VISIBLE : View.GONE);
-                mMapView.setVisibility(isShow ? View.GONE : View.VISIBLE);
+                rlrContent.setVisibility(isShow ? View.GONE : View.VISIBLE);
             }
-        }, 500);
+        }, DELAY_INTERVAL);
     }
 
     @Override
     public void initViewLabel(View view) {
         super.initViewLabel(view);
-        LanguageHelper.getValueByViewId(searchView);
+        LanguageHelper.getValueByViewId(searchView, txtSearching);
+    }
+
+    @Override
+    public void onFetchCompleted(String tabNameInitCompleted) {
+        tabNameChilds.add(tabNameInitCompleted);
+        if (tabNameChilds.size() == 2) {
+            progressBar.setVisibility(View.GONE);
+            txtSearching.setVisibility(View.GONE);
+            frame.setVisibility(View.VISIBLE);
+        }
     }
 }

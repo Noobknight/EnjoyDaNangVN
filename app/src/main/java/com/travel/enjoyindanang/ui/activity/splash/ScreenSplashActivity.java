@@ -67,7 +67,7 @@ public class ScreenSplashActivity extends MvpActivity<SplashScreenPresenter> imp
 
     @Override
     public void init() {
-        if (Utils.hasSessionLogin()) {
+        if (Utils.hasSessionLogin() && NetworkUtils.isNetworkContented(ScreenSplashActivity.this)) {
             localUser = JsonUtils.convertJsonToObject(SharedPrefsUtils.getStringFromPrefs(Constant.SHARED_PREFS_NAME,
                     Constant.KEY_EXTRAS_USER_INFO), UserInfo.class);
             mvpPresenter.getUserInfoById(localUser.getUserId());

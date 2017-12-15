@@ -10,11 +10,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
-import com.travel.enjoyindanang.R;
-import com.travel.enjoyindanang.constant.Constant;
-import com.travel.enjoyindanang.model.Partner;
-import com.travel.enjoyindanang.ui.base.LoadMoreRecyclerViewAdapter;
-import com.travel.enjoyindanang.utils.ImageUtils;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -22,6 +17,11 @@ import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import com.travel.enjoyindanang.R;
+import com.travel.enjoyindanang.constant.Constant;
+import com.travel.enjoyindanang.model.Partner;
+import com.travel.enjoyindanang.ui.base.LoadMoreRecyclerViewAdapter;
+import com.travel.enjoyindanang.utils.ImageUtils;
 
 /**
  * Author: Tavv
@@ -52,8 +52,10 @@ public class PartnerCategoryAdapter extends LoadMoreRecyclerViewAdapter<Partner>
         if (holder instanceof PartnerViewHolder) {
             Partner partner = mDataList.get(position);
             ((PartnerViewHolder) holder).tvTitle.setText(partner.getName());
-            if (StringUtils.isNotBlank(partner.getDistance()) &&  !StringUtils.equals(partner.getDistance().trim(), "km")
-                    && partner.isDisplayDistance()) {
+            if (StringUtils.isNotBlank(partner.getDistance()) &&
+                    !StringUtils.equals(partner.getDistance().trim(), "km") &&
+                    partner.isDisplayDistance()) {
+//                String distance = LanguageHelper.getValueByKey(Utils.getString(R.string.Partner_Distance)) + ": " + partner.getDistance() + "\t";
                 String distance = partner.getDistance() + "\t";
                 ((PartnerViewHolder) holder).txtDistance.setText(distance);
             } else {

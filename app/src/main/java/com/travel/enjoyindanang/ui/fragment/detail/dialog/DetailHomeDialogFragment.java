@@ -22,6 +22,9 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.annotation.DialogType;
 import com.travel.enjoyindanang.constant.Constant;
@@ -33,10 +36,6 @@ import com.travel.enjoyindanang.ui.fragment.home.PartnerCategoryFragment;
 import com.travel.enjoyindanang.utils.DialogUtils;
 import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 
 /**
  * Author: Tavv

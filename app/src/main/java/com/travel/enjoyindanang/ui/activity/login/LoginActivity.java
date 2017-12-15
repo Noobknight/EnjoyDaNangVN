@@ -18,7 +18,6 @@ import com.facebook.internal.CallbackManagerImpl;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.gson.Gson;
 import com.kakao.auth.Session;
 
 import org.apache.commons.lang3.StringUtils;
@@ -27,6 +26,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.refactor.lib.colordialog.PromptDialog;
+
 import com.travel.enjoyindanang.GlobalApplication;
 import com.travel.enjoyindanang.MvpActivity;
 import com.travel.enjoyindanang.R;
@@ -39,7 +39,6 @@ import com.travel.enjoyindanang.model.UserInfo;
 import com.travel.enjoyindanang.ui.activity.main.MainActivity;
 import com.travel.enjoyindanang.ui.activity.signup.SignUpActivity;
 import com.travel.enjoyindanang.utils.DialogUtils;
-import com.travel.enjoyindanang.utils.SharedPrefsUtils;
 import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.config.ForceUpdateChecker;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
@@ -316,6 +315,7 @@ public class LoginActivity extends MvpActivity<LoginPresenter> implements LoginV
                     @Override
                     public void onClick(PromptDialog promptDialog) {
                         promptDialog.dismiss();
+                        GlobalApplication.getGlobalApplicationContext().setHasClickedUpdate(true);
                         Utils.redirectStore(LoginActivity.this, updateUrl);
                     }
                 });

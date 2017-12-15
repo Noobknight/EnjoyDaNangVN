@@ -50,11 +50,14 @@ public abstract class BaseFragment extends Fragment {
         View view = inflater.inflate(getRootLayoutId(), container, false);
         bindView(view);
         init(view);
+        init(view, savedInstanceState);
         setEvent(view);
         initViewLabel(view);
         executeBase();
         return view;
     }
+
+    public void init(View view, Bundle savedInstanceState){};
 
     protected abstract void init(View view);
 
@@ -165,6 +168,19 @@ public abstract class BaseFragment extends Fragment {
         }
     }
 
+    public void showProgressDialog(Context context) {
+        if (progressDialog != null) {
+            if (!progressDialog.isShowing()) {
+                progressDialog.show();
+            }
+        } else {
+            progressDialog = new ProgressDialog(context);
+            progressDialog.setCancelable(false);
+            progressDialog.setMessage(Utils.getLanguageByResId(R.string.Loading));
+            progressDialog.show();
+        }
+    }
+
     public void showProgressDialog(String title) {
         if (progressDialog != null) {
             if (!progressDialog.isShowing()) {
@@ -197,4 +213,5 @@ public abstract class BaseFragment extends Fragment {
     }
 
     protected void setHasOptionMenu(){}
+
 }

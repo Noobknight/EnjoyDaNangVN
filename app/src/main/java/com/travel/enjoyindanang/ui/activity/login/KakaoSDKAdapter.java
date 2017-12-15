@@ -7,7 +7,6 @@ import com.kakao.auth.AuthType;
 import com.kakao.auth.IApplicationConfig;
 import com.kakao.auth.ISessionConfig;
 import com.kakao.auth.KakaoAdapter;
-
 import com.travel.enjoyindanang.GlobalApplication;
 
 /**

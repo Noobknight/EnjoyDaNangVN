@@ -24,6 +24,15 @@ import com.daimajia.slider.library.SliderTypes.BaseSliderView;
 import com.daimajia.slider.library.SliderTypes.DefaultSliderView;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.google.android.gms.maps.model.LatLng;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.HashMap;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import com.travel.enjoyindanang.MvpFragment;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.common.Common;
@@ -34,15 +43,6 @@ import com.travel.enjoyindanang.model.PartnerAlbum;
 import com.travel.enjoyindanang.utils.ImageUtils;
 import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.helper.LocationHelper;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.HashMap;
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
  * Author: Tavv

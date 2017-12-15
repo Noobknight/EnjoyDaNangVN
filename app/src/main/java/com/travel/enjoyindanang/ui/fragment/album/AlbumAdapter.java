@@ -28,7 +28,7 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumViewHol
     private List<PartnerAlbum> images;
     private Context mContext;
 
-    public class AlbumViewHolder extends RecyclerView.ViewHolder {
+    static class AlbumViewHolder extends RecyclerView.ViewHolder {
         public SimpleDraweeView thumbnail;
 
         public AlbumViewHolder(View view) {

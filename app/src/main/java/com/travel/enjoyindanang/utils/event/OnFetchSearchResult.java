@@ -8,5 +8,5 @@ package com.travel.enjoyindanang.utils.event;
  */
 
 public interface OnFetchSearchResult {
-    void onFetchCompleted(boolean isCompleted);
+    void onFetchCompleted(String tabNameInitCompleted);
 }

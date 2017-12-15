@@ -9,9 +9,9 @@ import com.travel.enjoyindanang.R;
 
 public class Constant {
 
-    public static String URL_HOST = "http://enjoyindanang.vn/API/";
-    public static String URL_HOST_IMAGE = "http://enjoyindanang.vn";
-    public static String URL_FORGOT_PWD = "http://enjoyindanang.vn/Account/ForgotPassword";
+    public static String URL_HOST = "https://enjoyindanang.vn/API/";
+    public static String URL_HOST_IMAGE = "https://enjoyindanang.vn";
+    public static String URL_FORGOT_PWD = "https://enjoyindanang.vn/Account/ForgotPassword";
 
     public static final String URL_DIRECTION_MAPS = "http://maps.google.com/maps?f=d&hl=en&saddr=%1$,.2f,%1$,.2f&daddr=%1$,.2f,%1$,.2f";
 
@@ -44,7 +44,7 @@ public class Constant {
 
     public static final int CONNECT_TIME_OUT = 15000;
 
-    public static final String FILE_NAME_LANGUAGE = "language.json";
+    public static final String FILE_NAME_LANGUAGE = "languageAppVN.json";
 
     public static String EMBEB_YOUTUBE_FORMAT = "<html><body><iframe width=\"100%\" height=\"%d\" src=\"%s\" frameborder=\"0\" allowfullscreen></iframe></body></html>";
 

@@ -41,6 +41,7 @@ public class GlobalApplication extends MultiDexApplication{
     private boolean hasSessionLogin;
     private BroadcastReceiver mBroadcastReceiver = null;
     private boolean hasClickedUpdate;
+
     @Override
     public void onCreate() {
         super.onCreate();
