@@ -13,11 +13,11 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.travel.enjoyindanang.GlobalApplication;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
-
-import com.travel.enjoyindanang.GlobalApplication;
 
 /**
  * Author: Tavv
@@ -44,6 +44,16 @@ public class LocationUtils {
     public static boolean isGpsEnabled() {
         LocationManager lm = (LocationManager) Utils.getContext().getSystemService(Context.LOCATION_SERVICE);
         return lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+
+    /**
+     * 判断Gps是否可用
+     *
+     * @return {@code true}: 是<br>{@code false}: 否
+     */
+    public static boolean isNetworkEnabled() {
+        LocationManager lm = (LocationManager) Utils.getContext().getSystemService(Context.LOCATION_SERVICE);
+        return lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
     }
 
     /**
@@ -148,6 +158,16 @@ public class LocationUtils {
         }
         return null;
     }
+
+
+    public static String getFullInfoAddress(Address address) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
+            sb.append(address.getAddressLine(i)).append(", ");
+        }
+        return sb.toString();
+    }
+
 
     /**
      * 根据经纬度获取所在国家

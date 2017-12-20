@@ -16,6 +16,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -42,6 +43,22 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.drawee.view.SimpleDraweeView;
+import com.google.android.gms.common.ConnectionResult;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.greenrobot.eventbus.EventBus;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import cn.refactor.lib.colordialog.ColorDialog;
+import cn.refactor.lib.colordialog.PromptDialog;
 import com.travel.enjoyindanang.GlobalApplication;
 import com.travel.enjoyindanang.MvpActivity;
 import com.travel.enjoyindanang.R;
@@ -67,7 +84,8 @@ import com.travel.enjoyindanang.ui.fragment.introduction.IntroductionFragment;
 import com.travel.enjoyindanang.ui.fragment.logcheckin.CheckinHistoryFragment;
 import com.travel.enjoyindanang.ui.fragment.profile.ProfileFragment;
 import com.travel.enjoyindanang.ui.fragment.profile_menu.ProfileMenuFragment;
-import com.travel.enjoyindanang.ui.fragment.search.SearchFragment;
+import com.travel.enjoyindanang.ui.fragment.search.MapFragment;
+import com.travel.enjoyindanang.ui.fragment.term.TermFragment;
 import com.travel.enjoyindanang.utils.DateUtils;
 import com.travel.enjoyindanang.utils.DialogUtils;
 import com.travel.enjoyindanang.utils.ImageUtils;
@@ -75,27 +93,18 @@ import com.travel.enjoyindanang.utils.LocationUtils;
 import com.travel.enjoyindanang.utils.SharedPrefsUtils;
 import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.config.ForceUpdateChecker;
+import com.travel.enjoyindanang.utils.event.LocationConnectListener;
+import com.travel.enjoyindanang.utils.event.OnBackFragmentListener;
+import com.travel.enjoyindanang.utils.event.OnFindLastLocationCallback;
 import com.travel.enjoyindanang.utils.event.OnUpdateProfileSuccess;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 import com.travel.enjoyindanang.utils.helper.LocationHelper;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.greenrobot.eventbus.EventBus;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import cn.refactor.lib.colordialog.ColorDialog;
-import cn.refactor.lib.colordialog.PromptDialog;
+import static com.travel.enjoyindanang.utils.Utils.getContext;
 
 public class MainActivity extends MvpActivity<MainPresenter> implements MainView, AdapterView.OnItemClickListener,
-        NavigationView.OnNavigationItemSelectedListener, OnUpdateProfileSuccess, ForceUpdateChecker.OnUpdateNeededListener {
+        NavigationView.OnNavigationItemSelectedListener, OnUpdateProfileSuccess, ForceUpdateChecker.OnUpdateNeededListener,
+        LocationConnectListener, OnFindLastLocationCallback {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final int PERMISSION_REQUEST_CODE = 200;
@@ -105,12 +114,13 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
     private Menu mMenu;
     private final int INTRODUCTION = 1;
     private final int CONTACT_US = 2;
-    private final int FAVORITE = 3;
-    private final int LOG_CHECKIN = 4;
-    private final int CHANGE_PROFILE = 6;
-    private final int CHANGE_PASSWORD = 7;
-    private final int LOGOUT = 8;
-    private final int LOGIN = 4;
+    private final int TERM = 3;
+    private final int FAVORITE = 4;
+    private final int LOG_CHECKIN = 5;
+    private final int CHANGE_PROFILE = 7;
+    private final int CHANGE_PASSWORD = 8;
+    private final int LOGOUT = 9;
+    private final int LOGIN = 5;
     private boolean isOpen;
     private final String IS_OPEN = "IS_OPEN";
 
@@ -178,6 +188,10 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
 
     public LocationHelper mLocationHelper;
 
+    private boolean isFirstTimeCheckPermission;
+
+    private OnBackFragmentListener onBackFragmentListener;
+
     @Override
     public void setContentView() {
         setContentView(R.layout.activity_main);
@@ -209,7 +223,8 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
         if (!disableShowPopup()) {
             mvpPresenter.getPopup();
         }
-        if (!checkPermission()) {
+        isFirstTimeCheckPermission = !hasPermission();
+        if (!hasPermission()) {
             requestPermission();
         } else {
             startTrackLocation();
@@ -230,10 +245,22 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
         if (GlobalApplication.getGlobalApplicationContext().isHasSessionLogin()) {
             ForceUpdateChecker.with(this).onUpdateNeeded(this).check();
         }
-        validAndUpdateFullName();
+        if (!isFirstTimeCheckPermission) {
+            validAndUpdateFullName();
+        }
+        registerLocationReceiver();
+        registerGPSReciver();
+        LocalBroadcastManager.getInstance(getContext()).registerReceiver(onChangedLocationReceiver,
+                new IntentFilter(Extras.KEY_RECEIVER_LOCATION_ON_FOUND_FILTER));
+    }
+
+    private void registerLocationReceiver() {
         IntentFilter intentFilter = new IntentFilter(Extras.KEY_RECEIVER_LOCATION_FILTER);
         LocalBroadcastManager
                 .getInstance(MainActivity.this).registerReceiver(mLocationReceiver, intentFilter);
+    }
+
+    private void registerGPSReciver() {
         registerReceiver(gpsLocationReceiver, new IntentFilter(BROADCAST_ACTION));
     }
 
@@ -244,14 +271,21 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
             LocalBroadcastManager
                     .getInstance(MainActivity.this).unregisterReceiver(mLocationReceiver);
         }
+        if (gpsLocationReceiver != null) {
+            unregisterReceiver(gpsLocationReceiver);
+        }
+        if (onChangedLocationReceiver != null) {
+            LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(onChangedLocationReceiver);
+        }
+//        if(mLocationHelper != null){
+//            mLocationHelper.stopLocationUpdates();
+//        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         stopTrackingService();
-        if (gpsLocationReceiver != null)
-            unregisterReceiver(gpsLocationReceiver);
     }
 
     @Override
@@ -330,7 +364,12 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
                         EventBus.getDefault().post("hasBackFragment");
                         currentTab = HomeTab.Home;
                         lvDrawerNav.clearChoices();
-                    } else if (tag.equals(SearchFragment.class.getName())) {
+                    } else if (tag.equals(MapFragment.class.getName())) {
+                        if (!(fragment instanceof OnBackFragmentListener)) {
+                            throw new IllegalStateException(
+                                    "Fragment must implement the callbacks.");
+                        }
+                        onBackFragmentListener = (OnBackFragmentListener) fragment;
                         setShowMenuItem(Constant.HIDE_ALL_ITEM_MENU);
                         currentTab = HomeTab.Search;
                         lvDrawerNav.clearChoices();
@@ -361,6 +400,7 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
         } else {
             if (getSupportFragmentManager().getBackStackEntryCount() > 1) {
                 Fragment fragment = getTopFragment();
+                boolean canBackWithMapFrg = true;
                 if (fragment instanceof ProfileFragment) {
                     if (!isUpdatedFullName(fragment)) {
                         DialogUtils.showDialog(fragment.getContext(), DialogType.WARNING,
@@ -368,10 +408,14 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
                                 Utils.getLanguageByResId(R.string.Home_Account_Fullname_NotEmpty));
                         return;
                     }
+                } else if (fragment instanceof MapFragment) {
+                    onBackFragmentListener.onBack(true);
+                    canBackWithMapFrg = ((MapFragment) fragment).isResultSearchQueryVisible();
                 }
-                getSupportFragmentManager().popBackStack();
-//                enableBackButton(false);
-                setShowMenuItem(Constant.SHOW_MENU_BACK);
+                if (canBackWithMapFrg) {
+                    getSupportFragmentManager().popBackStack();
+                    setShowMenuItem(Constant.SHOW_MENU_BACK);
+                }
             } else {
                 if (Utils.hasLogin()) {
                     if (isExit) {
@@ -433,54 +477,54 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
 
     }
 
-    @OnClick({R.id.img_home, R.id.img_search, R.id.img_scan, R.id.img_menu, R.id.edit_profile, R.id.img_back})
+    @OnClick({R.id.img_home, R.id.img_search, R.id.img_scan, R.id.img_menu, R.id.img_back})
     public void onClick(View view) {
-        switch (view.getId()) {
-            case R.id.img_home:
-                if (currentTab != HomeTab.Home) {
-                    Fragment fragment = getSupportFragmentManager().findFragmentByTag(HomeFragment.class.getName());
-                    if (fragment == null) {
-                        addFrMenu(HomeFragment.class.getName(), true);
-                    } else {
-                        backToFragment(fragment);
-                    }
+        if (Utils.hasLogin()) {
+            if (StringUtils.isNotEmpty(Utils.getUserInfo().getFullName())) {
+                switch (view.getId()) {
+                    case R.id.img_home:
+                        if (currentTab != HomeTab.Home) {
+                            Fragment fragment = getSupportFragmentManager().findFragmentByTag(HomeFragment.class.getName());
+                            if (fragment == null) {
+                                addFrMenu(HomeFragment.class.getName(), true);
+                            } else {
+                                backToFragment(fragment);
+                            }
 
-                }
-                break;
-            case R.id.img_search:
-                if (currentTab != HomeTab.Search) {
-                    Fragment fragment = getSupportFragmentManager().findFragmentByTag(SearchFragment.class.getName());
-                    if (fragment == null) {
-                        addFrMenu(SearchFragment.class.getName(), true);
-                    } else {
-                        currentTab = HomeTab.Search;
-                        resurfaceFragment(fragment, SearchFragment.class.getName());
-                    }
-                }
-                break;
-            case R.id.img_menu:
-                if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
-                    mDrawerLayout.closeDrawer(GravityCompat.START);
-                } else {
-                    mDrawerLayout.openDrawer(GravityCompat.START);
-                }
+                        }
+                        break;
+                    case R.id.img_search:
+                        if (currentTab != HomeTab.Search) {
+                            Fragment fragment = getSupportFragmentManager().findFragmentByTag(MapFragment.class.getName());
+                            if (fragment == null) {
+                                addFrMenu(MapFragment.class.getName(), true);
+                            } else {
+                                currentTab = HomeTab.Search;
+                                resurfaceFragment(fragment, MapFragment.class.getName());
+                            }
+                        }
+                        break;
+                    case R.id.img_menu:
+                        if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
+                            mDrawerLayout.closeDrawer(GravityCompat.START);
+                        } else {
+                            mDrawerLayout.openDrawer(GravityCompat.START);
+                        }
 
-                break;
-            case R.id.img_scan:
-                if (Utils.hasLogin()) {
-                    startActivity(new Intent(MainActivity.this, ScanActivity.class));
-                    overridePendingTransitionEnter();
-                } else {
-                    DialogUtils.showDialog(MainActivity.this, DialogType.WARNING, DialogUtils.getTitleDialog(2), Utils.getLanguageByResId(R.string.Message_You_Need_Login));
+                        break;
+                    case R.id.img_scan:
+                        if (Utils.hasLogin()) {
+                            startActivity(new Intent(MainActivity.this, ScanActivity.class));
+                            overridePendingTransitionEnter();
+                        } else {
+                            DialogUtils.showDialog(MainActivity.this, DialogType.WARNING, DialogUtils.getTitleDialog(2), Utils.getLanguageByResId(R.string.Message_You_Need_Login));
+                        }
+                        break;
+                    case R.id.img_back:
+                        this.onBackPressed();
+                        break;
                 }
-                break;
-            case R.id.edit_profile:
-                addFr(ProfileFragment.class.getName(), CHANGE_PROFILE);
-                currentTab = HomeTab.None;
-                break;
-            case R.id.img_back:
-                this.onBackPressed();
-                break;
+            }
         }
     }
 
@@ -508,13 +552,16 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
                     case CONTACT_US:
                         addFr(ContactUsFragment.class.getName(), position);
                         break;
+                    case TERM:
+                        addFr(TermFragment.class.getName(), position);
+                        break;
                     case FAVORITE:
                         addFr(FavoriteFragment.class.getName(), position);
                         break;
                     case LOG_CHECKIN:
                         addFr(CheckinHistoryFragment.class.getName(), position);
                         break;
-                    case 5:
+                    case 6:
                         break;
                     case CHANGE_PROFILE:
                         addFr(ProfileFragment.class.getName(), position);
@@ -561,6 +608,9 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
                     break;
                 case CONTACT_US:
                     addFr(ContactUsFragment.class.getName(), position);
+                    break;
+                case TERM:
+                    addFr(TermFragment.class.getName(), position);
                     break;
                 case LOGIN:
                     finish();
@@ -674,7 +724,7 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
     }
 
 
-    private boolean checkPermission() {
+    private boolean hasPermission() {
         int resultCamera = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA);
         int resultWrite = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
         int resultRead = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE);
@@ -687,9 +737,7 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
     }
 
     private void requestPermission() {
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                        Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+        ActivityCompat.requestPermissions(this, Constant.PERMISSION_REQUIRED,
                 PERMISSION_REQUEST_CODE);
 
     }
@@ -705,8 +753,10 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
                     boolean readAccepted = grantResults[2] == PackageManager.PERMISSION_GRANTED;
 
                     if (cameraAccepted && writeAccepted && readAccepted) {
+                        isFirstTimeCheckPermission = false;
                         startTrackLocation();
                     } else {
+                        isFirstTimeCheckPermission = true;
                         DialogUtils.showDialog(MainActivity.this, DialogType.WARNING, DialogUtils.getTitleDialog(2),
                                 Utils.getLanguageByResId(R.string.Permission_Request_CAMERA_WRITE_READ));
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -928,18 +978,16 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
     private void startTrackLocation() {
         if (isServiceConnected)
             return;
-        if (mLocationHelper == null) {
-            mLocationHelper = new LocationHelper(MainActivity.this);
-            mLocationHelper.checkpermission();
-            mLocationHelper.simpleBuildGoogleApi();
-        }
+        mLocationHelper = new LocationHelper(MainActivity.this, this);
+        mLocationHelper.checkpermission();
+        buildConfigGoogleApi();
         if (mLocationHelper.isPermissionGranted() && LocationUtils.isGpsEnabled()) {
-            if(locationService == null){
+            if (locationService == null) {
                 locationService = new Intent(this, LocationService.class);
                 bindService(locationService, serviceConnection, BIND_AUTO_CREATE);
             }
         } else {
-            mLocationHelper.showSettingDialog();
+            mLocationHelper.showSettingDialog(this);
         }
     }
 
@@ -974,6 +1022,7 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             // Check for the integer request code originally supplied to startResolutionForResult().
             case LocationHelper.REQUEST_CHECK_SETTINGS:
@@ -1014,8 +1063,56 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
     private Runnable sendUpdatesToUI = new Runnable() {
         public void run() {
             if (mLocationHelper != null) {
-                mLocationHelper.showSettingDialog();
+                mLocationHelper.showSettingDialog(MainActivity.this);
             }
         }
     };
+
+    private BroadcastReceiver onChangedLocationReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent != null) {
+                String action = intent.getAction();
+                Bundle bundle = intent.getBundleExtra(Extras.KEY_RECEIVER_LOCATION);
+                if (bundle != null) {
+                    Location currentLocation = bundle.getParcelable(Extras.EXTRAS_RECEIVER_LOCATION);
+                    if (action.equalsIgnoreCase(Extras.KEY_RECEIVER_LOCATION_ON_FOUND_FILTER)) {
+                        mLastLocation = currentLocation;
+                    }
+                }
+            }
+        }
+    };
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Log.i(TAG, "onConnected: " + bundle);
+        if (mLocationHelper != null) {
+            mLocationHelper.startLocationUpdates(this);
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.e(TAG, "onConnectionFailed: " + connectionResult.getErrorMessage());
+    }
+
+    @Override
+    public void onFound(Location location) {
+        mLastLocation = location;
+        EventBus.getDefault().post(location);
+    }
+
+    private void buildConfigGoogleApi() {
+        if (mLocationHelper != null) {
+            mLocationHelper.buildGoogleApiStandard(this);
+            mLocationHelper.buildLocationRequest();
+            mLocationHelper.buildLocationSettings();
+        }
+    }
 }

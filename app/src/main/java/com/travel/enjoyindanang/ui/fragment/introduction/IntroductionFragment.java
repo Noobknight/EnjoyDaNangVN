@@ -8,8 +8,6 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import org.apache.commons.lang3.StringUtils;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import com.travel.enjoyindanang.MvpFragment;
@@ -18,6 +16,7 @@ import com.travel.enjoyindanang.annotation.DialogType;
 import com.travel.enjoyindanang.constant.AppError;
 import com.travel.enjoyindanang.model.Introduction;
 import com.travel.enjoyindanang.utils.DialogUtils;
+import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 
 /**
  * Author: Tavv
@@ -41,6 +40,9 @@ public class IntroductionFragment extends MvpFragment<IntroductionPresenter> imp
     @BindView(R.id.lrlIntroContent)
     LinearLayout lrlIntroContent;
 
+    @BindView(R.id.txtTopIntroduction)
+    TextView txtTopIntroduction;
+
 
     @Override
     protected IntroductionPresenter createPresenter() {
@@ -56,7 +58,6 @@ public class IntroductionFragment extends MvpFragment<IntroductionPresenter> imp
 
     @Override
     protected void init(View view) {
-        mMainActivity.setNameToolbar(StringUtils.EMPTY);
     }
 
     @Override
@@ -101,5 +102,11 @@ public class IntroductionFragment extends MvpFragment<IntroductionPresenter> imp
     @Override
     public void onLoadFailure(AppError error) {
         DialogUtils.showDialog(getContext(), DialogType.WARNING, DialogUtils.getTitleDialog(2), error.getMessage());
+    }
+
+    @Override
+    public void initViewLabel(View view) {
+        super.initViewLabel(view);
+        LanguageHelper.getValueByViewId(txtTopIntroduction);
     }
 }

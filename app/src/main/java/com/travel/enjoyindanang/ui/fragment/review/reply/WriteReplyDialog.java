@@ -15,7 +15,6 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -29,6 +28,18 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import cn.refactor.lib.colordialog.PromptDialog;
 import com.travel.enjoyindanang.GlobalApplication;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.annotation.DialogType;
@@ -36,6 +47,7 @@ import com.travel.enjoyindanang.api.ApiCallback;
 import com.travel.enjoyindanang.api.ApiStores;
 import com.travel.enjoyindanang.api.model.Repository;
 import com.travel.enjoyindanang.api.module.AppClient;
+import com.travel.enjoyindanang.constant.AppError;
 import com.travel.enjoyindanang.constant.Constant;
 import com.travel.enjoyindanang.model.ImageData;
 import com.travel.enjoyindanang.model.PartnerAlbum;
@@ -56,18 +68,6 @@ import com.travel.enjoyindanang.utils.helper.PhotoHelper;
 import com.travel.enjoyindanang.utils.helper.SeparatorDecoration;
 import com.travel.enjoyindanang.utils.helper.SoftKeyboardManager;
 import com.travel.enjoyindanang.utils.widget.DividerItemDecoration;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import cn.refactor.lib.colordialog.PromptDialog;
 import okhttp3.MultipartBody;
 import rx.Observable;
 import rx.Subscriber;
@@ -150,11 +150,6 @@ public class WriteReplyDialog extends DialogFragment implements View.OnTouchList
     @BindView(R.id.lrlWriteReply)
     LinearLayout lrlWriteReply;
 
-    private boolean hasLoadmore;
-
-
-    @BindView(R.id.toolbar)
-    Toolbar mToolbar;
     @BindView(R.id.name)
     TextView toolbarName;
     @BindView(R.id.edit_profile)
@@ -387,8 +382,7 @@ public class WriteReplyDialog extends DialogFragment implements View.OnTouchList
                 mPhotoHelper.startGalleryIntent();
                 break;
             case R.id.btnSubmitReply:
-                // TODO: replace func submitWriteReply() to writeReply()
-                submitWriteReply();
+                writeReply();
                 break;
         }
     }
@@ -430,74 +424,26 @@ public class WriteReplyDialog extends DialogFragment implements View.OnTouchList
         recyclerView.setHasFixedSize(false);
     }
 
-
-    void submitWriteReply() {
-        if (!Utils.hasLogin() || review == null || partnerId == 0) return;
-        showLoading(Utils.getLanguageByResId(R.string.Sending));
-        final List<String> lstBase64 = getListImageBase64(mPreviewAdapter.getImages());
-        final int reviewId = review.getId();
-        long userId = GlobalApplication.getUserInfo().getUserId();
-        String userName = GlobalApplication.getUserInfo().getFullName();
-        String content = String.valueOf(edtWriteReply.getText());
-        String title = StringUtils.EMPTY;
-        if (StringUtils.isEmpty(content)) {
-            DialogUtils.showDialog(getActivity(), DialogType.WRONG, DialogUtils.getTitleDialog(3), Utils.getLanguageByResId(R.string.Validate_Message_All_Field_Empty));
-            return;
-        }
-
-        addSubscription(apiStores.writeReplyByReviewId(reviewId, userId, partnerId, 0, title, userName, content,
-                lstBase64.get(0), lstBase64.get(1), lstBase64.get(2)), new ApiCallback<Repository>() {
-
-            @Override
-            public void onSuccess(Repository model) {
-                if (Utils.isResponseError(model)) {
-                    DialogUtils.showDialog(getContext(), DialogType.WRONG, DialogUtils.getTitleDialog(3), model.getMessage());
-                    return;
-                }
-                DialogUtils.showDialog(getContext(), DialogType.SUCCESS, DialogUtils.getTitleDialog(1),
-                        Utils.getLanguageByResId(R.string.Review_Write_Reply_Success), new PromptDialog.OnPositiveListener() {
-                            @Override
-                            public void onClick(PromptDialog promptDialog) {
-                                isRefreshAfterSubmit = true;
-                                promptDialog.dismiss();
-                                clearData();
-                                fetchReplies(reviewId, START_PAGE);
-                            }
-                        });
-            }
-
-            @Override
-            public void onFailure(String msg) {
-                DialogUtils.showDialog(getContext(), DialogType.WRONG, DialogUtils.getTitleDialog(3), msg);
-            }
-
-            @Override
-            public void onFinish() {
-                hideLoading();
-            }
-        });
-    }
-
     void writeReply() {
         if (!Utils.hasLogin() || review == null || partnerId == 0) return;
         showLoading(Utils.getLanguageByResId(R.string.Sending));
         MultipartBody.Part[] lstParts = getFilePartsRequest(mPreviewAdapter.getImages());
         final int reviewId = review.getId();
         long userId = GlobalApplication.getUserInfo().getUserId();
-        String userName = GlobalApplication.getUserInfo().getFullName();
         String content = String.valueOf(edtWriteReply.getText());
+
         String title = StringUtils.EMPTY;
         if (StringUtils.isEmpty(content)) {
             DialogUtils.showDialog(getActivity(), DialogType.WRONG, DialogUtils.getTitleDialog(3), Utils.getLanguageByResId(R.string.Validate_Message_All_Field_Empty));
             return;
         }
-        addSubscription(apiStores.writeReplyByReviewId(reviewId, userId, partnerId, 0, title, userName, content,
+        addSubscription(apiStores.postComment(0, userId, partnerId, reviewId, Constant.DEFAULT_RATING_STAR, title, content,
                 lstParts[0], lstParts[1], lstParts[2]), new ApiCallback<Repository>() {
 
             @Override
             public void onSuccess(Repository model) {
                 if (Utils.isResponseError(model)) {
-                    DialogUtils.showDialog(getContext(), DialogType.WRONG, DialogUtils.getTitleDialog(3), model.getMessage());
+                    onWriteReplyFailure(new AppError(new Throwable(model.getMessage())));
                     return;
                 }
                 DialogUtils.showDialog(getContext(), DialogType.SUCCESS, DialogUtils.getTitleDialog(1),
@@ -514,7 +460,7 @@ public class WriteReplyDialog extends DialogFragment implements View.OnTouchList
 
             @Override
             public void onFailure(String msg) {
-                DialogUtils.showDialog(getContext(), DialogType.WRONG, DialogUtils.getTitleDialog(3), msg);
+                onWriteReplyFailure(new AppError(new Throwable(msg)));
             }
 
             @Override
@@ -618,18 +564,11 @@ public class WriteReplyDialog extends DialogFragment implements View.OnTouchList
                 fetchReplies(review.getId(), page);
             }
         });
-        mToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                isBack = true;
-                dismiss();
-            }
-        });
         lrlWriteReply.setOnTouchListener(this);
     }
 
     private void initToolbar() {
-        toolbarName.setText(LanguageHelper.getValueByKey(Utils.getString(R.string.Tab_Detail)).toUpperCase());
+        setHeightToolbar();
         tvProfile.setVisibility(View.GONE);
         imgScan.setVisibility(View.VISIBLE);
     }
@@ -658,7 +597,7 @@ public class WriteReplyDialog extends DialogFragment implements View.OnTouchList
         mPreviewAdapter.notifyDataSetChanged();
     }
 
-    @OnClick({R.id.img_scan})
+    @OnClick({R.id.img_scan, R.id.img_back})
     public void onMenuOptionsClick(View view) {
         switch (view.getId()) {
             case R.id.img_scan:
@@ -669,6 +608,21 @@ public class WriteReplyDialog extends DialogFragment implements View.OnTouchList
                     DialogUtils.showDialog(getActivity(), DialogType.WARNING, DialogUtils.getTitleDialog(2), Utils.getLanguageByResId(R.string.Message_You_Need_Login));
                 }
                 break;
+            case R.id.img_back:
+                isBack = true;
+                dismiss();
+                break;
         }
+    }
+
+    private void setHeightToolbar() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            frToolBar.setPadding(0, Utils.getStatusBarHeight(), 0, 0);
+        }
+    }
+
+    private void onWriteReplyFailure(AppError appError) {
+        hideLoading();
+        DialogUtils.showDialog(getContext(), DialogType.WRONG, DialogUtils.getTitleDialog(3), appError.getMessage());
     }
 }

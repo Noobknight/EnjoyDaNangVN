@@ -11,7 +11,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatButton;
@@ -116,6 +115,10 @@ public class ProfileFragment extends MvpFragment<ProfilePresenter> implements Pr
     @BindView(R.id.lrlUpdateProfile)
     LinearLayout lrlUpdateProfile;
 
+
+    @BindView(R.id.lrlControlUpload)
+    LinearLayout lrlControlUpload;
+
     private UserInfo userInfo;
 
     private PhotoHelper mPhotoHelper;
@@ -160,6 +163,7 @@ public class ProfileFragment extends MvpFragment<ProfilePresenter> implements Pr
     @Override
     protected void setEvent(View view) {
         lrlUpdateProfile.setOnTouchListener(this);
+        lrlControlUpload.setOnTouchListener(this);
     }
 
     @Override
@@ -423,7 +427,7 @@ public class ProfileFragment extends MvpFragment<ProfilePresenter> implements Pr
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
-        if (v.getId() == R.id.lrlUpdateProfile) {
+        if (v.getId() == R.id.lrlUpdateProfile || v.getId() == R.id.lrlControlUpload) {
             SoftKeyboardManager.hideSoftKeyboard(getContext(), v.getWindowToken(), 0);
         }
         return true;

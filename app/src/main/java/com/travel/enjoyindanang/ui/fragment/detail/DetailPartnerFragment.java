@@ -6,6 +6,9 @@ import android.net.Uri;
 import android.net.http.SslError;
 import android.os.Bundle;
 import android.support.v4.widget.NestedScrollView;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebResourceRequest;
@@ -24,25 +27,33 @@ import com.daimajia.slider.library.SliderTypes.BaseSliderView;
 import com.daimajia.slider.library.SliderTypes.DefaultSliderView;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.google.android.gms.maps.model.LatLng;
-import com.travel.enjoyindanang.MvpFragment;
-import com.travel.enjoyindanang.R;
-import com.travel.enjoyindanang.common.Common;
-import com.travel.enjoyindanang.constant.AppError;
-import com.travel.enjoyindanang.model.DetailPartner;
-import com.travel.enjoyindanang.model.Partner;
-import com.travel.enjoyindanang.model.PartnerAlbum;
-import com.travel.enjoyindanang.utils.ImageUtils;
-import com.travel.enjoyindanang.utils.Utils;
-import com.travel.enjoyindanang.utils.helper.LocationHelper;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import com.travel.enjoyindanang.MvpFragment;
+import com.travel.enjoyindanang.R;
+import com.travel.enjoyindanang.annotation.DialogType;
+import com.travel.enjoyindanang.common.Common;
+import com.travel.enjoyindanang.constant.AppError;
+import com.travel.enjoyindanang.constant.Constant;
+import com.travel.enjoyindanang.model.DetailPartner;
+import com.travel.enjoyindanang.model.Partner;
+import com.travel.enjoyindanang.model.PartnerAlbum;
+import com.travel.enjoyindanang.model.UserInfo;
+import com.travel.enjoyindanang.ui.fragment.detail.dialog.DetailHomeDialogFragment;
+import com.travel.enjoyindanang.utils.DialogUtils;
+import com.travel.enjoyindanang.utils.ImageUtils;
+import com.travel.enjoyindanang.utils.Utils;
+import com.travel.enjoyindanang.utils.event.OnItemClickListener;
+import com.travel.enjoyindanang.utils.helper.LanguageHelper;
+import com.travel.enjoyindanang.utils.helper.LocationHelper;
 
 /**
  * Author: Tavv
@@ -51,10 +62,11 @@ import butterknife.ButterKnife;
  * Version : 1.0
  */
 
-public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> implements iDetailPartnerView{
+public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> implements iDetailPartnerView,
+        OnItemClickListener {
     private static final String TAG = DetailPartnerFragment.class.getSimpleName();
-    private static final int REQUEST_PERMISSION_RESULT = 0x2;
-    private static final float INIT_ZOOM_LEVEL = 17.0f;
+    private static final String KEY_OPEN_FROM_NEARBY = "open_from_nearby";
+
     private static final int DURATION_SLIDE = 3000;
 
     @BindView(R.id.txtTitle)
@@ -91,12 +103,33 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
 
     private LocationHelper mLocationHelper;
 
+    @BindView(R.id.rcvPartnerAround)
+    RecyclerView rcvPartnerAround;
+
+    @BindView(R.id.txtNearPlaces)
+    TextView txtNearPlaces;
+
+    @BindView(R.id.txtDistance)
+    TextView txtDistance;
+
+    @BindView(R.id.txtDiscount)
+    TextView txtDiscount;
+
     private Partner partner;
 
-    public static DetailPartnerFragment newInstance(Partner partner) {
+    private List<Partner> lstPartnerAround;
+
+    private boolean isOpenFromNearby;
+
+    private boolean isHideListPartnerAround;
+
+    private DetailPartner detailPartner;
+
+    public static DetailPartnerFragment newInstance(Partner partner, boolean isOpenFromNearby) {
         DetailPartnerFragment fragment = new DetailPartnerFragment();
         Bundle bundle = new Bundle();
         bundle.putParcelable(TAG, partner);
+        bundle.putBoolean(KEY_OPEN_FROM_NEARBY, isOpenFromNearby);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -109,8 +142,8 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
     @Override
     protected void init(View view) {
         mBaseActivity.setTitle(Utils.getLanguageByResId(R.string.Tab_Detail));
-        if(mMainActivity != null){
-            if(mMainActivity.getLocationService() != null){
+        if (mMainActivity != null) {
+            if (mMainActivity.getLocationService() != null) {
                 mLastLocation = mMainActivity.getLocationService().getLastLocation();
             }
             mLocationHelper = mMainActivity.mLocationHelper;
@@ -141,9 +174,18 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
                 Bundle bundle = getArguments();
                 if (bundle != null) {
                     partner = (Partner) bundle.getParcelable(TAG);
+                    isOpenFromNearby = bundle.getBoolean(KEY_OPEN_FROM_NEARBY);
                     if (partner != null) {
                         initWebView();
-                        mvpPresenter.getAllDataHome(partner.getId());
+                        if (!isOpenFromNearby) {
+                            mvpPresenter.getAllDataHome(partner.getId());
+                        } else {
+                            if (StringUtils.isBlank(partner.getGeoLat()) || StringUtils.isBlank(partner.getGeoLng())) {
+                                mvpPresenter.getAllDataNearBy(partner.getId(), "", "");
+                            } else {
+                                mvpPresenter.getAllDataNearBy(partner.getId(), partner.getGeoLat(), partner.getGeoLng());
+                            }
+                        }
                     }
                 }
             }
@@ -163,7 +205,7 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
 
     @Override
     public void showToast(String desc) {
-        Toast.makeText(mMainActivity, desc, Toast.LENGTH_SHORT).show();
+        Toast.makeText(getContext(), desc, Toast.LENGTH_SHORT).show();
     }
 
     @Override
@@ -174,7 +216,7 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
 
     @Override
     public void onFetchFailure(AppError appError) {
-        Toast.makeText(mMainActivity, appError.getMessage(), Toast.LENGTH_SHORT).show();
+        DialogUtils.showDialog(getContext(), DialogType.WRONG, DialogUtils.getTitleDialog(3), appError.getMessage());
     }
 
 
@@ -182,6 +224,41 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
     public void onFetchAllData(List<DetailPartner> lstDetailPartner, List<PartnerAlbum> lstAlbum) {
         setDataAlbum(lstAlbum);
         setDataDetail(lstDetailPartner);
+
+    }
+
+    @Override
+    public void onFetchListPartnerAround(List<Partner> lstPartnerAround) {
+        if (!isHideListPartnerAround) {
+            initListPartnerAround(lstPartnerAround);
+            if (isOpenFromNearby) {
+                if (StringUtils.isNotBlank(detailPartner.getDistance()) &&
+                        !StringUtils.equals(detailPartner.getDistance().trim(), "km")
+                        && detailPartner.isDisplayDistance()) {
+                    String distance = detailPartner.getDistance();
+                    txtDistance.setText(distance);
+                } else {
+                    txtDistance.setVisibility(View.GONE);
+                }
+                txtDistance.setText(detailPartner.getDistance());
+                String strDiscount = String.format(Locale.getDefault(), Constant.DISCOUNT_TEMPLATE, detailPartner.getDiscount(), "%");
+                txtDiscount.setText(strDiscount);
+                txtDistance.setVisibility(View.VISIBLE);
+                txtDiscount.setVisibility(View.VISIBLE);
+            }
+        } else {
+            rcvPartnerAround.setVisibility(View.GONE);
+            txtNearPlaces.setVisibility(View.GONE);
+        }
+
+    }
+
+    @Override
+    public void onClick(View view, int position) {
+        if (CollectionUtils.isNotEmpty(lstPartnerAround)) {
+            DetailHomeDialogFragment dialog = DetailHomeDialogFragment.newInstance(lstPartnerAround.get(position), true);
+            DialogUtils.reOpenDialogFragment(mFragmentManager, dialog);
+        }
     }
 
     private class WebClient extends WebViewClient {
@@ -201,6 +278,7 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
             return false;
 
         }
+
     }
 
     private void loadVideo(String url) {
@@ -221,7 +299,7 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
 
     private void loadMapView(DetailPartner detailPartner) {
         try {
-            if (detailPartner != null) {
+            if (detailPartner != null && mLocationHelper != null) {
                 double longtitude = Double.parseDouble(StringUtils.trim(detailPartner.getGeoLng()));
                 double latitude = Double.parseDouble(StringUtils.trim(detailPartner.getGeoLat()));
                 String strImage = mLocationHelper.getUrlThumbnailLocation(longtitude, latitude);
@@ -314,13 +392,13 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
             double longitude = mLastLocation.getLongitude();
             return new LatLng(latitude, longitude);
         } else {
-            showToast("Couldn't get the location. Make sure location is enabled on the device");
+            showToast(Utils.getLanguageByResId(R.string.Map_Location_NotFound));
             return null;
         }
     }
 
-    private void retryGetLastLocation(){
-        if(mLastLocation == null && mMainActivity.getLocationService() != null){
+    private void retryGetLastLocation() {
+        if (mLastLocation == null && mMainActivity.getLocationService() != null) {
             mLastLocation = mMainActivity.getLocationService().getLastLocation();
         }
     }
@@ -362,7 +440,12 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
 
     private void setDataDetail(List<DetailPartner> lstDetailPartner) {
         if (CollectionUtils.isNotEmpty(lstDetailPartner)) {
-            DetailPartner detailPartner = lstDetailPartner.get(0);
+            detailPartner = lstDetailPartner.get(0);
+            isHideListPartnerAround = checkGeoPartnerEmpty(detailPartner);
+            if (!checkGeoPartnerEmpty(detailPartner)) {
+                UserInfo user = Utils.getUserInfo();
+                mvpPresenter.getListPartnerAround(user.getUserId(), detailPartner.getGeoLat(), detailPartner.getGeoLng());
+            }
             txtTitle.setText(detailPartner.getName());
             ImageUtils.loadImageWithFreso(imgPartner, detailPartner.getPicture());
             txtContent.loadDataWithBaseURL(null, detailPartner.getDescription(), "text/html", "utf-8", null);
@@ -372,6 +455,31 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
             loadMapView(detailPartner);
             loadVideo(detailPartner.getVideo());
         }
+    }
 
+    private void initListPartnerAround(List<Partner> lstPartnerAround) {
+        if (CollectionUtils.isNotEmpty(lstPartnerAround)) {
+            this.lstPartnerAround = lstPartnerAround;
+            LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false);
+            DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(getContext(),
+                    layoutManager.getOrientation());
+            rcvPartnerAround.setNestedScrollingEnabled(false);
+            rcvPartnerAround.setLayoutManager(layoutManager);
+            rcvPartnerAround.addItemDecoration(dividerItemDecoration);
+            PartnerAroundAdapter partnerAroundAdapter = new PartnerAroundAdapter(lstPartnerAround, this);
+            rcvPartnerAround.setAdapter(partnerAroundAdapter);
+        } else {
+            rcvPartnerAround.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void initViewLabel(View view) {
+        super.initViewLabel(view);
+        LanguageHelper.getValueByViewId(txtNearPlaces);
+    }
+
+    private boolean checkGeoPartnerEmpty(DetailPartner partner) {
+        return partner != null && (StringUtils.isEmpty(partner.getGeoLat()) || StringUtils.isEmpty(partner.getGeoLng()));
     }
 }

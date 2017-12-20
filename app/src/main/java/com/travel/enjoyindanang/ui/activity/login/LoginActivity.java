@@ -1,9 +1,14 @@
 package com.travel.enjoyindanang.ui.activity.login;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.AppCompatButton;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -18,15 +23,7 @@ import com.facebook.internal.CallbackManagerImpl;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.gson.Gson;
 import com.kakao.auth.Session;
-
-import org.apache.commons.lang3.StringUtils;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import cn.refactor.lib.colordialog.PromptDialog;
 import com.travel.enjoyindanang.GlobalApplication;
 import com.travel.enjoyindanang.MvpActivity;
 import com.travel.enjoyindanang.R;
@@ -38,13 +35,20 @@ import com.travel.enjoyindanang.constant.LoginType;
 import com.travel.enjoyindanang.model.UserInfo;
 import com.travel.enjoyindanang.ui.activity.main.MainActivity;
 import com.travel.enjoyindanang.ui.activity.signup.SignUpActivity;
+import com.travel.enjoyindanang.ui.activity.term.TermActivity;
 import com.travel.enjoyindanang.utils.DialogUtils;
-import com.travel.enjoyindanang.utils.SharedPrefsUtils;
 import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.config.ForceUpdateChecker;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 import com.travel.enjoyindanang.utils.helper.SoftKeyboardManager;
 import com.travel.enjoyindanang.utils.helper.StatusBarCompat;
+
+import org.apache.commons.lang3.StringUtils;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import cn.refactor.lib.colordialog.PromptDialog;
 
 import static com.travel.enjoyindanang.ui.activity.login.LoginViaGoogle.RC_SIGN_IN;
 
@@ -58,6 +62,7 @@ import static com.travel.enjoyindanang.ui.activity.login.LoginViaGoogle.RC_SIGN_
 public class LoginActivity extends MvpActivity<LoginPresenter> implements LoginView, LoginCallBack, View.OnTouchListener,
         ForceUpdateChecker.OnUpdateNeededListener {
     private static final String TAG = LoginActivity.class.getSimpleName();
+    private static final int PERMISSION_REQUEST_CODE = 200;
 
     @BindView(R.id.edtUserName)
     EditText edtUserName;
@@ -79,6 +84,9 @@ public class LoginActivity extends MvpActivity<LoginPresenter> implements LoginV
 
     @BindView(R.id.txtContinue)
     TextView txtContinue;
+
+    @BindView(R.id.txtTermSystem)
+    TextView txtTermSystem;
 
     @BindView(R.id.lrlLogin)
     LinearLayout lrlLogin;
@@ -104,6 +112,9 @@ public class LoginActivity extends MvpActivity<LoginPresenter> implements LoginV
 
     @Override
     public void init() {
+        if (!hasPermission()) {
+            requestPermission();
+        }
         LoginFactory loginFactory = new LoginFactory();
         loginViaFacebook = (LoginViaFacebook) loginFactory.getLoginType(LoginType.FACEBOOK, this, this);
         loginViaGoogle = (LoginViaGoogle) loginFactory.getLoginType(LoginType.GOOGLE, this, this);
@@ -131,12 +142,13 @@ public class LoginActivity extends MvpActivity<LoginPresenter> implements LoginV
 
     @Override
     public void initViewLabel() {
-        LanguageHelper.getValueByViewId(edtUserName, edtPassword, txtOr, txtCreateAccount, txtForgotPwd, btnLoginNormal, txtContinue);
+        LanguageHelper.getValueByViewId(edtUserName, edtPassword, txtOr, txtCreateAccount,
+                txtForgotPwd, btnLoginNormal, txtContinue, txtTermSystem);
     }
 
 
     @OnClick({R.id.btnLoginFb, R.id.btnLoginGPlus, R.id.btnLoginKakaotalk, R.id.btnLoginNormal
-            , R.id.txtCreateAccount, R.id.txtForgotPwd, R.id.txtContinue})
+            , R.id.txtCreateAccount, R.id.txtForgotPwd, R.id.txtContinue, R.id.txtTermSystem})
     public void onLoginClick(View view) {
         Intent intent = null;
         switch (view.getId()) {
@@ -157,6 +169,9 @@ public class LoginActivity extends MvpActivity<LoginPresenter> implements LoginV
                 break;
             case R.id.txtForgotPwd:
                 intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constant.URL_FORGOT_PWD));
+                break;
+            case R.id.txtTermSystem:
+                intent = new Intent(this, TermActivity.class);
                 break;
             case R.id.txtContinue:
                 intent = new Intent(this, MainActivity.class);
@@ -316,9 +331,70 @@ public class LoginActivity extends MvpActivity<LoginPresenter> implements LoginV
                     @Override
                     public void onClick(PromptDialog promptDialog) {
                         promptDialog.dismiss();
+                        GlobalApplication.getGlobalApplicationContext().setHasClickedUpdate(true);
                         Utils.redirectStore(LoginActivity.this, updateUrl);
                     }
                 });
+    }
+
+
+    private boolean hasPermission() {
+        int resultCamera = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.CAMERA);
+        int resultWrite = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        int resultRead = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.READ_EXTERNAL_STORAGE);
+        int resultLocation = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION);
+        int resultCroarse = ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION);
+        return resultCamera == PackageManager.PERMISSION_GRANTED &&
+                resultWrite == PackageManager.PERMISSION_GRANTED && resultRead == PackageManager.PERMISSION_GRANTED
+                && resultLocation == PackageManager.PERMISSION_GRANTED &&
+                resultCroarse == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestPermission() {
+        ActivityCompat.requestPermissions(this, Constant.PERMISSION_REQUIRED,
+                PERMISSION_REQUEST_CODE);
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_CODE:
+                if (grantResults.length > 0) {
+
+                    boolean cameraAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
+                    boolean writeAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
+                    boolean readAccepted = grantResults[2] == PackageManager.PERMISSION_GRANTED;
+
+                    if (cameraAccepted && writeAccepted && readAccepted) {
+                        //do nothing
+                    } else {
+                        DialogUtils.showDialog(LoginActivity.this, DialogType.WARNING, DialogUtils.getTitleDialog(2),
+                                Utils.getLanguageByResId(R.string.Permission_Request_CAMERA_WRITE_READ));
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                            if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA)) {
+                                DialogUtils.showDialog(LoginActivity.this,
+                                        DialogType.INFO,
+                                        Utils.getLanguageByResId(R.string.Permisstion_Title),
+                                        Utils.getLanguageByResId(R.string.Permission_Request_Content),
+                                        new PromptDialog.OnPositiveListener() {
+                                            @Override
+                                            public void onClick(PromptDialog promptDialog) {
+                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                                    requestPermission();
+                                                }
+                                            }
+                                        }
+                                );
+                                return;
+                            }
+                        }
+
+                    }
+                }
+
+                break;
+        }
     }
 
 }

@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -27,6 +28,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsResult;
 import com.google.android.gms.location.LocationSettingsStates;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
@@ -42,6 +44,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import org.apache.commons.lang3.StringUtils;
+import org.greenrobot.eventbus.EventBus;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -51,14 +54,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+import com.travel.enjoyindanang.constant.Constant;
 import com.travel.enjoyindanang.utils.JsonUtils;
 import com.travel.enjoyindanang.utils.PermissionUtils;
+import com.travel.enjoyindanang.utils.event.LocationConnectListener;
 import com.travel.enjoyindanang.utils.event.OnFindLastLocationCallback;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
+
+import static android.content.Context.LOCATION_SERVICE;
 
 /**
  * Author: Tavv
@@ -88,6 +95,11 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
 
     private LocationRequest mLocationRequest;
 
+    private FusedLocationProviderClient mFusedLocationClient;
+
+    private SettingsClient mSettingsClient;
+
+    private LocationSettingsRequest mLocationSettingsRequest;
     // list of permissions
 
     private ArrayList<String> permissions = new ArrayList<>();
@@ -100,6 +112,13 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
 
     private OnFindLastLocationCallback findCallback;
 
+    private LocationManager mLocationManager;
+
+    /**
+     * Time when the location was updated represented as a String.
+     */
+    private String mLastUpdateTime;
+
     public LocationHelper(Context context, OnFindLastLocationCallback findCallback) {
         this.context = context;
         this.findCallback = findCallback;
@@ -107,6 +126,9 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
         permissionUtils = new PermissionUtils(context, this);
         permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
         permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
+        mLocationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
+        mSettingsClient = LocationServices.getSettingsClient(context);
     }
 
 
@@ -116,6 +138,9 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
         permissionUtils = new PermissionUtils(context, this);
         permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
         permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
+        mLocationManager = (LocationManager) context.getSystemService(LOCATION_SERVICE);
+        mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
+        mSettingsClient = LocationServices.getSettingsClient(context);
     }
 
 
@@ -218,11 +243,14 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
     }
 
     public String getFullInfoAddress(Address address) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
-            sb.append(address.getAddressLine(i)).append(", ");
+        if (address != null) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i <= address.getMaxAddressLineIndex(); i++) {
+                sb.append(address.getAddressLine(i)).append(", ");
+            }
+            return sb.toString();
         }
-        return sb.toString();
+        return StringUtils.EMPTY;
     }
 
 
@@ -238,67 +266,53 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
         mGoogleApiClient.connect();
     }
 
-    public void buildGoogleApiClient(GoogleApiClient.ConnectionCallbacks connectionCallbacks,
-                                     GoogleApiClient.OnConnectionFailedListener connectionFailedListener) {
-        mGoogleApiClient = new GoogleApiClient.Builder(context)
-                .addConnectionCallbacks(connectionCallbacks)
-                .addOnConnectionFailedListener(connectionFailedListener)
-                .addApi(LocationServices.API).build();
+    public GoogleApiClient buildGoogleApiStandard(LocationConnectListener locationConnectListener) {
+        if (mGoogleApiClient == null) {
+            mGoogleApiClient = new GoogleApiClient.Builder(context)
+                    .addConnectionCallbacks(locationConnectListener)
+                    .addOnConnectionFailedListener(locationConnectListener)
+                    .addApi(LocationServices.API).build();
+            mGoogleApiClient.connect();
+        }
+        return mGoogleApiClient;
+    }
 
-        mGoogleApiClient.connect();
+    public LocationRequest buildLocationRequest() {
+        if (mLocationRequest == null) {
+            mLocationRequest = LocationRequest.create();
+            mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+            mLocationRequest.setInterval(UPDATE_INTERVAL);
+            mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
+        }
+        return mLocationRequest;
+    }
 
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setInterval(UPDATE_INTERVAL);
-        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
-
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(mLocationRequest);
+    public LocationSettingsRequest.Builder buildLocationSettings() {
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
+        builder.addLocationRequest(buildLocationRequest());
         builder.setAlwaysShow(true);
+        mLocationSettingsRequest = builder.build();
 
-        PendingResult<LocationSettingsResult> result =
-                LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder.build());
-
-        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
-            @Override
-            public void onResult(@NonNull LocationSettingsResult locationSettingsResult) {
-
-                final Status status = locationSettingsResult.getStatus();
-
-                switch (status.getStatusCode()) {
-                    case LocationSettingsStatusCodes.SUCCESS:
-                        break;
-                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
-                        try {
-                            // Show the dialog by calling startResolutionForResult(),
-                            // and check the result in onActivityResult().
-                            status.startResolutionForResult(current_activity, REQUEST_CHECK_SETTINGS);
-
-                        } catch (IntentSender.SendIntentException e) {
-                            // Ignore the error.
-                        }
-                        break;
-                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
-                        break;
-                }
-            }
-        });
-
-
+        // Check whether location settings are satisfied
+        // https://developers.google.com/android/reference/com/google/android/gms/location/SettingsClient
+        mSettingsClient = LocationServices.getSettingsClient(context);
+        mSettingsClient.checkLocationSettings(mLocationSettingsRequest);
+        return builder;
     }
 
     /* Show Location Access Dialog */
-    public void showSettingDialog() {
-        LocationRequest locationRequest = LocationRequest.create();
-        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);//Setting priotity of Location request to high
-        locationRequest.setInterval(30 * 1000);
-        locationRequest.setFastestInterval(5 * 1000);//5 sec Time interval for location update
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
-                .addLocationRequest(locationRequest);
-        builder.setAlwaysShow(true); //this is the key ingredient to show dialog always when GPS is off
-
+    public void showSettingDialog(LocationConnectListener locationConnectListener) {
+        if (mGoogleApiClient == null) {
+            buildGoogleApiStandard(locationConnectListener);
+        }
+        if (mLocationRequest == null) {
+            buildLocationRequest();
+        }
+        if (mLocationSettingsRequest == null) {
+            buildLocationSettings();
+        }
         PendingResult<LocationSettingsResult> result =
-                LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder.build());
+                LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, mLocationSettingsRequest);
         result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
             @Override
             public void onResult(LocationSettingsResult result) {
@@ -330,36 +344,26 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
 
 
     // Trigger new location updates at interval
-    public void startLocationUpdates(GoogleApiClient.ConnectionCallbacks connectionCallbacks,
-                                     GoogleApiClient.OnConnectionFailedListener connectionFailedListener) {
-        mGoogleApiClient = new GoogleApiClient.Builder(context)
-                .addConnectionCallbacks(connectionCallbacks)
-                .addOnConnectionFailedListener(connectionFailedListener)
-                .addApi(LocationServices.API).build();
+    public void startLocationUpdates(LocationConnectListener locationConnectListener) {
+        if (mLocationRequest != null) {
+            try {
+                mSettingsClient.checkLocationSettings(mLocationSettingsRequest)
+                        .addOnSuccessListener(current_activity, new OnSuccessListener<LocationSettingsResponse>() {
+                            @Override
+                            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+                                //noinspection MissingPermission
+                                mFusedLocationClient.requestLocationUpdates(mLocationRequest,
+                                        locationCallback, Looper.myLooper());
+                                getLastFusedLocation();
 
-        mGoogleApiClient.connect();
-        // Create the location request to start receiving updates
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        mLocationRequest.setInterval(UPDATE_INTERVAL);
-        mLocationRequest.setFastestInterval(FASTEST_INTERVAL);
-
-        // Create LocationSettingsRequest object using location request
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
-        builder.addLocationRequest(mLocationRequest);
-        LocationSettingsRequest locationSettingsRequest = builder.build();
-
-        // Check whether location settings are satisfied
-        // https://developers.google.com/android/reference/com/google/android/gms/location/SettingsClient
-        SettingsClient settingsClient = LocationServices.getSettingsClient(context);
-        settingsClient.checkLocationSettings(locationSettingsRequest);
-        try {
-            LocationServices.getFusedLocationProviderClient(context).requestLocationUpdates(mLocationRequest, locationCallback,
-                    Looper.myLooper());
-        } catch (SecurityException e) {
-            e.printStackTrace();
+                            }
+                        });
+            } catch (SecurityException e) {
+                e.printStackTrace();
+            }
+        } else {
+            Log.e(TAG, "LocationRequest is null !");
         }
-
     }
 
     /**
@@ -396,7 +400,7 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
                         mLastLocation = getLocation();
                         break;
                     case Activity.RESULT_CANCELED:
-                        // The user was asked to change settings, but chose not to
+                        EventBus.getDefault().post(Constant.LOCATION_NOT_FOUND);
                         break;
                     default:
                         break;
@@ -459,9 +463,8 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
 
     public void getLastLocationClient() {
         // Get last known recent location using new Google Play Services SDK (v11+)
-        FusedLocationProviderClient locationClient = LocationServices.getFusedLocationProviderClient(context);
 
-        locationClient.getLastLocation()
+        mFusedLocationClient.getLastLocation()
                 .addOnSuccessListener(new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
@@ -629,7 +632,7 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
         }
     }
 
-    private LocationCallback locationCallback = new LocationCallback() {
+    public LocationCallback locationCallback = new LocationCallback() {
         @Override
         public void onLocationResult(LocationResult locationResult) {
             // do work here
@@ -658,6 +661,26 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
 
         MarkerOptions markerOptions = new MarkerOptions().position(position);
         marker = mGoogleMap.addMarker(markerOptions);
+    }
+
+    public void getLastFusedLocation() {
+        // Get last known recent location using new Google Play Services SDK (v11+)
+        mFusedLocationClient.getLastLocation()
+                .addOnSuccessListener(new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        // GPS location can be null if GPS is switched off
+                        if (location != null) {
+                            onLocationChanged(location);
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        e.printStackTrace();
+                    }
+                });
     }
 
 }

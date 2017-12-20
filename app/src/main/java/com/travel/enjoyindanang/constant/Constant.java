@@ -1,6 +1,8 @@
 package com.travel.enjoyindanang.constant;
 
 
+import android.Manifest;
+
 import com.travel.enjoyindanang.R;
 
 /**
@@ -45,6 +47,7 @@ public class Constant {
     public static final int CONNECT_TIME_OUT = 15000;
 
     public static final String FILE_NAME_LANGUAGE = "language.json";
+    public static final String FILE_NAME_LANGUAGE_VN = "languageVN.json";
 
     public static String EMBEB_YOUTUBE_FORMAT = "<html><body><iframe width=\"100%\" height=\"%d\" src=\"%s\" frameborder=\"0\" allowfullscreen></iframe></body></html>";
 
@@ -55,14 +58,14 @@ public class Constant {
     public static final String TITLE_SUCCESS = "Success";
 
 
-    public static final int[] ICON_MENU_NORMAL = new int[]{0, R.drawable.ic_introduction, R.drawable.ic_contact, R.drawable.ic_favorite,
+    public static final int[] ICON_MENU_NORMAL = new int[]{0, R.drawable.ic_introduction, R.drawable.ic_contact, R.drawable.dieukhoan, R.drawable.ic_favorite,
             R.drawable.ic_log_checkin, 0, R.drawable.ic_profile, R.drawable.ic_change_password, R.drawable.ic_logout};
 
-    public static final int[] ICON_MENU_NO_LOGIN = new int[]{0, R.drawable.ic_introduction, R.drawable.ic_contact, 0, R.drawable.ic_logout};
+    public static final int[] ICON_MENU_NO_LOGIN = new int[]{0, R.drawable.ic_introduction, R.drawable.ic_contact, R.drawable.dieukhoan, 0, R.drawable.ic_logout};
 
-    public static final Integer[] INDEX_HEADER_NORMAL = new Integer[]{0, 5};
+    public static final Integer[] INDEX_HEADER_NORMAL = new Integer[]{0, 6};
 
-    public static final Integer[] INDEX_HEADER_NO_LOGIN = new Integer[]{0, 3};
+    public static final Integer[] INDEX_HEADER_NO_LOGIN = new Integer[]{0, 4};
 
     public static final String FROM_DATE = "FromDate";
     public static final String TO_DATE = "ToDate";
@@ -74,17 +77,25 @@ public class Constant {
     public static final String KEY_EXTRAS_USER_INFO = "user_data";
     public static final String KEY_EXTRAS_CLOSE_POPUP = "popup_close_home";
     public static final String KEY_EXTRAS_DATE_CLOSE_POPUP = "date_close_popup";
-    public static final String SHARED_PREFS_NAME= "EnjoyDNSharedPrefs";
+    public static final String SHARED_PREFS_NAME = "EnjoySharedPrefs";
 
-    public static final int  SHOW_BACK_ICON = 1;
-    public static final int  HIDE_BACK_ICON = 2;
-    public static final int  SHOW_QR_CODE = 1;
-    public static final int  SHOW_EDIT_PROFILE = 2;
-    public static final int  HIDE_ALL_ITEM_MENU = 3;
-    public static final int  SHOW_MENU_BACK = 4;
+    public static final int SHOW_BACK_ICON = 1;
+    public static final int HIDE_BACK_ICON = 2;
+    public static final int SHOW_QR_CODE = 1;
+    public static final int SHOW_EDIT_PROFILE = 2;
+    public static final int HIDE_ALL_ITEM_MENU = 3;
+    public static final int SHOW_MENU_BACK = 4;
 
     public static final int DEFAULT_ITEM_EACH_FETCH = 6;
 
     public static final String TITLE_HOME_VN = "TRANG CHỦ";
+
+
     public static final String LOCATION_NOT_FOUND = "Location_Not_Found";
+
+    public static final int DEFAULT_RATING_STAR = 4;
+
+    public static final String[] PERMISSION_REQUIRED = new String[]{Manifest.permission.CAMERA,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION};
 }

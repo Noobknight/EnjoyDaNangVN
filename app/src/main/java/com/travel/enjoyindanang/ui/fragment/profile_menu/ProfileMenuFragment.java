@@ -91,7 +91,6 @@ public class ProfileMenuFragment extends MvpFragment<ProfileMenuPresenter> imple
 
     @Override
     public void onResume() {
-        mMainActivity.setNameToolbar(Utils.getLanguageByResId(R.string.Home_Account_Profile).toUpperCase());
         super.onResume();
     }
 

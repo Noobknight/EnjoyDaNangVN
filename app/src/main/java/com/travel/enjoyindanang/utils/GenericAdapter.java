@@ -7,9 +7,9 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import java.util.List;
-
 import com.travel.enjoyindanang.R;
+
+import java.util.List;
 
 /**
  * Author: Tavv

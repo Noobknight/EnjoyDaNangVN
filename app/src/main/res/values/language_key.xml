@@ -193,5 +193,16 @@
     <string name="ScanQR.Hint.Passcode">ScanQR.Hint.Passcode</string>
     <string name="Partner.Distance">Partner.Distance</string>
     <string name="App.Location.Required">App.Location.Required</string>
+    <string name="Search.Button.Find">Search.Button.Find</string>
+    <string name="Search.Tab1.Title">Search.Tab1.Title</string>
+    <string name="Search.Tab2.Title">Search.Tab2.Title</string>
+    <string name="Action.Searching">Action.Searching</string>
+    <string name="Splash.Configuration">Splash.Configuration</string>
     <string name="Map.Location.NotFound">Map.Location.NotFound</string>
+    <string name="Action.Search.Nearby">Action.Search.Nearby</string>
+    <string name="Map.Distance">Map.Distance</string>
+    <string name="Map.My.Current.Position">Map.My.Current.Position</string>
+    <string name="Partner.NearByPlaces">Partner.NearByPlaces</string>
+    <string name="Home.Term.System">Home.Term.System</string>
+    <string name="Home.Event">Home.Event</string>
 </resources>
