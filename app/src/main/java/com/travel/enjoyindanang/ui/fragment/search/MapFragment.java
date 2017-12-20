@@ -31,16 +31,6 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import com.travel.enjoyindanang.MvpFragment;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.annotation.DialogType;
@@ -59,6 +49,16 @@ import com.travel.enjoyindanang.utils.event.OnItemClickListener;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 import com.travel.enjoyindanang.utils.helper.LocationHelper;
 import com.travel.enjoyindanang.utils.helper.SoftKeyboardManager;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * Author: Tavv
@@ -114,7 +114,7 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
     LinearLayout lrlInfoPartner;
 
     @BindView(R.id.rllPartnerPlaces)
-    RelativeLayout rllPartnerPlaces;
+    LinearLayout rllPartnerPlaces;
 
     @BindView(R.id.rcvSearchResult)
     RecyclerView rcvSearchResult;
@@ -150,9 +150,9 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
 
     private boolean isResultSearchQueryVisible;
 
-    private MarkerOptions markerOptions;
-
     private List<Marker> lstMarkers;
+
+    private boolean isDistanceTextClick;
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -227,6 +227,7 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
                 partner = lstPartnerNearPlace.get(position);
             }
             if (view.getId() == R.id.txtDistance) {
+                isDistanceTextClick = true;
                 if (CollectionUtils.isNotEmpty(lstMarkers)) {
                     for (Marker marker : lstMarkers) {
                         InfoWindow infoWindow = (InfoWindow) marker.getTag();
@@ -489,7 +490,7 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
     private void loadMapView(Location currentLocation) {
         if (currentLocation != null) {
             LatLng point = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-            markerOptions = new MarkerOptions();
+            MarkerOptions markerOptions = new MarkerOptions();
             Address address = mLocationHelper.getAddress(currentLocation.getLatitude(), currentLocation.getLongitude());
             String titleMarker = mLocationHelper.getFullInfoAddress(address);
             if (currentMarker != null) {
@@ -605,6 +606,7 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
             String strCategory = infoWindow.getCategory().replaceAll("\\s+", " ");
             txtDistance.setText(infoWindow.getDistance() + " - " + strCategory);
             txtPartnerName.setText(infoWindow.getPartnerName());
+            setLayoutWeight(rllPartnerPlaces, 0.4f);
             return false;
         } else {
             txtDistance.setText(Utils.getLanguageByResId(R.string.Map_My_Current_Position));
@@ -613,7 +615,7 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
         }
     }
 
-    private void setLayoutWeight(RelativeLayout relativeLayout, float weight) {
+    private void setLayoutWeight(LinearLayout relativeLayout, float weight) {
         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, 0, weight);
         relativeLayout.setLayoutParams(layoutParams);
     }
