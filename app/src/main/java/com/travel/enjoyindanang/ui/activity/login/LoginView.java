@@ -12,7 +12,7 @@ import com.travel.enjoyindanang.model.UserInfo;
  * Version : 1.0
  */
 
-public interface LoginView extends iBaseView{
+public interface LoginView extends iBaseView {
 
     void onLoginSuccess(Repository<UserInfo> resultCallBack);
 

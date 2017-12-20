@@ -55,7 +55,8 @@ public class SearchPartnerResultAdapter extends RecyclerView.Adapter<SearchPartn
         if (model != null) {
             holder.txtPartnerName.setText(model.getName());
             holder.txtAddress.setText(model.getLocationAddress());
-            holder.txtCategory.setText(model.getCategoryName());
+            String strCategory = model.getCategoryName().replaceAll("\\s+"," ");
+            holder.txtCategory.setText(strCategory);
             ImageUtils.loadImageNoRadius(context, holder.imgPartner, model.getPicture());
             if (StringUtils.isNotBlank(model.getDistance()) &&
                     !StringUtils.equals(model.getDistance().trim(), "km") &&
@@ -68,12 +69,6 @@ public class SearchPartnerResultAdapter extends RecyclerView.Adapter<SearchPartn
                 @Override
                 public void onClick(View v) {
                     onItemClickListener.onClick(v, position);
-                }
-            });
-            holder.txtDistance.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    onItemClickListener.onClick(view, position);
                 }
             });
         }

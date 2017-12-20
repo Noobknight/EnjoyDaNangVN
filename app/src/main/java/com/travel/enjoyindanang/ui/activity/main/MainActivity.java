@@ -1,5 +1,6 @@
 package com.travel.enjoyindanang.ui.activity.main;
 
+
 import android.Manifest;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -16,7 +17,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -43,22 +43,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.drawee.view.SimpleDraweeView;
-import com.google.android.gms.common.ConnectionResult;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.greenrobot.eventbus.EventBus;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import cn.refactor.lib.colordialog.ColorDialog;
-import cn.refactor.lib.colordialog.PromptDialog;
 import com.travel.enjoyindanang.GlobalApplication;
 import com.travel.enjoyindanang.MvpActivity;
 import com.travel.enjoyindanang.R;
@@ -85,7 +69,6 @@ import com.travel.enjoyindanang.ui.fragment.logcheckin.CheckinHistoryFragment;
 import com.travel.enjoyindanang.ui.fragment.profile.ProfileFragment;
 import com.travel.enjoyindanang.ui.fragment.profile_menu.ProfileMenuFragment;
 import com.travel.enjoyindanang.ui.fragment.search.MapFragment;
-import com.travel.enjoyindanang.ui.fragment.term.TermFragment;
 import com.travel.enjoyindanang.utils.DateUtils;
 import com.travel.enjoyindanang.utils.DialogUtils;
 import com.travel.enjoyindanang.utils.ImageUtils;
@@ -93,18 +76,30 @@ import com.travel.enjoyindanang.utils.LocationUtils;
 import com.travel.enjoyindanang.utils.SharedPrefsUtils;
 import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.config.ForceUpdateChecker;
-import com.travel.enjoyindanang.utils.event.LocationConnectListener;
 import com.travel.enjoyindanang.utils.event.OnBackFragmentListener;
-import com.travel.enjoyindanang.utils.event.OnFindLastLocationCallback;
 import com.travel.enjoyindanang.utils.event.OnUpdateProfileSuccess;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 import com.travel.enjoyindanang.utils.helper.LocationHelper;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.greenrobot.eventbus.EventBus;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import cn.refactor.lib.colordialog.ColorDialog;
+import cn.refactor.lib.colordialog.PromptDialog;
+
 import static com.travel.enjoyindanang.utils.Utils.getContext;
 
 public class MainActivity extends MvpActivity<MainPresenter> implements MainView, AdapterView.OnItemClickListener,
-        NavigationView.OnNavigationItemSelectedListener, OnUpdateProfileSuccess, ForceUpdateChecker.OnUpdateNeededListener,
-        LocationConnectListener, OnFindLastLocationCallback {
+        NavigationView.OnNavigationItemSelectedListener, OnUpdateProfileSuccess, ForceUpdateChecker.OnUpdateNeededListener {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private static final int PERMISSION_REQUEST_CODE = 200;
@@ -114,13 +109,12 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
     private Menu mMenu;
     private final int INTRODUCTION = 1;
     private final int CONTACT_US = 2;
-    private final int TERM = 3;
-    private final int FAVORITE = 4;
-    private final int LOG_CHECKIN = 5;
-    private final int CHANGE_PROFILE = 7;
-    private final int CHANGE_PASSWORD = 8;
-    private final int LOGOUT = 9;
-    private final int LOGIN = 5;
+    private final int FAVORITE = 3;
+    private final int LOG_CHECKIN = 4;
+    private final int CHANGE_PROFILE = 6;
+    private final int CHANGE_PASSWORD = 7;
+    private final int LOGOUT = 8;
+    private final int LOGIN = 4;
     private boolean isOpen;
     private final String IS_OPEN = "IS_OPEN";
 
@@ -192,6 +186,8 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
 
     private OnBackFragmentListener onBackFragmentListener;
 
+    private boolean isFullNameEmpty;
+
     @Override
     public void setContentView() {
         setContentView(R.layout.activity_main);
@@ -250,7 +246,7 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
         }
         registerLocationReceiver();
         registerGPSReciver();
-        LocalBroadcastManager.getInstance(getContext()).registerReceiver(onChangedLocationReceiver,
+        LocalBroadcastManager.getInstance(MainActivity.this).registerReceiver(onChangedLocationReceiver,
                 new IntentFilter(Extras.KEY_RECEIVER_LOCATION_ON_FOUND_FILTER));
     }
 
@@ -275,11 +271,8 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
             unregisterReceiver(gpsLocationReceiver);
         }
         if (onChangedLocationReceiver != null) {
-            LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(onChangedLocationReceiver);
+            LocalBroadcastManager.getInstance(MainActivity.this).unregisterReceiver(onChangedLocationReceiver);
         }
-//        if(mLocationHelper != null){
-//            mLocationHelper.stopLocationUpdates();
-//        }
     }
 
     @Override
@@ -552,16 +545,13 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
                     case CONTACT_US:
                         addFr(ContactUsFragment.class.getName(), position);
                         break;
-                    case TERM:
-                        addFr(TermFragment.class.getName(), position);
-                        break;
                     case FAVORITE:
                         addFr(FavoriteFragment.class.getName(), position);
                         break;
                     case LOG_CHECKIN:
                         addFr(CheckinHistoryFragment.class.getName(), position);
                         break;
-                    case 6:
+                    case 5:
                         break;
                     case CHANGE_PROFILE:
                         addFr(ProfileFragment.class.getName(), position);
@@ -608,9 +598,6 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
                     break;
                 case CONTACT_US:
                     addFr(ContactUsFragment.class.getName(), position);
-                    break;
-                case TERM:
-                    addFr(TermFragment.class.getName(), position);
                     break;
                 case LOGIN:
                     finish();
@@ -737,7 +724,9 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
     }
 
     private void requestPermission() {
-        ActivityCompat.requestPermissions(this, Constant.PERMISSION_REQUIRED,
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
                 PERMISSION_REQUEST_CODE);
 
     }
@@ -795,6 +784,7 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
                             @Override
                             public void onClick(PromptDialog promptDialog) {
                                 promptDialog.dismiss();
+                                isFullNameEmpty = true;
                                 addFr(ProfileFragment.class.getName(), CHANGE_PROFILE);
                             }
                         });
@@ -978,16 +968,18 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
     private void startTrackLocation() {
         if (isServiceConnected)
             return;
-        mLocationHelper = new LocationHelper(MainActivity.this, this);
-        mLocationHelper.checkpermission();
-        buildConfigGoogleApi();
+        if (mLocationHelper == null) {
+            mLocationHelper = new LocationHelper(MainActivity.this);
+            mLocationHelper.checkpermission();
+            mLocationHelper.simpleBuildGoogleApi();
+        }
         if (mLocationHelper.isPermissionGranted() && LocationUtils.isGpsEnabled()) {
             if (locationService == null) {
                 locationService = new Intent(this, LocationService.class);
                 bindService(locationService, serviceConnection, BIND_AUTO_CREATE);
             }
         } else {
-            mLocationHelper.showSettingDialog(this);
+            mLocationHelper.showSettingDialog();
         }
     }
 
@@ -1022,7 +1014,6 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             // Check for the integer request code originally supplied to startResolutionForResult().
             case LocationHelper.REQUEST_CHECK_SETTINGS:
@@ -1063,7 +1054,7 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
     private Runnable sendUpdatesToUI = new Runnable() {
         public void run() {
             if (mLocationHelper != null) {
-                mLocationHelper.showSettingDialog(MainActivity.this);
+                mLocationHelper.showSettingDialog();
             }
         }
     };
@@ -1084,35 +1075,4 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
         }
     };
 
-    @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        Log.i(TAG, "onConnected: " + bundle);
-        if (mLocationHelper != null) {
-            mLocationHelper.startLocationUpdates(this);
-        }
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.e(TAG, "onConnectionFailed: " + connectionResult.getErrorMessage());
-    }
-
-    @Override
-    public void onFound(Location location) {
-        mLastLocation = location;
-        EventBus.getDefault().post(location);
-    }
-
-    private void buildConfigGoogleApi() {
-        if (mLocationHelper != null) {
-            mLocationHelper.buildGoogleApiStandard(this);
-            mLocationHelper.buildLocationRequest();
-            mLocationHelper.buildLocationSettings();
-        }
-    }
 }

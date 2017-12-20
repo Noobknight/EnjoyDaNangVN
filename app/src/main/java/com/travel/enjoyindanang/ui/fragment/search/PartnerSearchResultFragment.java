@@ -113,7 +113,7 @@ public class PartnerSearchResultFragment extends MvpFragment<SearchPresenter> im
 
     @Override
     public void onClick(View view, int position) {
-        DetailHomeDialogFragment dialog = DetailHomeDialogFragment.newInstance(lstPartner.get(position), false);
+        DetailHomeDialogFragment dialog = DetailHomeDialogFragment.newInstance(lstPartner.get(position));
         DialogUtils.openDialogFragment(mFragmentManager, dialog);
     }
 

@@ -10,6 +10,7 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -70,7 +71,7 @@ import com.travel.enjoyindanang.utils.helper.SoftKeyboardManager;
 public class MapFragment extends MvpFragment<SearchPresenter> implements iSearchView,
         SearchView.OnQueryTextListener, OnItemClickListener, OnMapReadyCallback,
         GoogleMap.OnInfoWindowClickListener, GoogleMap.OnMarkerClickListener,
-        OnBackFragmentListener, GoogleMap.OnInfoWindowCloseListener {
+        OnBackFragmentListener {
     private static final String TAG = MapFragment.class.getSimpleName();
 
     private static final float INIT_ZOOM_LEVEL = 14f;
@@ -113,9 +114,6 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
     @BindView(R.id.lrlInfoPartner)
     LinearLayout lrlInfoPartner;
 
-    @BindView(R.id.rllPartnerPlaces)
-    RelativeLayout rllPartnerPlaces;
-
     @BindView(R.id.rcvSearchResult)
     RecyclerView rcvSearchResult;
 
@@ -149,10 +147,6 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
     private Marker currentMarker;
 
     private boolean isResultSearchQueryVisible;
-
-    private MarkerOptions markerOptions;
-
-    private List<Marker> lstMarkers;
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -219,34 +213,14 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
         DetailHomeDialogFragment dialog = null;
         if (parent.equals(rcvSearchResult)) {
             if (CollectionUtils.isNotEmpty(lstPartnerResultSearch)) {
-                dialog = DetailHomeDialogFragment.newInstance(lstPartnerResultSearch.get(position), false);
+                dialog = DetailHomeDialogFragment.newInstance(lstPartnerResultSearch.get(position));
             }
         } else {
-            Partner partner = null;
             if (CollectionUtils.isNotEmpty(lstPartnerNearPlace)) {
-                partner = lstPartnerNearPlace.get(position);
-            }
-            if (view.getId() == R.id.txtDistance) {
-                if (CollectionUtils.isNotEmpty(lstMarkers)) {
-                    for (Marker marker : lstMarkers) {
-                        InfoWindow infoWindow = (InfoWindow) marker.getTag();
-                        if (infoWindow != null && partner != null) {
-                            if (infoWindow.getPartnerId() == partner.getId()) {
-                                marker.showInfoWindow();
-                                moveCameraWithGeo(partner.getGeoLat(), partner.getGeoLng());
-                                setInfoOnMarkerClick(marker);
-                                break;
-                            }
-                        }
-                    }
-                }
-            } else {
-                dialog = DetailHomeDialogFragment.newInstance(partner, false);
+                dialog = DetailHomeDialogFragment.newInstance(lstPartnerNearPlace.get(position));
             }
         }
-        if (dialog != null) {
-            DialogUtils.openDialogFragment(mFragmentManager, dialog);
-        }
+        DialogUtils.openDialogFragment(mFragmentManager, dialog);
     }
 
     @Override
@@ -273,7 +247,6 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
             lstPartnerNearPlace.get(i).setLocationAddress(lstAddress.get(i));
         }
         SearchPartnerResultAdapter mSearchNearResultAdapter = new SearchPartnerResultAdapter(lstPartnerNearPlace, getContext(), this);
-
         rcvPartnerNearPlace.setAdapter(mSearchNearResultAdapter);
         drawNearPlace();
     }
@@ -293,7 +266,6 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
         hideProgress(false);
         enableSearchView(searchView, false);
         mMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.mapView);
-        setLayoutWeight(rllPartnerPlaces, 0.5f);
         if (LocationUtils.isGpsEnabled() && LocationUtils.isLocationEnabled()) {
             userInfo = Utils.getUserInfo();
             getComponentFromMain();
@@ -307,9 +279,11 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
                 e.printStackTrace();
             }
         } else {
-            enableSearchView(searchView, true);
-            txtEmpty.setVisibility(View.VISIBLE);
-            rcvPartnerNearPlace.setVisibility(View.GONE);
+            lnlSearch.setOnTouchListener(new View.OnTouchListener() {
+                public boolean onTouch(View v, MotionEvent event) {
+                    return true;
+                }
+            });
             DialogUtils.showDialog(getContext(), DialogType.INFO, Utils.getLanguageByResId(R.string.Permisstion_Title),
                     Utils.getLanguageByResId(R.string.Map_Location_NotFound));
         }
@@ -320,7 +294,7 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
         rcvSearchResult.setLayoutManager(layoutManager);
         lstPartnerResultSearch = new ArrayList<>();
         mSearchQueryAdapter = new SearchResultAdapter(getContext(), lstPartnerResultSearch, this);
-        rcvSearchResult.setNestedScrollingEnabled(false);
+        rcvPartnerNearPlace.setNestedScrollingEnabled(false);
         rcvSearchResult.setAdapter(mSearchQueryAdapter);
     }
 
@@ -361,7 +335,6 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
             loadMapView(mLocationService.getLastLocation());
             fetchNearPlace();
         } else {
-            enableSearchView(searchView, true);
             hideProgress(true);
             txtEmpty.setVisibility(View.VISIBLE);
             rcvPartnerNearPlace.setVisibility(View.GONE);
@@ -450,7 +423,6 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
                     .fillColor(Utils.getColorRes(R.color.color_circle_fill_map)));
         }
         if (CollectionUtils.isNotEmpty(lstPartnerNearPlace)) {
-            lstMarkers = new ArrayList<>();
             for (Partner partner : lstPartnerNearPlace) {
                 double lat = Double.parseDouble(partner.getGeoLat());
                 double lng = Double.parseDouble(partner.getGeoLng());
@@ -462,25 +434,23 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
                     BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(btmMarker);
                     markerOptions.position(point).title(partner.getName()).draggable(false)
                             .icon(icon);
-                    addMarkerInfo(partner, markerOptions, mGoogleMap, lstMarkers);
+                    addMarkerInfo(partner, markerOptions, mGoogleMap);
                 }
             }
             mGoogleMap.setOnMarkerClickListener(this);
             mGoogleMap.setOnInfoWindowClickListener(this);
-            mGoogleMap.setOnInfoWindowCloseListener(this);
         }
         hideProgress(true);
         enableSearchView(searchView, true);
     }
 
-    private void addMarkerInfo(Partner partner, MarkerOptions markerOptions, GoogleMap googleMap, List<Marker> lstMarkers) {
+    private void addMarkerInfo(Partner partner, MarkerOptions markerOptions, GoogleMap googleMap) {
         if (partner != null && markerOptions != null && googleMap != null) {
             InfoWindow infoWindow = new InfoWindow(partner.getId(), partner.getName(),
                     partner.getLocationAddress(), partner.getPicture(),
                     partner.getDistance(), partner.getCategoryName());
             Marker marker = googleMap.addMarker(markerOptions);
             marker.setTag(infoWindow);
-            lstMarkers.add(marker);
         }
     }
 
@@ -488,7 +458,7 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
     private void loadMapView(Location currentLocation) {
         if (currentLocation != null) {
             LatLng point = new LatLng(currentLocation.getLatitude(), currentLocation.getLongitude());
-            markerOptions = new MarkerOptions();
+            MarkerOptions marker = new MarkerOptions();
             Address address = mLocationHelper.getAddress(currentLocation.getLatitude(), currentLocation.getLongitude());
             String titleMarker = mLocationHelper.getFullInfoAddress(address);
             if (currentMarker != null) {
@@ -496,10 +466,10 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
             }
             myCurrentAddress = titleMarker;
             if (mGoogleMap != null) {
-                markerOptions.position(point).title(titleMarker).draggable(false)
+                marker.position(point).title(titleMarker).draggable(false)
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
                 CameraPosition cameraPosition = CameraPosition.builder().target(point).zoom(INIT_ZOOM_LEVEL).bearing(0).tilt(45).build();
-                currentMarker = mGoogleMap.addMarker(markerOptions);
+                currentMarker = mGoogleMap.addMarker(marker);
                 mGoogleMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
             }
         }
@@ -521,8 +491,6 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
     public void onInfoWindowClick(Marker marker) {
         InfoWindow infoWindow = (InfoWindow) marker.getTag();
         if (CollectionUtils.isNotEmpty(lstPartnerNearPlace) && infoWindow != null) {
-            lrlInfoPartner.setVisibility(View.VISIBLE);
-            setLayoutWeight(rllPartnerPlaces, 0.4f);
             Partner result = null;
             for (Partner partner : lstPartnerNearPlace) {
                 if (partner.getId() == infoWindow.getPartnerId()) {
@@ -531,7 +499,7 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
                 }
             }
             if (result != null) {
-                DetailHomeDialogFragment dialog = DetailHomeDialogFragment.newInstance(result, false);
+                DetailHomeDialogFragment dialog = DetailHomeDialogFragment.newInstance(result);
                 DialogUtils.openDialogFragment(mFragmentManager, dialog);
             }
         }
@@ -539,7 +507,18 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
 
     @Override
     public boolean onMarkerClick(Marker marker) {
-        return setInfoOnMarkerClick(marker);
+        InfoWindow infoWindow = (InfoWindow) marker.getTag();
+        if (infoWindow != null) {
+            lrlInfoPartner.setVisibility(View.VISIBLE);
+            String strCategory = infoWindow.getCategory().replaceAll("\\s+"," ");
+            txtDistance.setText(infoWindow.getDistance() + " - " + strCategory);
+            txtPartnerName.setText(infoWindow.getPartnerName());
+            return false;
+        } else {
+            txtDistance.setText(Utils.getLanguageByResId(R.string.Map_My_Current_Position));
+            txtPartnerName.setText(myCurrentAddress);
+            return true;
+        }
     }
 
     @Override
@@ -583,43 +562,5 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
                 enableSearchView(child, enabled);
             }
         }
-    }
-
-    private void moveCameraWithGeo(String geoLat, String geoLng) {
-        if (StringUtils.isNotBlank(geoLat)
-                && StringUtils.isNotBlank(geoLng)
-                && mGoogleMap != null) {
-            double latitude = Double.parseDouble(geoLat);
-            double longitude = Double.parseDouble(geoLng);
-            final LatLng maposition = new LatLng(latitude, longitude);
-            mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(maposition));
-            mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(INIT_ZOOM_LEVEL));
-        }
-    }
-
-    private boolean setInfoOnMarkerClick(Marker marker) {
-        InfoWindow infoWindow = (InfoWindow) marker.getTag();
-        if (infoWindow != null) {
-            lrlInfoPartner.setVisibility(View.VISIBLE);
-            String strCategory = infoWindow.getCategory().replaceAll("\\s+", " ");
-            txtDistance.setText(infoWindow.getDistance() + " - " + strCategory);
-            txtPartnerName.setText(infoWindow.getPartnerName());
-            return false;
-        } else {
-            txtDistance.setText(Utils.getLanguageByResId(R.string.Map_My_Current_Position));
-            txtPartnerName.setText(myCurrentAddress);
-            return true;
-        }
-    }
-
-    private void setLayoutWeight(RelativeLayout relativeLayout, float weight) {
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(RecyclerView.LayoutParams.MATCH_PARENT, 0, weight);
-        relativeLayout.setLayoutParams(layoutParams);
-    }
-
-    @Override
-    public void onInfoWindowClose(Marker marker) {
-        lrlInfoPartner.setVisibility(View.GONE);
-        setLayoutWeight(rllPartnerPlaces, 0.5f);
     }
 }
