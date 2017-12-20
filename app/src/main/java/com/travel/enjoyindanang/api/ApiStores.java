@@ -22,7 +22,6 @@ import com.travel.enjoyindanang.model.Schedule;
 import com.travel.enjoyindanang.model.UserInfo;
 import com.travel.enjoyindanang.model.Utility;
 import com.travel.enjoyindanang.model.Weather;
-
 import okhttp3.MultipartBody;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;

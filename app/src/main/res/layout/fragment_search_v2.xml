@@ -70,7 +70,8 @@
                 android:background="@color/material_grey_200"
                 android:gravity="center_vertical"
                 android:orientation="vertical"
-                android:paddingLeft="@dimen/_8sdp">
+                android:paddingLeft="@dimen/_8sdp"
+                android:visibility="gone">
 
                 <TextView
                     android:id="@+id/txtPartnerName"
@@ -93,26 +94,31 @@
 
             </LinearLayout>
 
-
-            <android.support.v7.widget.RecyclerView
-                android:id="@+id/rcvPartnerNearPlace"
+            <RelativeLayout
+                android:id="@+id/rllPartnerPlaces"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight=".4"
-                android:paddingLeft="@dimen/_8sdp"
-                android:paddingTop="@dimen/_3sdp" />
+                android:layout_weight=".5">
 
-            <TextView
-                android:id="@+id/txtEmpty"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight=".4"
-                android:gravity="center"
-                android:text="@string/Message.Category.PartnerEmpty"
-                android:textColor="@color/red"
-                android:textSize="@dimen/_13ssp"
-                android:textStyle="bold"
-                android:visibility="gone" />
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/rcvPartnerNearPlace"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:paddingLeft="@dimen/_8sdp"
+                    android:paddingTop="@dimen/_3sdp" />
+
+                <TextView
+                    android:id="@+id/txtEmpty"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="@string/Message.Category.PartnerEmpty"
+                    android:textColor="@color/red"
+                    android:textSize="@dimen/_13ssp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
+            </RelativeLayout>
 
         </LinearLayout>
 

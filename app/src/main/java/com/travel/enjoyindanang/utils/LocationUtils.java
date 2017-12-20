@@ -13,11 +13,11 @@ import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
 
-import com.travel.enjoyindanang.GlobalApplication;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
+
+import com.travel.enjoyindanang.GlobalApplication;
 
 /**
  * Author: Tavv

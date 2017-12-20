@@ -28,18 +28,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import cn.refactor.lib.colordialog.PromptDialog;
 import com.travel.enjoyindanang.GlobalApplication;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.annotation.DialogType;
@@ -65,9 +53,20 @@ import com.travel.enjoyindanang.utils.event.OnItemClickListener;
 import com.travel.enjoyindanang.utils.helper.EndlessScrollListener;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 import com.travel.enjoyindanang.utils.helper.PhotoHelper;
-import com.travel.enjoyindanang.utils.helper.SeparatorDecoration;
 import com.travel.enjoyindanang.utils.helper.SoftKeyboardManager;
 import com.travel.enjoyindanang.utils.widget.DividerItemDecoration;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import cn.refactor.lib.colordialog.PromptDialog;
 import okhttp3.MultipartBody;
 import rx.Observable;
 import rx.Subscriber;
@@ -420,7 +419,8 @@ public class WriteReplyDialog extends DialogFragment implements View.OnTouchList
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext(), orientation, true);
         recyclerView.setLayoutManager(layoutManager);
         layoutManager.setReverseLayout(rightToLeft);
-        recyclerView.addItemDecoration(new SeparatorDecoration(getContext(), Utils.getColorRes(R.color.white), 20));
+        DividerItemDecoration decoration = new DividerItemDecoration(getContext(), orientation);
+        recyclerView.addItemDecoration(decoration);
         recyclerView.setHasFixedSize(false);
     }
 

@@ -11,14 +11,6 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import com.travel.enjoyindanang.MvpFragment;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.annotation.DialogType;
@@ -35,7 +27,15 @@ import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.event.OnItemClickListener;
 import com.travel.enjoyindanang.utils.helper.EndlessScrollListener;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
-import com.travel.enjoyindanang.utils.helper.SeparatorDecoration;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * Author: Tavv
@@ -238,8 +238,7 @@ public class PartnerCategoryFragment extends MvpFragment<PartnerCategoryPresente
         lstPartner = new ArrayList<>();
         mLayoutManager = new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false);
         partnerCategoryAdapter = new PartnerCategoryAdapter(getContext(), this);
-        rcvPartnerCategory.addItemDecoration(
-                new SeparatorDecoration(getContext(), Utils.getColorRes(R.color.material_grey_300), VERTICAL_ITEM_SPACE));
+        rcvPartnerCategory.addItemDecoration(Utils.getDividerDecoration(mLayoutManager.getOrientation()));
         rcvPartnerCategory.setLayoutManager(mLayoutManager);
         rcvPartnerCategory.setHasFixedSize(false);
         rcvPartnerCategory.setAdapter(partnerCategoryAdapter);

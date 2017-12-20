@@ -3,20 +3,25 @@ package com.travel.enjoyindanang.ui.fragment.term;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.Spanned;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import com.travel.enjoyindanang.MvpFragment;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.annotation.DialogType;
 import com.travel.enjoyindanang.constant.AppError;
 import com.travel.enjoyindanang.model.Content;
 import com.travel.enjoyindanang.utils.DialogUtils;
+import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
+
+import org.apache.commons.lang3.StringUtils;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 /**
  * Author: Tavv
@@ -89,13 +94,19 @@ public class TermFragment extends MvpFragment<TermPresenter> implements TermView
 
     @Override
     public void onLoadTermSuccess(Content content) {
-        Spanned spanned = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
-            spanned = Html.fromHtml(content.getContent(), Html.FROM_HTML_MODE_LEGACY);
+        if(StringUtils.isNotBlank(content.getContent())){
+            Spanned spanned = null;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                spanned = Html.fromHtml(content.getContent(), Html.FROM_HTML_MODE_LEGACY);
+            }else{
+                spanned = Html.fromHtml(content.getContent());
+            }
+            txtContent.setText(spanned);
         }else{
-            spanned = Html.fromHtml(content.getContent());
+            txtContent.setText(Utils.getLanguageByResId(R.string.Home_Empty));
+            txtContent.setTextColor(Utils.getColorRes(R.color.red));
+            txtContent.setGravity(Gravity.CENTER);
         }
-        txtContent.setText(spanned);
         lrlTermContent.setVisibility(View.VISIBLE);
         prgLoading.setVisibility(View.GONE);
     }

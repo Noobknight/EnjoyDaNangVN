@@ -3,6 +3,7 @@ package com.travel.enjoyindanang.ui.fragment.logcheckin;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -35,7 +36,6 @@ import com.travel.enjoyindanang.utils.DialogUtils;
 import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.event.OnItemClickListener;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
-import com.travel.enjoyindanang.utils.helper.SeparatorDecoration;
 
 /**
  * Author: Tavv
@@ -102,7 +102,8 @@ public class CheckinHistoryFragment extends MvpFragment<CheckinHistoryPresenter>
     protected void init(View view) {
         userInfo = GlobalApplication.getUserInfo();
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
-        rcvHistoryCheckin.addItemDecoration(new SeparatorDecoration(getContext(), Utils.getColorRes(R.color.material_grey_300), VERTICAL_ITEM_SPACE));
+        DividerItemDecoration decoration = new DividerItemDecoration(getContext(), layoutManager.getOrientation());
+        rcvHistoryCheckin.addItemDecoration(decoration);
         rcvHistoryCheckin.setLayoutManager(layoutManager);
         rcvHistoryCheckin.setHasFixedSize(false);
         mLstHistoryCheckins = new ArrayList<>();

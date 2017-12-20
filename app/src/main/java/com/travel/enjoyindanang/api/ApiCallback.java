@@ -1,13 +1,6 @@
 package com.travel.enjoyindanang.api;
 
 
-import org.apache.commons.lang3.StringUtils;
-import org.greenrobot.eventbus.EventBus;
-
-import java.net.ConnectException;
-import java.net.SocketTimeoutException;
-import java.net.UnknownHostException;
-
 import com.travel.enjoyindanang.LogApp;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.constant.AppError;
@@ -15,6 +8,14 @@ import com.travel.enjoyindanang.constant.Constant;
 import com.travel.enjoyindanang.model.BaseReponse;
 import com.travel.enjoyindanang.model.NetworkStatus;
 import com.travel.enjoyindanang.utils.Utils;
+
+import org.apache.commons.lang3.StringUtils;
+import org.greenrobot.eventbus.EventBus;
+
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
+
 import retrofit2.adapter.rxjava.HttpException;
 import rx.Subscriber;
 

@@ -2,7 +2,6 @@ package com.travel.enjoyindanang.ui.fragment.home;
 
 import java.util.List;
 
-import com.travel.enjoyindanang.api.model.Repository;
 import com.travel.enjoyindanang.constant.AppError;
 import com.travel.enjoyindanang.iBaseView;
 import com.travel.enjoyindanang.model.Banner;
@@ -18,10 +17,6 @@ public interface iHomeView  extends iBaseView {
     void onGetPartnerSuccess(List<Partner> data);
 
     void onGetPartnerFailure(AppError error);
-
-    void onGetPartnerByCategorySuccess(Repository<Partner> data);
-
-    void onGetPartnerByCategoryFailure(AppError error);
 
     void addFavoriteSuccess();
 

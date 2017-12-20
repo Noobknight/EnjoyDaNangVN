@@ -20,18 +20,8 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
-
-import org.apache.commons.lang3.StringUtils;
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
-
-import java.util.List;
-
-import butterknife.ButterKnife;
-import cn.refactor.lib.colordialog.PromptDialog;
-
 import com.travel.enjoyindanang.LogApp;
+import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.annotation.DialogType;
 import com.travel.enjoyindanang.api.ApiStores;
 import com.travel.enjoyindanang.api.module.AppClient;

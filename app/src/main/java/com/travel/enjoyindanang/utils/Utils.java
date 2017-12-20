@@ -10,10 +10,18 @@ import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.DividerItemDecoration;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.google.gson.Gson;
+import com.travel.enjoyindanang.GlobalApplication;
+import com.travel.enjoyindanang.R;
+import com.travel.enjoyindanang.api.model.Repository;
+import com.travel.enjoyindanang.constant.Constant;
+import com.travel.enjoyindanang.model.UserInfo;
+import com.travel.enjoyindanang.ui.activity.splash.ScreenSplashActivity;
+import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -28,12 +36,6 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import com.travel.enjoyindanang.GlobalApplication;
-import com.travel.enjoyindanang.api.model.Repository;
-import com.travel.enjoyindanang.constant.Constant;
-import com.travel.enjoyindanang.model.UserInfo;
-import com.travel.enjoyindanang.ui.activity.splash.ScreenSplashActivity;
-import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -194,7 +196,15 @@ public class Utils {
     }
 
     public static UserInfo getUserInfo() {
-        return GlobalApplication.getUserInfo() != null ? GlobalApplication.getUserInfo() : new UserInfo();
+        UserInfo userInfo = null;
+        if (GlobalApplication.getUserInfo() != null) {
+            userInfo = GlobalApplication.getUserInfo();
+            userInfo.setIgnoreLogin(false);
+        } else {
+            userInfo = new UserInfo();
+            userInfo.setIgnoreLogin(true);
+        }
+        return userInfo;
     }
 
     public static void hideSoftKeyboard(Activity activity) {
@@ -321,7 +331,13 @@ public class Utils {
         }
     }
 
-    public static Context getContext(){
+    public static Context getContext() {
         return GlobalApplication.getGlobalApplicationContext();
+    }
+
+    public static DividerItemDecoration getDividerDecoration(int orientation) {
+        DividerItemDecoration decoration = new DividerItemDecoration(getContext(), orientation);
+        decoration.setDrawable(ContextCompat.getDrawable(getContext(), R.drawable.divider_item));
+        return decoration;
     }
 }

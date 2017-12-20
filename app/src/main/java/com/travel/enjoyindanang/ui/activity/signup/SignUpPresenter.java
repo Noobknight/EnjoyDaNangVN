@@ -14,7 +14,7 @@ import com.travel.enjoyindanang.utils.Utils;
  * Version : 1.0
  */
 
-public class SignUpPresenter extends BasePresenter<SignUpView> {
+public class SignUpPresenter extends BasePresenter<SignUpView>{
     public SignUpPresenter(SignUpView view) {
         super(view);
     }

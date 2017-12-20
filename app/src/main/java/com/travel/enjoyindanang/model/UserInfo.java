@@ -59,6 +59,8 @@ public class UserInfo implements Serializable {
     @Expose
     private String type;
 
+    private boolean isIgnoreLogin;
+
     public UserInfo() {
     }
 
@@ -155,6 +157,14 @@ public class UserInfo implements Serializable {
 
     public void setUserId(long userId) {
         this.userId = userId;
+    }
+
+    public boolean isIgnoreLogin() {
+        return isIgnoreLogin;
+    }
+
+    public void setIgnoreLogin(boolean ignoreLogin) {
+        isIgnoreLogin = ignoreLogin;
     }
 
     @Override
