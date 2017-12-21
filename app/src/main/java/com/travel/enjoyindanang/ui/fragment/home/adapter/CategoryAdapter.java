@@ -8,16 +8,13 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
+import com.travel.enjoyindanang.R;
+import com.travel.enjoyindanang.model.Category;
+import com.travel.enjoyindanang.utils.ImageUtils;
 
 import org.apache.commons.collections.CollectionUtils;
 
 import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import com.travel.enjoyindanang.R;
-import com.travel.enjoyindanang.model.Category;
-import com.travel.enjoyindanang.utils.ImageUtils;
 
 /**
  * Created by chien on 10/8/17.
@@ -26,13 +23,10 @@ import com.travel.enjoyindanang.utils.ImageUtils;
 public class CategoryAdapter extends BaseAdapter {
     private Context context;
     private List<Category> categories;
-    private static LayoutInflater inflater = null;
 
     public CategoryAdapter(Context context, List<Category> categories) {
         this.context = context;
         this.categories = categories;
-        inflater = (LayoutInflater) context.
-                getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
     @Override
@@ -52,10 +46,14 @@ public class CategoryAdapter extends BaseAdapter {
 
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
-        Holder holder;
+        Holder holder = null;
         if (view == null) {
+            LayoutInflater inflater = (LayoutInflater) context.
+                    getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             view = inflater.inflate(R.layout.item_home_menu, viewGroup, false);
-            holder = new Holder(view);
+            holder = new Holder();
+            holder.tvName = (TextView) view.findViewById(R.id.tv_name);
+            holder.imgCategory = (SimpleDraweeView) view.findViewById(R.id.img_icon);
             view.setTag(holder);
         } else {
             holder = (Holder) view.getTag();
@@ -67,15 +65,8 @@ public class CategoryAdapter extends BaseAdapter {
     }
 
     static final class Holder {
-        @BindView(R.id.tv_name)
         TextView tvName;
-
-        @BindView(R.id.img_icon)
         SimpleDraweeView imgCategory;
-
-        Holder(View view) {
-            ButterKnife.bind(this, view);
-        }
     }
 
 }
