@@ -355,7 +355,9 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
     public void onMapReady(GoogleMap googleMap) {
         isMapAlreadyInit = true;
         mGoogleMap = googleMap;
-        mLocationHelper.setGoogleMap(mGoogleMap);
+        if(mLocationHelper != null && googleMap != null){
+            mLocationHelper.setGoogleMap(googleMap);
+        }
         mGoogleMap.getUiSettings().setMapToolbarEnabled(false);
         mGoogleMap.setMyLocationEnabled(true);
         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
