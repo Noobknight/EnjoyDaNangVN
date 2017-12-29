@@ -1,5 +1,9 @@
 package com.travel.enjoyindanang.api.module;
 
+import com.travel.enjoyindanang.BuildConfig;
+import com.travel.enjoyindanang.api.model.NullOnEmptyConverterFactory;
+import com.travel.enjoyindanang.constant.Constant;
+
 import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.util.concurrent.TimeUnit;
@@ -11,9 +15,6 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-import com.travel.enjoyindanang.BuildConfig;
-import com.travel.enjoyindanang.api.model.NullOnEmptyConverterFactory;
-import com.travel.enjoyindanang.constant.Constant;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
@@ -43,10 +44,9 @@ public class AppClient {
 //                .build();
 //
         httpClient = new OkHttpClient.Builder()
-//                .addNetworkInterceptor(new HeaderInterceptor())
                 .addInterceptor(interceptor)
-                .connectTimeout(30, TimeUnit.SECONDS)
-                .readTimeout(30, TimeUnit.SECONDS)
+                .connectTimeout(180, TimeUnit.SECONDS)
+                .readTimeout(180, TimeUnit.SECONDS)
                 .build();
         if (retrofit == null) {
             retrofit = new Retrofit.Builder()
@@ -62,14 +62,23 @@ public class AppClient {
 
 
     public static Retrofit setNewBaseUrl(String url) {
+        if(httpClient == null){
+            HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+            interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+            httpClient = new OkHttpClient.Builder()
+                    .addInterceptor(interceptor)
+                    .connectTimeout(180, TimeUnit.SECONDS)
+                    .readTimeout(180, TimeUnit.SECONDS)
+                    .build();
+        }
         if (httpClient != null) {
             return new Retrofit.Builder()
-                      .baseUrl(url)
-                      .client(httpClient)
-                      .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                      .addConverterFactory(new NullOnEmptyConverterFactory())
-                      .addConverterFactory(GsonConverterFactory.create())
-                      .build();
+                    .baseUrl(url)
+                    .client(httpClient)
+                    .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                    .addConverterFactory(new NullOnEmptyConverterFactory())
+                    .addConverterFactory(GsonConverterFactory.create())
+                    .build();
         }
         return null;
     }

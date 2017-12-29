@@ -4,14 +4,15 @@ import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 
 import com.travel.enjoyindanang.MvpFragment;
 import com.travel.enjoyindanang.R;
+import com.travel.enjoyindanang.annotation.DialogType;
 import com.travel.enjoyindanang.constant.AppError;
 import com.travel.enjoyindanang.model.Partner;
 import com.travel.enjoyindanang.model.PartnerAlbum;
+import com.travel.enjoyindanang.ui.fragment.detail.dialog.DetailHomeDialogFragment;
 import com.travel.enjoyindanang.utils.DialogUtils;
 import com.travel.enjoyindanang.utils.Utils;
 
@@ -118,7 +119,13 @@ public class AlbumDetailFragment extends MvpFragment<AlbumDetailPresenter> imple
 
     @Override
     public void onFetchFail(AppError error) {
-        Log.e(TAG, "onFetchFail " + error.getMessage());
+        DetailHomeDialogFragment fragment = (DetailHomeDialogFragment) getParentFragment();
+        if (fragment != null) {
+            fragment.countGetResultFailed += 1;
+            if (fragment.countGetResultFailed == 1) {
+                DialogUtils.showDialog(getContext(), DialogType.WRONG, DialogUtils.getTitleDialog(3), error.getMessage());
+            }
+        }
     }
 
     @Override

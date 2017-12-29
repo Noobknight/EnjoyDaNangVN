@@ -69,6 +69,8 @@ public class DetailHomeDialogFragment extends DialogFragment implements TabLayou
 
     private MainActivity mMainActivity;
 
+    public int countGetResultFailed = 0;
+
     private boolean isOpenFromNearby;
 
     public static DetailHomeDialogFragment newInstance(Partner partner, boolean isOpenFromNearby) {
@@ -94,17 +96,18 @@ public class DetailHomeDialogFragment extends DialogFragment implements TabLayou
 
     @OnClick(R.id.img_back)
     public void onClick(View view) {
-        if(mMainActivity != null){
+        if (mMainActivity != null) {
             Fragment fragment = mMainActivity.getActiveFragment();
-            if(fragment instanceof PartnerCategoryFragment){
+            if (fragment instanceof PartnerCategoryFragment) {
                 dismiss();
-            }else{
+            } else {
                 mMainActivity.setShowMenuItem(Constant.SHOW_QR_CODE);
                 dismiss();
             }
         }
 
     }
+
     @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -115,11 +118,11 @@ public class DetailHomeDialogFragment extends DialogFragment implements TabLayou
         final Dialog dialog = new Dialog(getActivity(), R.style.AppTheme) {
             @Override
             public void onBackPressed() {
-                if(mMainActivity != null){
+                if (mMainActivity != null) {
                     Fragment fragment = mMainActivity.getActiveFragment();
-                    if(fragment instanceof PartnerCategoryFragment){
+                    if (fragment instanceof PartnerCategoryFragment) {
                         dismiss();
-                    }else{
+                    } else {
                         mMainActivity.setShowMenuItem(Constant.SHOW_QR_CODE);
                         dismiss();
                     }
@@ -173,7 +176,7 @@ public class DetailHomeDialogFragment extends DialogFragment implements TabLayou
         // Assign window properties to fill the parent
         params.width = WindowManager.LayoutParams.MATCH_PARENT;
         params.height = WindowManager.LayoutParams.MATCH_PARENT;
-        getDialog().getWindow().setAttributes((WindowManager.LayoutParams) params);
+        getDialog().getWindow().setAttributes((android.view.WindowManager.LayoutParams) params);
         // Call super onResume after sizing
         super.onResume();
     }
@@ -242,4 +245,6 @@ public class DetailHomeDialogFragment extends DialogFragment implements TabLayou
                 break;
         }
     }
+
+
 }

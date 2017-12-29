@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -25,17 +26,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-import cn.refactor.lib.colordialog.PromptDialog;
 import com.travel.enjoyindanang.GlobalApplication;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.annotation.DialogType;
@@ -55,6 +45,18 @@ import com.travel.enjoyindanang.utils.event.OnBackFragmentListener;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 import com.travel.enjoyindanang.utils.helper.PhotoHelper;
 import com.travel.enjoyindanang.utils.helper.SoftKeyboardManager;
+
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import cn.refactor.lib.colordialog.PromptDialog;
 import okhttp3.MultipartBody;
 import rx.Observable;
 import rx.Subscriber;
@@ -179,7 +181,9 @@ public class WriteReviewDialog extends DialogFragment implements View.OnTouchLis
                 writeReview();
                 break;
             case R.id.btnAttachImage:
-                mPhotoHelper.startGalleryIntent();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+                    mPhotoHelper.startGalleryIntent();
+                }
                 break;
         }
     }
@@ -239,12 +243,7 @@ public class WriteReviewDialog extends DialogFragment implements View.OnTouchLis
         if (partner != null) {
             showSending();
             long userId = Utils.hasLogin() ? userInfo.getUserId() : 0;
-            MultipartBody.Part[] lstParts = null;
-            if (mPreviewAdapter != null) {
-                if (CollectionUtils.isNotEmpty(mPreviewAdapter.getImages())) {
-                    lstParts = getFilePartsRequest(mPreviewAdapter.getImages());
-                }
-            }
+            MultipartBody.Part[] lstParts = getFilePartsRequest(mPreviewAdapter.getImages());
             addSubscription(apiStores.postComment(0, userId, partner.getId(), 0,
                     (int) ratingCount, title, content,
                     lstParts[0], lstParts[1], lstParts[2]), new ApiCallback<Repository>() {

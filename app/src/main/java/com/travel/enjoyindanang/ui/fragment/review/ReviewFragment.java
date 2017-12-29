@@ -11,15 +11,6 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
-
-import org.apache.commons.collections.CollectionUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import com.travel.enjoyindanang.MvpFragment;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.annotation.DialogType;
@@ -29,6 +20,7 @@ import com.travel.enjoyindanang.model.Partner;
 import com.travel.enjoyindanang.model.PartnerAlbum;
 import com.travel.enjoyindanang.model.Reply;
 import com.travel.enjoyindanang.model.Review;
+import com.travel.enjoyindanang.ui.fragment.detail.dialog.DetailHomeDialogFragment;
 import com.travel.enjoyindanang.ui.fragment.review.reply.ImagePreviewAdapter;
 import com.travel.enjoyindanang.ui.fragment.review.reply.WriteReplyDialog;
 import com.travel.enjoyindanang.ui.fragment.review.write.WriteReviewDialog;
@@ -40,6 +32,15 @@ import com.travel.enjoyindanang.utils.event.OnItemClickListener;
 import com.travel.enjoyindanang.utils.helper.EndlessScrollListener;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 import com.travel.enjoyindanang.utils.helper.SoftKeyboardManager;
+
+import org.apache.commons.collections.CollectionUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Author: Tavv
@@ -91,8 +92,6 @@ public class ReviewFragment extends MvpFragment<ReviewPresenter> implements iRev
     private ProgressBar prgLoadingReply;
 
     private int rowIndexClick;
-
-    private boolean hasLoadmore;
 
     private Review currentReviewClick;
 
@@ -147,8 +146,6 @@ public class ReviewFragment extends MvpFragment<ReviewPresenter> implements iRev
             @Override
             public void onLoadMore(int page) {
                 currentPage = page;
-//                mAdapter.setProgressMore(true);
-//                hasLoadmore = true;
                 onRetryGetListReview(page);
             }
 
@@ -206,9 +203,6 @@ public class ReviewFragment extends MvpFragment<ReviewPresenter> implements iRev
 
     @Override
     public void onFetchReviews(List<Review> models) {
-//        if(hasLoadmore){
-//            mAdapter.setProgressMore(false);
-//        }
         if (CollectionUtils.isEmpty(models) && currentPage == 0) {
             lrlContentReview.setVisibility(View.VISIBLE);
             prgLoading.setVisibility(View.GONE);
@@ -225,7 +219,13 @@ public class ReviewFragment extends MvpFragment<ReviewPresenter> implements iRev
 
     @Override
     public void onFetchFailure(AppError error) {
-        DialogUtils.showDialog(getContext(), DialogType.WRONG, DialogUtils.getTitleDialog(3), error.getMessage());
+        DetailHomeDialogFragment fragment = (DetailHomeDialogFragment) getParentFragment();
+        if (fragment != null) {
+            fragment.countGetResultFailed += 1;
+            if (fragment.countGetResultFailed == 1) {
+                DialogUtils.showDialog(getContext(), DialogType.WRONG, DialogUtils.getTitleDialog(3), error.getMessage());
+            }
+        }
     }
 
     @Override
