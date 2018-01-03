@@ -55,6 +55,10 @@ import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 import com.travel.enjoyindanang.utils.helper.PhotoHelper;
 import com.travel.enjoyindanang.utils.helper.SoftKeyboardManager;
+
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 import rx.Observable;
@@ -386,39 +390,14 @@ public class ProfileFragment extends MvpFragment<ProfilePresenter> implements Pr
     }
 
     private void setValueAvatar() {
-        Observable.create(new Observable.OnSubscribe<String>() {
-            @Override
-            public void call(Subscriber<? super String> subscriber) {
-                if (fileChoose == null) {
-                    subscriber.onNext(ImageUtils.getByteArrayFromImageURL(userInfo.getImage()));
-                } else {
-                    subscriber.onNext(ImageUtils.encodeTobase64(fileChoose));
-                }
-                subscriber.onCompleted();
-            }
-        }).subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<String>() {
-                    @Override
-                    public void onCompleted() {
-
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e(TAG, "onError: " + e.getMessage());
-                    }
-
-                    @Override
-                    public void onNext(String base64) {
-                        String endValue = StringUtils.isBlank(base64) ? StringUtils.EMPTY : base64;
-                        mvpPresenter.updateProfile(userInfo.getUserId(),
-                                String.valueOf(edtFullname.getText()),
-                                String.valueOf(edtPhone.getText()),
-                                String.valueOf(edtEmail.getText()),
-                                endValue);
-                    }
-                });
+        MultipartBody.Part part = getFilePartsRequest();
+        RequestBody typeBody = RequestBody.create(MediaType.parse("text/plain"), "UPDATEPROFILE");
+        RequestBody fullNameBody = RequestBody.create(MediaType.parse("text/plain"), String.valueOf(edtFullname.getText()));
+        RequestBody phoneBody = RequestBody.create(MediaType.parse("text/plain"), String.valueOf(edtPhone.getText()));
+        RequestBody emailBody = RequestBody.create(MediaType.parse("text/plain"), String.valueOf(edtEmail.getText()));
+        RequestBody copdeBody = RequestBody.create(MediaType.parse("text/plain"), userInfo.getCode());
+        mvpPresenter.updateProfile(typeBody, userInfo.getUserId(),
+                fullNameBody, phoneBody, emailBody, copdeBody,part);
     }
 
     public boolean isEmptyFullName() {
@@ -431,5 +410,15 @@ public class ProfileFragment extends MvpFragment<ProfilePresenter> implements Pr
             SoftKeyboardManager.hideSoftKeyboard(getContext(), v.getWindowToken(), 0);
         }
         return true;
+    }
+
+    private MultipartBody.Part getFilePartsRequest() {
+        MultipartBody.Part part = null;
+        try {
+            part = Utils.createContentBody(fileChoose);
+            return part;
+        } catch (Exception e) {
+            return part;
+        }
     }
 }

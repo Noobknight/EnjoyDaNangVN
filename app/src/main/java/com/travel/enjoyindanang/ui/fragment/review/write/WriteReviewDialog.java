@@ -1,5 +1,6 @@
 package com.travel.enjoyindanang.ui.fragment.review.write;
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
@@ -57,7 +58,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.refactor.lib.colordialog.PromptDialog;
+import okhttp3.MediaType;
 import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
@@ -174,6 +177,7 @@ public class WriteReviewDialog extends DialogFragment implements View.OnTouchLis
     }
 
 
+    @SuppressLint("NewApi")
     @OnClick({R.id.btnSubmitReview, R.id.btnAttachImage})
     public void onClick(View view) {
         switch (view.getId()) {
@@ -181,9 +185,7 @@ public class WriteReviewDialog extends DialogFragment implements View.OnTouchLis
                 writeReview();
                 break;
             case R.id.btnAttachImage:
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                    mPhotoHelper.startGalleryIntent();
-                }
+                mPhotoHelper.startGalleryIntent();
                 break;
         }
     }
@@ -244,8 +246,9 @@ public class WriteReviewDialog extends DialogFragment implements View.OnTouchLis
             showSending();
             long userId = Utils.hasLogin() ? userInfo.getUserId() : 0;
             MultipartBody.Part[] lstParts = getFilePartsRequest(mPreviewAdapter.getImages());
+            RequestBody contentBody = RequestBody.create(MediaType.parse("text/plain"), content);
             addSubscription(apiStores.postComment(0, userId, partner.getId(), 0,
-                    (int) ratingCount, title, content,
+                    (int) ratingCount, title, contentBody,
                     lstParts[0], lstParts[1], lstParts[2]), new ApiCallback<Repository>() {
                 @Override
                 public void onSuccess(Repository model) {
@@ -301,7 +304,7 @@ public class WriteReviewDialog extends DialogFragment implements View.OnTouchLis
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
         if (onBackListener != null) {
-            onBackListener.onDismiss(dialog, isBack);
+            onBackListener.onDismiss(dialog, isBack, false);
         }
     }
 

@@ -22,6 +22,7 @@ import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.model.PartnerAlbum;
 import com.travel.enjoyindanang.model.Reply;
 import com.travel.enjoyindanang.model.ReviewImage;
+import com.travel.enjoyindanang.ui.fragment.review.ReviewAdapter;
 import com.travel.enjoyindanang.utils.ImageUtils;
 import com.travel.enjoyindanang.utils.Utils;
 
@@ -36,15 +37,23 @@ public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ReplyViewHol
 
     private List<Reply> replies;
 
+    private int indexOfReview;
+
     private ImagePreviewAdapter.OnImageReviewClickListener onImageReviewClickListener;
+
+    private ReviewAdapter.OnReplyClickListener onReplyClick;
 
     public ReplyAdapter(List<Reply> replies) {
         this.replies = replies;
     }
 
-    public ReplyAdapter(List<Reply> replies, ImagePreviewAdapter.OnImageReviewClickListener onImageReviewClickListener) {
+
+    public ReplyAdapter(List<Reply> replies, ImagePreviewAdapter.OnImageReviewClickListener onImageReviewClickListener,
+                        ReviewAdapter.OnReplyClickListener onReplyClick, int indexOfReview) {
         this.replies = replies;
         this.onImageReviewClickListener = onImageReviewClickListener;
+        this.indexOfReview = indexOfReview;
+        this.onReplyClick = onReplyClick;
     }
 
     @Override
@@ -68,6 +77,13 @@ public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ReplyViewHol
                 onImageReviewClickListener.onImageClick(view, position, reply.getAvatar(), getListImage(position));
             }
         });
+
+        holder.txtRemoveReply.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onReplyClick.onClick(null, view, position, indexOfReview);
+            }
+        });
     }
 
     @Override
@@ -85,6 +101,9 @@ public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ReplyViewHol
 
         @BindView(R.id.txtContentReview)
         TextView txtContentReview;
+
+        @BindView(R.id.txtRemoveReply)
+        TextView txtRemoveReply;
 
         @BindView(R.id.txtNumberOfImages)
         TextView txtNumberOfImages;
@@ -145,5 +164,12 @@ public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ReplyViewHol
             replies.remove(replies.size() - 1);
             notifyItemRemoved(replies.size());
         }
+    }
+
+    public void removeAt(int position) {
+        replies.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, replies.size());
+        notifyDataSetChanged();
     }
 }

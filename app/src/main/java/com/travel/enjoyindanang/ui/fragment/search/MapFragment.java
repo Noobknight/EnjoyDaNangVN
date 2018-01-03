@@ -184,9 +184,11 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
             showResultContainer(true);
             progressBar.setVisibility(View.VISIBLE);
         } else {
-            mSearchQueryAdapter.clearAllItem();
-            Utils.hideSoftKeyboard(getActivity());
-            showResultContainer(false);
+            if(mSearchQueryAdapter != null){
+                mSearchQueryAdapter.clearAllItem();
+                Utils.hideSoftKeyboard(getActivity());
+                showResultContainer(false);
+            }
             progressBar.setVisibility(View.GONE);
         }
         return false;
@@ -358,8 +360,8 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
         if(mLocationHelper != null && googleMap != null){
             mLocationHelper.setGoogleMap(googleMap);
         }
-        mGoogleMap.getUiSettings().setMapToolbarEnabled(false);
-        mGoogleMap.setMyLocationEnabled(true);
+        googleMap.getUiSettings().setMapToolbarEnabled(false);
+        googleMap.setMyLocationEnabled(true);
         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
         if (LocationUtils.isGpsEnabled() && LocationUtils.isLocationEnabled() && !isLocationNotFound) {
             loadMapView(mLocationService.getLastLocation());
@@ -570,7 +572,7 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
     }
 
     @Override
-    public void onDismiss(DialogInterface dialogInterface, boolean isBack) {
+    public void onDismiss(DialogInterface dialogInterface, boolean isBack, boolean isNeedRefresh) {
 
     }
 

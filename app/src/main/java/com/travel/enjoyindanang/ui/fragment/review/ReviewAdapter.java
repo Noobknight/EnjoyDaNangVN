@@ -57,10 +57,12 @@ public class ReviewAdapter extends RecyclerView.Adapter {
     private Context context;
     private OnItemClickListener onItemClickListener;
 
+    private ReplyAdapter replyAdapter;
+
     private ImagePreviewAdapter.OnImageReviewClickListener onImagePreviewClick;
 
     public interface OnReplyClickListener {
-        void onClick(ProgressBar prgLoading, View view, int position);
+        void onClick(ProgressBar prgLoading, View view, int position, int indexOfReview);
     }
 
     private OnReplyClickListener onReplyClickListener;
@@ -124,6 +126,8 @@ public class ReviewAdapter extends RecyclerView.Adapter {
         @BindView(R.id.txtWriteReply)
         TextView txtWriteReply;
 
+        @BindView(R.id.txtRemoveReview)
+        TextView txtRemoveReview;
 
         ReviewViewHolder(View itemView) {
             super(itemView);
@@ -167,7 +171,14 @@ public class ReviewAdapter extends RecyclerView.Adapter {
             ((ReviewViewHolder) holder).txtNumRate.setText(String.valueOf(model.getStar()));
             ((ReviewViewHolder) holder).txtReviewerName.setText(model.getName());
             ((ReviewViewHolder) holder).txtTitleReview.setText(model.getTitle());
-            ((ReviewViewHolder) holder).txtDate.setText(Utils.formatDate(Constant.DATE_SERVER_FORMAT, Constant.DATE_FORMAT_DMY, model.getDate()));
+            ((ReviewViewHolder) holder).txtDate.setText(model.getDate());
+//            ((ReviewViewHolder) holder).txtDate.setText(Utils.formatDate(Constant.DATE_SERVER_FORMAT, Constant.DATE_FORMAT_DMY, model.getDate()));
+            if (model.isEnableRemove()) {
+                ((ReviewViewHolder) holder).txtRemoveReview.setVisibility(View.VISIBLE);
+                LanguageHelper.getValueByViewId(((ReviewViewHolder) holder).txtRemoveReview);
+            } else {
+                ((ReviewViewHolder) holder).txtRemoveReview.setVisibility(View.GONE);
+            }
             LanguageHelper.getValueByViewId(((ReviewViewHolder) holder).txtWriteReply);
             ImageUtils.loadImageWithFreso(((ReviewViewHolder) holder).imgAvatar, model.getAvatar());
             if (((ReviewViewHolder) holder).txtContentReview.getLineCount() > 3) {
@@ -205,7 +216,7 @@ public class ReviewAdapter extends RecyclerView.Adapter {
             // Reply
             initAdapter(((ReviewViewHolder) holder).rcvReply, LinearLayoutManager.VERTICAL);
             lstReply.add(new ArrayList<Reply>());
-            ReplyAdapter replyAdapter = new ReplyAdapter(lstReply.get(position), onImagePreviewClick);
+            replyAdapter = new ReplyAdapter(lstReply.get(position), onImagePreviewClick, onReplyClickListener, position);
             ((ReviewViewHolder) holder).rcvReply.addItemDecoration(new DividerItemDecoration(context, LinearLayoutManager.VERTICAL));
             ((ReviewViewHolder) holder).rcvReply.setAdapter(replyAdapter);
             initExpandableLayout(holder, model);
@@ -213,7 +224,7 @@ public class ReviewAdapter extends RecyclerView.Adapter {
                 @Override
                 public void onClick(View view) {
                     if (!model.isExpandedComment()) {
-                        onReplyClickListener.onClick((((ReviewViewHolder) holder).prgLoadingReply), view, position);
+                        onReplyClickListener.onClick((((ReviewViewHolder) holder).prgLoadingReply), view, position, position);
                     }
                     onClickButton(((ReviewViewHolder) holder).expandableLayout);
                 }
@@ -222,6 +233,12 @@ public class ReviewAdapter extends RecyclerView.Adapter {
                 @Override
                 public void onClick(View view) {
                     onItemClickListener.onClick(view, position);
+                }
+            });
+            ((ReviewViewHolder) holder).txtRemoveReview.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    onItemClickListener.onClick(v, position);
                 }
             });
         } else if (holder instanceof LoadingViewHolder) {
@@ -299,6 +316,22 @@ public class ReviewAdapter extends RecyclerView.Adapter {
             lstReviews.remove(lstReviews.size() - 1);
             notifyItemRemoved(lstReviews.size());
         }
+    }
+
+    public void removeReply(int indexOfReview, int indexOfReply){
+        lstReply.get(indexOfReview).remove(indexOfReply);
+        replyAdapter.notifyItemRemoved(indexOfReply);
+        replyAdapter.notifyItemRangeChanged(indexOfReply, lstReply.size());
+        replyAdapter.notifyDataSetChanged();
+        notifyDataSetChanged();
+    }
+
+
+    public void removeAt(int position) {
+        lstReviews.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, lstReviews.size());
+        notifyDataSetChanged();
     }
 
 

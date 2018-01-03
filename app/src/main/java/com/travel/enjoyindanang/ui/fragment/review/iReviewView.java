@@ -25,4 +25,8 @@ public interface iReviewView extends iBaseView {
 
     void onRefreshReviews(List<Review> models);
 
+    void onRemoveSuccess();
+
+    void onRemoveReplySuccess();
+
 }
