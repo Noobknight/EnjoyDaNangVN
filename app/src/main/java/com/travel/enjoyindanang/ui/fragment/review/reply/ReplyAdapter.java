@@ -71,6 +71,13 @@ public class ReplyAdapter extends RecyclerView.Adapter<ReplyAdapter.ReplyViewHol
         int size = CollectionUtils.isEmpty(reply.getImages()) ? 0 : reply.getImages().size();
         String strCountImages = String.format(Locale.getDefault(), "%d %s", size, Utils.getLanguageByResId(R.string.Image));
         holder.txtNumberOfImages.setText(strCountImages);
+        if (reply.isEnableRemove()) {
+            holder.txtRemoveReply.setVisibility(View.VISIBLE);
+            String lblDelete = Utils.getLanguageByResId(R.string.Delete);
+            holder.txtRemoveReply.setText(lblDelete);
+        } else {
+            holder.txtRemoveReply.setVisibility(View.GONE);
+        }
         holder.txtNumberOfImages.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
