@@ -39,11 +39,8 @@ public class DetailPartnerPresenter extends BasePresenter<iDetailPartnerView> {
             public void onSuccess(DetailPartnerCombined data) {
                 Repository<DetailPartner> detailPartnerRepository = data.getDetailPartnerRepository();
                 Repository<PartnerAlbum> partnerAlbumRepository = data.getPartnerAlbumRepository();
-                if (Utils.isResponseError(detailPartnerRepository)) {
-                    mvpView.onFetchFailure(new AppError(new Throwable(detailPartnerRepository.getMessage())));
-                }
-                if (Utils.isResponseError(partnerAlbumRepository)) {
-                    mvpView.onFetchFailure(new AppError(new Throwable(partnerAlbumRepository.getMessage())));
+                if (Utils.isResponseError(detailPartnerRepository) || Utils.isResponseError(partnerAlbumRepository)) {
+                    mvpView.onFetchFailure(new AppError(new Throwable(AppError.DEFAULT_ERROR_MESSAGE)));
                 }
                 mvpView.onFetchAllData(detailPartnerRepository.getData(),
                         partnerAlbumRepository.getData());
@@ -76,11 +73,8 @@ public class DetailPartnerPresenter extends BasePresenter<iDetailPartnerView> {
             public void onSuccess(DetailPartnerCombined data) {
                 Repository<DetailPartner> detailPartnerRepository = data.getDetailPartnerRepository();
                 Repository<PartnerAlbum> partnerAlbumRepository = data.getPartnerAlbumRepository();
-                if (Utils.isResponseError(detailPartnerRepository)) {
-                    mvpView.onFetchFailure(new AppError(new Throwable(detailPartnerRepository.getMessage())));
-                }
-                if (Utils.isResponseError(partnerAlbumRepository)) {
-                    mvpView.onFetchFailure(new AppError(new Throwable(partnerAlbumRepository.getMessage())));
+                if (Utils.isResponseError(detailPartnerRepository) || Utils.isResponseError(partnerAlbumRepository)) {
+                    mvpView.onFetchFailure(new AppError(new Throwable(AppError.DEFAULT_ERROR_MESSAGE)));
                 }
                 mvpView.onFetchAllData(detailPartnerRepository.getData(),
                         partnerAlbumRepository.getData());

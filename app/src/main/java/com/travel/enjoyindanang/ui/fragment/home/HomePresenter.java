@@ -87,14 +87,10 @@ public class HomePresenter extends BasePresenter<iHomeView> {
                         Repository<Partner> partnerRepository = data.getPartnerRepository();
                         Repository<Banner> bannerRepository = data.getBannerRepository();
                         Repository<Category> categoryRepository = data.getCategoryRepository();
-                        if(Utils.isResponseError(partnerRepository)){
-                           mvpView.onGetPartnerFailure(new AppError(new Throwable(partnerRepository.getMessage())));
-                        }
-                        if(Utils.isResponseError(bannerRepository)){
-                            mvpView.onGetPartnerFailure(new AppError(new Throwable(bannerRepository.getMessage())));
-                        }
-                        if(Utils.isResponseError(categoryRepository)){
-                            mvpView.onGetPartnerFailure(new AppError(new Throwable(categoryRepository.getMessage())));
+                        if(Utils.isResponseError(partnerRepository) || Utils.isResponseError(bannerRepository) ||
+                                Utils.isResponseError(categoryRepository)){
+                           mvpView.onGetPartnerFailure(new AppError(new Throwable(AppError.DEFAULT_ERROR_MESSAGE)));
+                           return;
                         }
                         mvpView.onFetchAllDataSuccess(partnerRepository.getData(), bannerRepository.getData(), categoryRepository.getData());
                     }
