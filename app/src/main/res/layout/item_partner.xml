@@ -69,9 +69,9 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:paddingLeft="10dp"
-            android:paddingBottom="@dimen/_3sdp"
             android:textColor="@color/title_partner"
             android:textSize="@dimen/_15ssp"
+            android:paddingBottom="@dimen/_3sdp"
             android:textStyle="bold" />
     </LinearLayout>
 

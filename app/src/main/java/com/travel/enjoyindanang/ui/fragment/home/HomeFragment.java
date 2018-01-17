@@ -19,6 +19,7 @@ import com.daimajia.slider.library.Animations.DescriptionAnimation;
 import com.daimajia.slider.library.SliderLayout;
 import com.daimajia.slider.library.SliderTypes.BaseSliderView;
 import com.daimajia.slider.library.SliderTypes.DefaultSliderView;
+import com.google.android.gms.maps.model.LatLng;
 import com.travel.enjoyindanang.MvpFragment;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.annotation.DialogType;
@@ -37,6 +38,7 @@ import com.travel.enjoyindanang.ui.fragment.home.adapter.PartnerAdapter;
 import com.travel.enjoyindanang.utils.DialogUtils;
 import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.event.OnItemClickListener;
+import com.travel.enjoyindanang.utils.helper.LocationHelper;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -59,6 +61,7 @@ public class HomeFragment extends MvpFragment<HomePresenter> implements iHomeVie
     private static final String TAG = HomeFragment.class.getSimpleName();
     private static final int VERTICAL_ITEM_SPACE = 8;
     private static final int DURATION_SLIDE = 3000;
+    private static final float DISTANCE_TO_RELOAD = 0.5f;// ~500 meters
 
     @BindView(R.id.rcv_partner)
     RecyclerView rcvPartner;
@@ -247,7 +250,9 @@ public class HomeFragment extends MvpFragment<HomePresenter> implements iHomeVie
 
     @Override
     public void onFetchFailure(AppError error) {
-//        DialogUtils.showDialog(getContext(), DialogType.WRONG, DialogUtils.getTitleDialog(3), error.getMessage());
+        if (CollectionUtils.isEmpty(lstBanners) && CollectionUtils.isEmpty(lstCategories) && CollectionUtils.isEmpty(lstPartner)) {
+            DialogUtils.showDialog(getContext(), DialogType.WRONG, DialogUtils.getTitleDialog(3), error.getMessage());
+        }
     }
 
 
@@ -287,6 +292,7 @@ public class HomeFragment extends MvpFragment<HomePresenter> implements iHomeVie
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMessageReceive(Object obj) {
+        boolean needReload = false;
         if (obj instanceof String) {
             String msg = (String) obj;
             if (msg.equalsIgnoreCase(Constant.LOCATION_NOT_FOUND)) {
@@ -297,20 +303,40 @@ public class HomeFragment extends MvpFragment<HomePresenter> implements iHomeVie
             }
 
         } else if (obj instanceof Location) {
-            firstTimePosition = (Location) obj;
-            prgLoading.post(new Runnable() {
-                public void run() {
-                    if (firstTimePosition == null) {
-                        mvpPresenter.getAllDataHome(user.getUserId(), StringUtils.EMPTY, StringUtils.EMPTY);
-                    } else {
-                        String strGeoLat = String.valueOf(firstTimePosition.getLatitude());
-                        String strGeoLng = String.valueOf(firstTimePosition.getLongitude());
-                        mvpPresenter.getAllDataHome(user.getUserId(), strGeoLat, strGeoLng);
+            final Location newLocation = (Location) obj;
+            if(firstTimePosition == null){
+                firstTimePosition = newLocation;
+                needReload = true;
+            }else{
+                LatLng startPoint = new LatLng(firstTimePosition.getLatitude(), firstTimePosition.getLongitude());
+                LatLng endPoint = new LatLng(newLocation.getLatitude(), newLocation.getLongitude());
+                LocationHelper locationHelper = mMainActivity.mLocationHelper;
+                if (locationHelper != null) {
+                    double value = locationHelper.calculationByDistance(startPoint, endPoint);
+                    if(value > DISTANCE_TO_RELOAD){
+                        firstTimePosition = newLocation;
+                        needReload = true;
+                    }else{
+                        needReload = false;
                     }
                 }
-            });
+            }
+            if(needReload){
+                prgLoading.post(new Runnable() {
+                    public void run() {
+                        if (firstTimePosition == null) {
+                            mvpPresenter.getAllDataHome(user.getUserId(), StringUtils.EMPTY, StringUtils.EMPTY);
+                        } else {
+                            String strGeoLat = String.valueOf(firstTimePosition.getLatitude());
+                            String strGeoLng = String.valueOf(firstTimePosition.getLongitude());
+                            mvpPresenter.getAllDataHome(user.getUserId(), strGeoLat, strGeoLng);
+                        }
+                    }
+                });
+            }
         }
     }
+
 
     @Override
     public void onStart() {

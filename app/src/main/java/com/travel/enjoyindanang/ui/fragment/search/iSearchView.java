@@ -1,10 +1,10 @@
 package com.travel.enjoyindanang.ui.fragment.search;
 
-import java.util.List;
-
 import com.travel.enjoyindanang.constant.AppError;
 import com.travel.enjoyindanang.iBaseView;
 import com.travel.enjoyindanang.model.Partner;
+
+import java.util.List;
 
 /**
  * Author: Tavv
@@ -19,7 +19,9 @@ public interface iSearchView extends iBaseView {
 
     void onResultPlaceByRange(List<Partner> lstPartner);
 
-    void onGetLocationAddress(List<String> lstAddress);
+    void onGetLocationAddress(List<Partner> lstPartners);
+
+    void onGetAddress(String strAddress);
 
     void onError(AppError error);
 }

@@ -1,11 +1,13 @@
 package com.travel.enjoyindanang.ui.fragment.search;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.location.Address;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v7.widget.AppCompatButton;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,6 +17,7 @@ import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
@@ -59,6 +62,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Author: Tavv
@@ -70,7 +74,7 @@ import butterknife.ButterKnife;
 public class MapFragment extends MvpFragment<SearchPresenter> implements iSearchView,
         SearchView.OnQueryTextListener, OnItemClickListener, OnMapReadyCallback,
         GoogleMap.OnInfoWindowClickListener, GoogleMap.OnMarkerClickListener,
-        OnBackFragmentListener, GoogleMap.OnInfoWindowCloseListener {
+        OnBackFragmentListener, GoogleMap.OnInfoWindowCloseListener, GoogleMap.OnCameraIdleListener {
     private static final String TAG = MapFragment.class.getSimpleName();
 
     private static final float INIT_ZOOM_LEVEL = 14f;
@@ -89,9 +93,9 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
 
     private List<Partner> lstPartnerNearPlace;
 
-    private static final int DEFAULT_RADIUS = 1000; // 1 kilometer
+    private static final int DEFAULT_RADIUS = 1100; // 1 kilometer
 
-    private static final int DEFAULT_MARKER_ICON_SIZE = 50; // 1 kilometer
+    private static final int DEFAULT_MARKER_ICON_SIZE = 50;
 
     private static final int DELAY_INTERVAL = 1000;
 
@@ -134,6 +138,20 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
     @BindView(R.id.txtDistance)
     TextView txtDistance;
 
+    @BindView(R.id.imgPickUpLocation)
+    ImageView imgPickUpLocation;
+
+    @BindView(R.id.frlPickUpContent)
+    FrameLayout frlPickUpContent;
+
+
+    @BindView(R.id.txtAddressPickup)
+    TextView txtAddressPickup;
+
+    @BindView(R.id.btnPickUpDone)
+    AppCompatButton btnPickUpDone;
+
+
     private SearchResultAdapter mSearchQueryAdapter;
 
     private UserInfo userInfo;
@@ -152,7 +170,9 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
 
     private List<Marker> lstMarkers;
 
-    private boolean isDistanceTextClick;
+    private LatLng positionPickupIdle;
+
+    private Location pickUpLocation;
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
@@ -160,7 +180,7 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
         mvpPresenter = createPresenter();
     }
 
-    private void fetchNearPlace() {
+    private void fetchNearPlace(Location currentLocation) {
         if (currentLocation != null) {
             String geoLat = String.valueOf(currentLocation.getLatitude());
             String geoLng = String.valueOf(currentLocation.getLongitude());
@@ -184,7 +204,7 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
             showResultContainer(true);
             progressBar.setVisibility(View.VISIBLE);
         } else {
-            if(mSearchQueryAdapter != null){
+            if (mSearchQueryAdapter != null) {
                 mSearchQueryAdapter.clearAllItem();
                 Utils.hideSoftKeyboard(getActivity());
                 showResultContainer(false);
@@ -229,7 +249,6 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
                 partner = lstPartnerNearPlace.get(position);
             }
             if (view.getId() == R.id.txtDistance) {
-                isDistanceTextClick = true;
                 if (CollectionUtils.isNotEmpty(lstMarkers)) {
                     for (Marker marker : lstMarkers) {
                         InfoWindow infoWindow = (InfoWindow) marker.getTag();
@@ -267,19 +286,21 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
         } else {
             rcvPartnerNearPlace.setVisibility(View.GONE);
             txtEmpty.setVisibility(View.VISIBLE);
+            hideProgress(true);
         }
+        hideLoading();
     }
 
     @Override
-    public void onGetLocationAddress(List<String> lstAddress) {
-        for (int i = 0; i < lstAddress.size(); i++) {
-            lstPartnerNearPlace.get(i).setLocationAddress(lstAddress.get(i));
-        }
+    public void onGetLocationAddress(List<Partner> lstPartners) {
+        lstPartnerNearPlace = lstPartners;
         SearchPartnerResultAdapter mSearchNearResultAdapter = new SearchPartnerResultAdapter(lstPartnerNearPlace, getContext(), this);
-
         rcvPartnerNearPlace.setAdapter(mSearchNearResultAdapter);
-        drawNearPlace();
+        rcvPartnerNearPlace.setVisibility(View.VISIBLE);
+        txtEmpty.setVisibility(View.GONE);
+        drawNearPlace(currentLocation);
     }
+
 
     @Override
     public void onError(AppError error) {
@@ -353,19 +374,24 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
         customSearchView();
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onMapReady(GoogleMap googleMap) {
         isMapAlreadyInit = true;
-        mGoogleMap = googleMap;
-        if(mLocationHelper != null && googleMap != null){
+        if (mLocationHelper != null && googleMap != null) {
             mLocationHelper.setGoogleMap(googleMap);
         }
-        googleMap.getUiSettings().setMapToolbarEnabled(false);
         googleMap.setMyLocationEnabled(true);
+        googleMap.getUiSettings().setZoomControlsEnabled(false);
+        googleMap.getUiSettings().setMyLocationButtonEnabled(true);
+        googleMap.getUiSettings().setCompassEnabled(true);
+        googleMap.getUiSettings().setRotateGesturesEnabled(true);
+        googleMap.getUiSettings().setZoomGesturesEnabled(true);
         googleMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        mGoogleMap = googleMap;
         if (LocationUtils.isGpsEnabled() && LocationUtils.isLocationEnabled() && !isLocationNotFound) {
             loadMapView(mLocationService.getLastLocation());
-            fetchNearPlace();
+            fetchNearPlace(currentLocation);
         } else {
             hideProgress(true);
             enableSearchView(searchView, true);
@@ -390,7 +416,7 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
     @Override
     public void initViewLabel(View view) {
         super.initViewLabel(view);
-        LanguageHelper.getValueByViewId(searchView, txtSearching, txtPartnerName, txtEmpty);
+        LanguageHelper.getValueByViewId(searchView, txtSearching, txtPartnerName, txtEmpty, btnPickUpDone);
         String defaultDistance = Utils.getLanguageByResId(R.string.Map_Distance);
         if (StringUtils.isNotBlank(defaultDistance)) {
             txtDistance.setText(defaultDistance.concat(": -.-"));
@@ -443,7 +469,7 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
         super.onDestroyView();
     }
 
-    private void drawNearPlace() {
+    private void drawNearPlace(Location currentLocation) {
         Bitmap btmMarker = BitmapUtil.getBitmapFromDrawable(getContext(), R.drawable.marker_thumb, DEFAULT_MARKER_ICON_SIZE, DEFAULT_MARKER_ICON_SIZE);
         if (isMapAlreadyInit && currentLocation != null) {
             double lat = currentLocation.getLatitude();
@@ -476,6 +502,7 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
             mGoogleMap.setOnInfoWindowCloseListener(this);
         }
         hideProgress(true);
+        hideLoading();
         enableSearchView(searchView, true);
     }
 
@@ -502,7 +529,7 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
             }
             myCurrentAddress = titleMarker;
             if (mGoogleMap != null) {
-                markerOptions.position(point).title(titleMarker).draggable(false)
+                markerOptions.position(point).title(titleMarker).draggable(true)
                         .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
                 CameraPosition cameraPosition = CameraPosition.builder().target(point).zoom(INIT_ZOOM_LEVEL).bearing(0).tilt(45).build();
                 currentMarker = mGoogleMap.addMarker(markerOptions);
@@ -628,5 +655,59 @@ public class MapFragment extends MvpFragment<SearchPresenter> implements iSearch
     public void onInfoWindowClose(Marker marker) {
         lrlInfoPartner.setVisibility(View.GONE);
         setLayoutWeight(rllPartnerPlaces, 0.5f);
+    }
+
+    @Override
+    public void onCameraIdle() {
+        LatLng latLng = mGoogleMap.getCameraPosition().target;
+        pickUpLocation = new Location("");
+        pickUpLocation.setLongitude(latLng.longitude);
+        pickUpLocation.setLatitude(latLng.latitude);
+        Address address = mLocationHelper.getAddress(latLng);
+        if (address != null) {
+            if (positionPickupIdle == null) {
+                positionPickupIdle = latLng;
+                mvpPresenter.getAddress(address);
+            } else {
+                double distance = mLocationHelper.calculationByDistance(positionPickupIdle, latLng);
+                if (distance >= 0.1) {
+                    mvpPresenter.getAddress(address);
+                    positionPickupIdle = latLng;
+                    mGoogleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                    mGoogleMap.animateCamera(CameraUpdateFactory.zoomTo(INIT_ZOOM_LEVEL));
+                }
+            }
+        }
+    }
+
+    @OnClick({R.id.imgSetPickup, R.id.btnPickUpDone})
+    public void onViewClick(View view) {
+        switch (view.getId()) {
+            case R.id.imgSetPickup:
+                if (mGoogleMap != null) {
+                    txtAddressPickup.setText(myCurrentAddress);
+                    imgPickUpLocation.setVisibility(View.VISIBLE);
+                    frlPickUpContent.setVisibility(View.VISIBLE);
+                    mGoogleMap.setOnCameraIdleListener(this);
+                }
+                break;
+            case R.id.btnPickUpDone:
+                if (mGoogleMap != null) {
+                    mGoogleMap.clear();
+                    if (pickUpLocation != null) {
+                        currentLocation = pickUpLocation;
+                        showLoading();
+                        enableSearchView(searchView, false);
+                        fetchNearPlace(pickUpLocation);
+                    }
+                }
+                break;
+        }
+    }
+
+
+    @Override
+    public void onGetAddress(String strAddress) {
+        txtAddressPickup.setText(strAddress);
     }
 }

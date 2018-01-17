@@ -2,9 +2,6 @@ package com.travel.enjoyindanang.ui.fragment.search;
 
 import android.location.Address;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.travel.enjoyindanang.BasePresenter;
 import com.travel.enjoyindanang.api.ApiCallback;
 import com.travel.enjoyindanang.api.model.Repository;
@@ -12,6 +9,12 @@ import com.travel.enjoyindanang.constant.AppError;
 import com.travel.enjoyindanang.model.Partner;
 import com.travel.enjoyindanang.utils.LocationUtils;
 import com.travel.enjoyindanang.utils.Utils;
+
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import rx.Observable;
 import rx.Subscriber;
 
@@ -72,27 +75,19 @@ public class SearchPresenter extends BasePresenter<iSearchView> {
 
     }
 
-
-    void getAddressByGeoLocation(final List<Partner> lstPartner) {
-        addSubscription(Observable.create(new Observable.OnSubscribe<List<String>>() {
+    void getAddress(final Address address) {
+        addSubscription(Observable.create(new Observable.OnSubscribe<String>() {
 
             @Override
-            public void call(Subscriber<? super List<String>> subscriber) {
-                List<String> lstAddress = new ArrayList<String>();
-                for (Partner partner : lstPartner) {
-                    double lat = Double.parseDouble(partner.getGeoLat());
-                    double lng = Double.parseDouble(partner.getGeoLng());
-                    Address address = LocationUtils.getAddress(lat, lng);
-                    String fullAddress = "";
-                    if (address != null) {
-                        fullAddress = LocationUtils.getFullInfoAddress(address);
-                    }
-                    lstAddress.add(fullAddress);
+            public void call(Subscriber<? super String> subscriber) {
+                String fullAddress = "";
+                if (address != null) {
+                    fullAddress = LocationUtils.getFullInfoAddress(address);
                 }
-                subscriber.onNext(lstAddress);
+                subscriber.onNext(fullAddress);
                 subscriber.onCompleted();
             }
-        }), new Subscriber<List<String>>() {
+        }), new Subscriber<String>() {
             @Override
             public void onCompleted() {
 
@@ -104,8 +99,51 @@ public class SearchPresenter extends BasePresenter<iSearchView> {
             }
 
             @Override
-            public void onNext(List<String> lstAddress) {
-                mvpView.onGetLocationAddress(lstAddress);
+            public void onNext(String strAddress) {
+                mvpView.onGetAddress(strAddress);
+            }
+        });
+    }
+
+
+    void getAddressByGeoLocation(final List<Partner> lstPartner) {
+        addSubscription(Observable.create(new Observable.OnSubscribe<List<Partner>>() {
+
+            @Override
+            public void call(Subscriber<? super List<Partner>> subscriber) {
+                List<Partner> lstPartners = new ArrayList<Partner>();
+                for (Partner partner : lstPartner) {
+                    if (StringUtils.isBlank(partner.getAddress())) {
+                        double lat = Double.parseDouble(partner.getGeoLat());
+                        double lng = Double.parseDouble(partner.getGeoLng());
+                        Address address = LocationUtils.getAddress(lat, lng);
+                        String fullAddress = "";
+                        if (address != null) {
+                            fullAddress = LocationUtils.getFullInfoAddress(address);
+                        }
+                        partner.setAddress(fullAddress);
+                        lstPartners.add(partner);
+                    } else {
+                        lstPartners.add(partner);
+                    }
+                }
+                subscriber.onNext(lstPartners);
+                subscriber.onCompleted();
+            }
+        }), new Subscriber<List<Partner>>() {
+            @Override
+            public void onCompleted() {
+
+            }
+
+            @Override
+            public void onError(Throwable e) {
+
+            }
+
+            @Override
+            public void onNext(List<Partner> lstPartner) {
+                mvpView.onGetLocationAddress(lstPartner);
             }
         });
     }

@@ -18,13 +18,6 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import com.travel.enjoyindanang.MvpFragment;
 import com.travel.enjoyindanang.R;
 import com.travel.enjoyindanang.annotation.DialogType;
@@ -38,6 +31,14 @@ import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.event.OnFetchSearchResult;
 import com.travel.enjoyindanang.utils.event.OnItemClickListener;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
+
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
 
 
 /**
@@ -191,10 +192,8 @@ public class SearchFragment extends MvpFragment<SearchPresenter> implements iSea
     }
 
     @Override
-    public void onGetLocationAddress(List<String> lstAddress) {
-        for (int i = 0; i < lstAddress.size(); i++) {
-            lstPartner.get(i).setLocationAddress(lstAddress.get(i));
-        }
+    public void onGetLocationAddress(List<Partner> lstPartner) {
+        this.lstPartner = lstPartner;
         ArrayList<Partner> data = new ArrayList<>();
         data.addAll(lstPartner);
         String strTab1 = Utils.getLanguageByResId(R.string.Search_Tab1_Title);
@@ -203,6 +202,11 @@ public class SearchFragment extends MvpFragment<SearchPresenter> implements iSea
         SearchTabAdapter mSearchTabAdapter = new SearchTabAdapter(getChildFragmentManager(), tabTitles, this, data);
         searchResultPager.setAdapter(mSearchTabAdapter);
         tabLayout.setupWithViewPager(searchResultPager);
+    }
+
+    @Override
+    public void onGetAddress(String strAddress) {
+
     }
 
 

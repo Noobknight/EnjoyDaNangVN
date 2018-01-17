@@ -187,34 +187,28 @@
 
     </LinearLayout>
 
-    <LinearLayout
-        style="@style/ButtonLoginSocial"
+    <TextView
+        android:id="@+id/txtTermSystem"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/_3sdp"
-        android:orientation="horizontal">
+        android:layout_marginLeft="@dimen/_15sdp"
+        android:ellipsize="end"
+        android:gravity="bottom"
+        android:layout_marginBottom="@dimen/_5sdp"
+        android:maxLines="1"
+        android:textColor="@color/black"
+        android:textSize="@dimen/_10ssp"
+        android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/txtTermSystem"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:ellipsize="end"
-            android:gravity="center_vertical"
-            android:maxLines="1"
-            android:text="@string/Home.Term.System"
-            android:textColor="@color/black"
-            android:textSize="@dimen/_13ssp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/txtContinue"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:gravity="right|end"
-            android:text="@string/Login.Continue"
-            android:textColor="@color/bg_login_button"
-            android:textSize="@dimen/_20ssp" />
-    </LinearLayout>
+    <TextView
+        android:id="@+id/txtContinue"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:gravity="right|end|bottom"
+        android:paddingRight="@dimen/_15sdp"
+        android:text="@string/Login.Continue"
+        android:textColor="@color/bg_login_button"
+        android:textSize="@dimen/_20ssp" />
 
 </LinearLayout>

@@ -42,6 +42,11 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.travel.enjoyindanang.constant.Constant;
+import com.travel.enjoyindanang.utils.JsonUtils;
+import com.travel.enjoyindanang.utils.PermissionUtils;
+import com.travel.enjoyindanang.utils.event.LocationConnectListener;
+import com.travel.enjoyindanang.utils.event.OnFindLastLocationCallback;
 
 import org.apache.commons.lang3.StringUtils;
 import org.greenrobot.eventbus.EventBus;
@@ -49,16 +54,12 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import com.travel.enjoyindanang.constant.Constant;
-import com.travel.enjoyindanang.utils.JsonUtils;
-import com.travel.enjoyindanang.utils.PermissionUtils;
-import com.travel.enjoyindanang.utils.event.LocationConnectListener;
-import com.travel.enjoyindanang.utils.event.OnFindLastLocationCallback;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscriber;
@@ -233,6 +234,23 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
         return null;
     }
 
+    public Address getAddress(LatLng latLng) {
+        if(latLng != null){
+            Geocoder geocoder;
+            List<Address> addresses;
+            geocoder = new Geocoder(context, Locale.getDefault());
+
+            try {
+                addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+                return addresses.get(0);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+    }
+
+
     public String getFullInfoByAddress(Address address) {
         if (address != null) {
             String addressLine = address.getMaxAddressLineIndex() > 0 ? address.getAddressLine(0).concat(", ") : "";
@@ -266,7 +284,7 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
         mGoogleApiClient.connect();
     }
 
-    public GoogleApiClient buildGoogleApiStandard(LocationConnectListener locationConnectListener) {
+    public synchronized GoogleApiClient buildGoogleApiStandard(LocationConnectListener locationConnectListener) {
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(context)
                     .addConnectionCallbacks(locationConnectListener)
@@ -681,6 +699,29 @@ public class LocationHelper implements PermissionUtils.PermissionResultCallback 
                         e.printStackTrace();
                     }
                 });
+    }
+
+    public double calculationByDistance(LatLng StartP, LatLng EndP) {
+        int Radius = 6371;//radius of earth in Km
+        double lat1 = StartP.latitude;
+        double lat2 = EndP.latitude;
+        double lon1 = StartP.longitude;
+        double lon2 = EndP.longitude;
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double c = 2 * Math.asin(Math.sqrt(a));
+        double valueResult = Radius * c;
+        double km = valueResult / 1;
+        DecimalFormat newFormat = new DecimalFormat("####");
+        int kmInDec = Integer.valueOf(newFormat.format(km));
+        double meter = valueResult % 1000;
+        int meterInDec = Integer.valueOf(newFormat.format(meter));
+        Log.i(TAG, "" + valueResult + "   KM  " + kmInDec + " Meter   " + meterInDec);
+
+        return Radius * c;
     }
 
 }

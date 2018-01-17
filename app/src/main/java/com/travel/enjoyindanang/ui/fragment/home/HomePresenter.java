@@ -30,16 +30,13 @@ public class HomePresenter extends BasePresenter<iHomeView> {
 
             @Override
             public void onSuccess(Repository<Partner> model) {
-                if (Utils.isResponseError(model)) {
-                    mvpView.onGetPartnerFailure(new AppError(new Throwable(model.getMessage())));
-                    return;
+                if (Utils.isNotEmptyContent(model)) {
+                    mvpView.onGetPartnerSuccess(model.getData());
                 }
-                mvpView.onGetPartnerSuccess(model.getData());
             }
 
             @Override
             public void onFailure(String msg) {
-                mvpView.onGetPartnerFailure(new AppError(new Throwable(msg)));
             }
 
             @Override
@@ -87,12 +84,9 @@ public class HomePresenter extends BasePresenter<iHomeView> {
                         Repository<Partner> partnerRepository = data.getPartnerRepository();
                         Repository<Banner> bannerRepository = data.getBannerRepository();
                         Repository<Category> categoryRepository = data.getCategoryRepository();
-                        if(Utils.isResponseError(partnerRepository) || Utils.isResponseError(bannerRepository) ||
-                                Utils.isResponseError(categoryRepository)){
-                           mvpView.onGetPartnerFailure(new AppError(new Throwable(AppError.DEFAULT_ERROR_MESSAGE)));
-                           return;
+                        if(Utils.isNotEmptyContent(partnerRepository) && Utils.isNotEmptyContent(bannerRepository) && Utils.isNotEmptyContent(categoryRepository)){
+                            mvpView.onFetchAllDataSuccess(partnerRepository.getData(), bannerRepository.getData(), categoryRepository.getData());
                         }
-                        mvpView.onFetchAllDataSuccess(partnerRepository.getData(), bannerRepository.getData(), categoryRepository.getData());
                     }
 
                     @Override

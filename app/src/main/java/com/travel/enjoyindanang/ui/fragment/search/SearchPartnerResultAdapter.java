@@ -8,6 +8,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.travel.enjoyindanang.R;
+import com.travel.enjoyindanang.model.Partner;
+import com.travel.enjoyindanang.utils.ImageUtils;
+import com.travel.enjoyindanang.utils.event.OnItemClickListener;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -16,10 +21,6 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import com.travel.enjoyindanang.R;
-import com.travel.enjoyindanang.model.Partner;
-import com.travel.enjoyindanang.utils.ImageUtils;
-import com.travel.enjoyindanang.utils.event.OnItemClickListener;
 
 /**
  * Author: Tavv
@@ -54,7 +55,7 @@ public class SearchPartnerResultAdapter extends RecyclerView.Adapter<SearchPartn
         holder.setIsRecyclable(false);
         if (model != null) {
             holder.txtPartnerName.setText(model.getName());
-            holder.txtAddress.setText(model.getLocationAddress());
+            holder.txtAddress.setText(model.getAddress());
             holder.txtCategory.setText(model.getCategoryName());
             ImageUtils.loadImageNoRadius(context, holder.imgPartner, model.getPicture());
             if (StringUtils.isNotBlank(model.getDistance()) &&

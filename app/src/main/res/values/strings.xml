@@ -100,6 +100,7 @@
 
     <string name="no_data_available">Haven\'t partner right now !</string>
 
+    <string name="btn_ok">Pick</string>
 
     <string name="exchange_rate">&lt;=&gt;</string>
     <string name="err_msg_email">Email Invalid</string>

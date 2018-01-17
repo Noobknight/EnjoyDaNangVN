@@ -14,6 +14,7 @@ import java.net.UnknownHostException;
 
 import retrofit2.adapter.rxjava.HttpException;
 import rx.Subscriber;
+import rx.exceptions.OnErrorFailedException;
 
 public abstract class ApiCallback<M> extends Subscriber<M> {
 
@@ -27,6 +28,11 @@ public abstract class ApiCallback<M> extends Subscriber<M> {
     @Override
     public void onError(Throwable e) {
         e.printStackTrace();
+        Throwable cause = e.getCause();
+        if(cause instanceof OnErrorFailedException || e instanceof OnErrorFailedException){
+            onFinish();
+            return;
+        }
         String status;
         String message = e.getMessage();
         if (StringUtils.isNotEmpty(message)) {
