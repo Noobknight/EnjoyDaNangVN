@@ -215,7 +215,8 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
         if (fragment != null) {
             fragment.countGetResultFailed += 1;
             if (fragment.countGetResultFailed == 1) {
-                DialogUtils.showDialog(getContext(), DialogType.WRONG, DialogUtils.getTitleDialog(3), appError.getMessage());
+            	Log.e(TAG, appError.getMessage());
+                // DialogUtils.showDialog(getContext(), DialogType.WRONG, DialogUtils.getTitleDialog(3), appError.getMessage());
             }
         }
     }

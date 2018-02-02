@@ -242,7 +242,8 @@ public class ReviewFragment extends MvpFragment<ReviewPresenter> implements iRev
         if (fragment != null) {
             fragment.countGetResultFailed += 1;
             if (fragment.countGetResultFailed == 1) {
-                DialogUtils.showDialog(getContext(), DialogType.WRONG, DialogUtils.getTitleDialog(3), error.getMessage());
+                Log.e(TAG, error.getMessage());
+                // DialogUtils.showDialog(getContext(), DialogType.WRONG, DialogUtils.getTitleDialog(3), error.getMessage());
             }
         }
     }
