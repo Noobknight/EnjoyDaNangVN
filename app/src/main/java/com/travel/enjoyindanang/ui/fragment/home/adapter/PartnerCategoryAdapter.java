@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -76,6 +77,12 @@ public class PartnerCategoryAdapter extends LoadMoreRecyclerViewAdapter<Partner>
                     mItemClickListener.onItemClick(view, position);
                 }
             });
+            ((PartnerViewHolder) holder).btnShare.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    mItemClickListener.onItemClick(view, position);
+                }
+            });
             int discount = partner.getDiscount();
             if (discount != 0) {
                 String strDiscount = String.format(Locale.getDefault(), Constant.DISCOUNT_TEMPLATE, discount, "%");
@@ -105,6 +112,8 @@ public class PartnerCategoryAdapter extends LoadMoreRecyclerViewAdapter<Partner>
         TextView txtDistance;
         @BindView(R.id.fabFavorite)
         FloatingActionButton fabFavorite;
+        @BindView(R.id.btnShare)
+        ImageView btnShare;
 
         @BindView(R.id.txtDiscount)
         TextView txtDiscount;

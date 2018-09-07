@@ -4,6 +4,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -243,7 +244,6 @@ public class ReviewFragment extends MvpFragment<ReviewPresenter> implements iRev
             fragment.countGetResultFailed += 1;
             if (fragment.countGetResultFailed == 1) {
                 Log.e(TAG, error.getMessage());
-                // DialogUtils.showDialog(getContext(), DialogType.WRONG, DialogUtils.getTitleDialog(3), error.getMessage());
             }
         }
     }

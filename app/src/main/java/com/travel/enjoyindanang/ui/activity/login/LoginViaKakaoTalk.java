@@ -165,10 +165,11 @@ public class LoginViaKakaoTalk implements ILogin<UserProfile, User> {
 
     private void requestMe() {
         List<String> propertyKeys = new ArrayList<String>();
-        propertyKeys.add("kaccount_email");
+        propertyKeys.add("account_email");
         propertyKeys.add("nickname");
         propertyKeys.add("profile_image");
         propertyKeys.add("thumbnail_image");
+        propertyKeys.add("story_publish");
         UserManagement.requestMe(new MeResponseCallback() {
             @Override
             public void onFailure(ErrorResult errorResult) {
@@ -196,7 +197,7 @@ public class LoginViaKakaoTalk implements ILogin<UserProfile, User> {
             public void onSuccess(UserProfile userProfile) {
                 handleCallbackResult(userProfile);
             }
-        }, propertyKeys, false);
+        });
     }
 
     private String getAccessToken() {

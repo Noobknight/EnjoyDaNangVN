@@ -5,8 +5,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.content.pm.Signature;
 import android.support.multidex.MultiDex;
 import android.support.multidex.MultiDexApplication;
+import android.util.Base64;
+import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.facebook.appevents.AppEventsLogger;
@@ -26,12 +31,16 @@ import com.travel.enjoyindanang.utils.Utils;
 import com.travel.enjoyindanang.utils.config.AppUpdateConfiguration;
 import com.travel.enjoyindanang.utils.helper.DomainHelper;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
+import com.zing.zalo.zalosdk.oauth.ZaloSDKApplication;
+
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Created by chien on 10/8/17.
  */
 
-public class GlobalApplication extends MultiDexApplication{
+public class GlobalApplication extends MultiDexApplication {
     private static final String TAG = GlobalApplication.class.getSimpleName();
     private static volatile GlobalApplication sInstance = null;
     private static volatile Activity currentActivity = null;
@@ -52,7 +61,7 @@ public class GlobalApplication extends MultiDexApplication{
         sInstance = this;
         AppEventsLogger.activateApp(this);
         KakaoSDK.init(new KakaoSDKAdapter());
-        if(!BuildConfig.DEBUG_MODE){
+        if (!BuildConfig.DEBUG_MODE) {
             final Fabric fabric = new Fabric.Builder(this)
                     .kits(new Crashlytics())
                     .debuggable(BuildConfig.DEBUG_MODE)
@@ -62,9 +71,11 @@ public class GlobalApplication extends MultiDexApplication{
         new AppUpdateConfiguration().configFirebaseUpdate();
         SharedPrefsUtils.setContext(this);
         hasSessionLogin = Utils.hasSessionLogin();
+        ZaloSDKApplication.wrap(this);
 //        setUpLangReceiver();
 //        checkLanguage();
     }
+
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
@@ -81,10 +92,11 @@ public class GlobalApplication extends MultiDexApplication{
 
     /**
      * singleton 애플리케이션 객체를 얻는다.
+     *
      * @return singleton 애플리케이션 객체
      */
     public static GlobalApplication getGlobalApplicationContext() {
-        if(sInstance == null)
+        if (sInstance == null)
             throw new IllegalStateException("this application does not inherit com.travel.enjoyindanang.GlobalApplication");
         return sInstance;
     }
@@ -96,7 +108,7 @@ public class GlobalApplication extends MultiDexApplication{
     public void onTerminate() {
         super.onTerminate();
         sInstance = null;
-        if(mBroadcastReceiver != null){
+        if (mBroadcastReceiver != null) {
             unregisterReceiver(mBroadcastReceiver);
         }
     }
@@ -117,11 +129,11 @@ public class GlobalApplication extends MultiDexApplication{
         GlobalApplication.userInfo = userInfo;
     }
 
-    private void checkLanguage(){
+    private void checkLanguage() {
         strLanguage = LanguageHelper.getSystemLanguage();
-        if(strLanguage.equalsIgnoreCase("vi")){
+        if (strLanguage.equalsIgnoreCase("vi")) {
             new DomainHelper(DomainHelper.DomainType.VN);
-        }else{
+        } else {
             new DomainHelper(DomainHelper.DomainType.KR);
         }
     }

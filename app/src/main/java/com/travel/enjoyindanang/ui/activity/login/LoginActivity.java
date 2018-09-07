@@ -37,6 +37,7 @@ import com.travel.enjoyindanang.utils.config.ForceUpdateChecker;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 import com.travel.enjoyindanang.utils.helper.SoftKeyboardManager;
 import com.travel.enjoyindanang.utils.helper.StatusBarCompat;
+import com.zing.zalo.zalosdk.oauth.ZaloSDK;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -90,6 +91,7 @@ public class LoginActivity extends MvpActivity<LoginPresenter> implements LoginV
     private LoginViaGoogle loginViaGoogle;
     private LoginViaKakaoTalk loginViaKakaoTalk;
     private LoginPresenter loginPresenter;
+    private LoginViaZalo loginViaZalo;
 
     private boolean isExit;
 
@@ -111,7 +113,7 @@ public class LoginActivity extends MvpActivity<LoginPresenter> implements LoginV
         loginViaFacebook = (LoginViaFacebook) loginFactory.getLoginType(LoginType.FACEBOOK, this, this);
         loginViaGoogle = (LoginViaGoogle) loginFactory.getLoginType(LoginType.GOOGLE, this, this);
         loginViaKakaoTalk = (LoginViaKakaoTalk) loginFactory.getLoginType(LoginType.KAKAOTALK, this, this);
-
+        loginViaZalo = (LoginViaZalo) loginFactory.getLoginType(LoginType.ZALO, this, this);
         //init
         loginViaFacebook.init();
         loginViaGoogle.init();
@@ -141,7 +143,7 @@ public class LoginActivity extends MvpActivity<LoginPresenter> implements LoginV
 
 
     @OnClick({R.id.btnLoginFb, R.id.btnLoginGPlus, R.id.btnLoginKakaotalk, R.id.btnLoginNormal
-            , R.id.txtCreateAccount, R.id.txtForgotPwd, R.id.txtContinue, R.id.txtTermSystem})
+            , R.id.txtCreateAccount, R.id.txtForgotPwd, R.id.txtContinue, R.id.btnLoginZalo})
     public void onLoginClick(View view) {
         Intent intent = null;
         switch (view.getId()) {
@@ -154,6 +156,9 @@ public class LoginActivity extends MvpActivity<LoginPresenter> implements LoginV
             case R.id.btnLoginKakaotalk:
                 loginViaKakaoTalk.login();
                 break;
+            case R.id.btnLoginZalo:
+                loginViaZalo.login();
+                break;
             case R.id.btnLoginNormal:
                 loginNormal();
                 break;
@@ -162,9 +167,6 @@ public class LoginActivity extends MvpActivity<LoginPresenter> implements LoginV
                 break;
             case R.id.txtForgotPwd:
                 intent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constant.URL_FORGOT_PWD));
-                break;
-            case R.id.txtTermSystem:
-                intent = new Intent(this, TermActivity.class);
                 break;
             case R.id.txtContinue:
                 intent = new Intent(this, MainActivity.class);
@@ -189,6 +191,8 @@ public class LoginActivity extends MvpActivity<LoginPresenter> implements LoginV
         } else if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             handleSignInGoogleResult(result);
+        }else {
+            ZaloSDK.Instance.onActivityResult(this, requestCode, resultCode, data);
         }
     }
 
@@ -218,6 +222,7 @@ public class LoginActivity extends MvpActivity<LoginPresenter> implements LoginV
         loginViaGoogle.setLoginPresenter(loginPresenter);
         loginViaFacebook.setLoginPresenter(loginPresenter);
         loginViaKakaoTalk.setLoginPresenter(loginPresenter);
+        loginViaZalo.setLoginPresenter(loginPresenter);
     }
 
     @Override
@@ -269,7 +274,7 @@ public class LoginActivity extends MvpActivity<LoginPresenter> implements LoginV
     @Override
     public void onLoginFailure(AppError error) {
         hideLoading();
-        DialogUtils.showDialog(this, PromptDialog.DIALOG_TYPE_WRONG, Utils.getLanguageByResId(R.string.Dialog_Title_Wrong), error.getMessage());
+        DialogUtils.showDialog(this, DialogType.WRONG, Utils.getLanguageByResId(R.string.Dialog_Title_Wrong), error.getMessage());
     }
 
     @Override

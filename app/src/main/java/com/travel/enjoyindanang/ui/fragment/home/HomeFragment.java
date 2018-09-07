@@ -29,15 +29,19 @@ import com.travel.enjoyindanang.framework.FragmentTransitionInfo;
 import com.travel.enjoyindanang.model.Banner;
 import com.travel.enjoyindanang.model.Category;
 import com.travel.enjoyindanang.model.Partner;
+import com.travel.enjoyindanang.model.Share;
 import com.travel.enjoyindanang.model.UserInfo;
 import com.travel.enjoyindanang.ui.activity.main.MainActivity;
 import com.travel.enjoyindanang.ui.fragment.detail.dialog.DetailHomeDialogFragment;
 import com.travel.enjoyindanang.ui.fragment.event.EventDialogFragment;
 import com.travel.enjoyindanang.ui.fragment.home.adapter.CategoryAdapter;
 import com.travel.enjoyindanang.ui.fragment.home.adapter.PartnerAdapter;
+import com.travel.enjoyindanang.ui.fragment.share.ShareDialogFragment;
 import com.travel.enjoyindanang.utils.DialogUtils;
 import com.travel.enjoyindanang.utils.Utils;
+import com.travel.enjoyindanang.utils.ZaloUtils;
 import com.travel.enjoyindanang.utils.event.OnItemClickListener;
+import com.travel.enjoyindanang.utils.event.OnShareZaloListener;
 import com.travel.enjoyindanang.utils.helper.LocationHelper;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -57,7 +61,7 @@ import butterknife.ButterKnife;
  */
 
 public class HomeFragment extends MvpFragment<HomePresenter> implements iHomeView, AdapterView.OnItemClickListener,
-        OnItemClickListener, BaseSliderView.OnSliderClickListener {
+        OnItemClickListener, BaseSliderView.OnSliderClickListener, OnShareZaloListener {
     private static final String TAG = HomeFragment.class.getSimpleName();
     private static final int VERTICAL_ITEM_SPACE = 8;
     private static final int DURATION_SLIDE = 3000;
@@ -96,6 +100,12 @@ public class HomeFragment extends MvpFragment<HomePresenter> implements iHomeVie
 
     private List<Banner> lstBanners;
 
+    private ZaloUtils zaloUtils;
+
+    private Share share;
+
+    private ShareDialogFragment bottomShareDialog;
+
     @Override
     public void showToast(String desc) {
 
@@ -110,6 +120,8 @@ public class HomeFragment extends MvpFragment<HomePresenter> implements iHomeVie
     protected void init(View view) {
         user = Utils.getUserInfo();
         lstPartner = new ArrayList<>();
+        zaloUtils = new ZaloUtils();
+        zaloUtils.setLoginZaLoListener(this);
         mPartnerAdapter = new PartnerAdapter(getContext(), lstPartner, this);
         LinearLayoutManager mLayoutManager = new LinearLayoutManager(getActivity());
         rcvPartner.addItemDecoration(Utils.getDividerDecoration(mLayoutManager.getOrientation()));
@@ -160,12 +172,17 @@ public class HomeFragment extends MvpFragment<HomePresenter> implements iHomeVie
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Category category = (Category) parent.getItemAtPosition(position);
         FragmentTransitionInfo transitionInfo = new FragmentTransitionInfo(R.anim.slide_up_in, R.anim.slide_to_left, R.anim.slide_up_in, R.anim.slide_to_left);
-        Fragment prev = mFragmentManager.findFragmentByTag(PartnerCategoryFragment.class.getName());
-        if (prev == null) {
-            mLastLocation = mLastLocation == null ? firstTimePosition : mLastLocation;
-            mMainActivity.addFragment(PartnerCategoryFragment.newInstance(category.getId(), category.getName(), mLastLocation),
-                    R.id.container_fragment, PartnerCategoryFragment.class.getName(),
-                    transitionInfo);
+        Fragment prev = null;
+        mLastLocation = mLastLocation == null ? firstTimePosition : mLastLocation;
+        if (StringUtils.isBlank(category.getOriginalUrl())) {
+            prev = mFragmentManager.findFragmentByTag(PartnerCategoryFragment.class.getName());
+            if (prev == null) {
+                mMainActivity.addFragment(PartnerCategoryFragment.newInstance(category.getId(), category.getName(), mLastLocation),
+                        R.id.container_fragment, PartnerCategoryFragment.class.getName(),
+                        transitionInfo);
+            }
+        } else {
+            DialogUtils.openDialogFragment(mFragmentManager, PartnerContentWebViewFragment.newInstance(category, mLastLocation));
         }
     }
 
@@ -191,6 +208,14 @@ public class HomeFragment extends MvpFragment<HomePresenter> implements iHomeVie
                 DialogUtils.showDialog(getContext(), DialogType.WARNING, DialogUtils.getTitleDialog(2), Utils.getLanguageByResId(R.string.Message_You_Need_Login));
             }
 
+        }else if (view.getId() == R.id.btnShare) {
+            String urlShare = lstPartner.get(position).getShareUrl();
+            if (StringUtils.isNotBlank(urlShare)) {
+                urlShare = Constant.URL_HOST_IMAGE + urlShare;
+                share = new Share(lstPartner.get(position).getName(), urlShare, StringUtils.EMPTY);
+//                DialogUtils.showPopupShare(getContext(), shareDialog, zaloUtils, mMainActivity, urlShare, lstPartner.get(position).getName());
+                bottomShareDialog = DialogUtils.showSheetShareDialog(mMainActivity, share);
+            }
         } else {
             MainActivity activity = (MainActivity) getActivity();
             activity.currentTab = HomeTab.None;
@@ -250,6 +275,7 @@ public class HomeFragment extends MvpFragment<HomePresenter> implements iHomeVie
 
     @Override
     public void onFetchFailure(AppError error) {
+        prgLoading.setVisibility(View.GONE);
         if (CollectionUtils.isEmpty(lstBanners) && CollectionUtils.isEmpty(lstCategories) && CollectionUtils.isEmpty(lstPartner)) {
             DialogUtils.showDialog(getContext(), DialogType.WRONG, DialogUtils.getTitleDialog(3), error.getMessage());
         }
@@ -334,6 +360,21 @@ public class HomeFragment extends MvpFragment<HomePresenter> implements iHomeVie
                     }
                 });
             }
+        }else if (obj instanceof Boolean) {
+            boolean isLoginZaloSuccess = (Boolean) obj;
+            Fragment fragment = mMainActivity.getActiveFragment();
+            if (fragment != this) {
+                if(fragment instanceof PartnerCategoryFragment && isLoginZaloSuccess){
+                    PartnerCategoryFragment partnerCategoryFragment = (PartnerCategoryFragment) fragment;
+                    Share share = partnerCategoryFragment.getShare();
+                    zaloUtils.shareFeed(getContext(), share.getUrlShare(), share.getTitle());
+                }
+            } else {
+                if (isLoginZaloSuccess && share != null) {
+                    zaloUtils.shareFeed(getContext(), share.getUrlShare(), share.getTitle());
+                }
+            }
+
         }
     }
 
@@ -384,5 +425,20 @@ public class HomeFragment extends MvpFragment<HomePresenter> implements iHomeVie
             mMainActivity.setShowMenuItem(Constant.SHOW_QR_CODE);
             nestedScrollView.scrollTo(0, 0);
         }
+    }
+
+    @Override
+    public void onShareSuccess() {
+        if(bottomShareDialog != null){
+            bottomShareDialog.dismiss();
+            String title = Utils.getString(R.string.share_title_success);
+            title = String.format(title, "Zalo");
+            DialogUtils.showDialog(getContext(), DialogType.SUCCESS, title, Utils.getString(R.string.share_content));
+        }
+    }
+
+    @Override
+    public void onShareFailure(String message) {
+
     }
 }

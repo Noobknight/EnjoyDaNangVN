@@ -71,8 +71,6 @@ public class DetailHomeDialogFragment extends DialogFragment implements TabLayou
 
     public int countGetResultFailed = 0;
 
-    private boolean isOpenFromNearby;
-
     public static DetailHomeDialogFragment newInstance(Partner partner, boolean isOpenFromNearby) {
         DetailHomeDialogFragment fragment = new DetailHomeDialogFragment();
         Bundle bundle = new Bundle();
@@ -154,7 +152,7 @@ public class DetailHomeDialogFragment extends DialogFragment implements TabLayou
         Bundle bundle = getArguments();
         if (bundle != null) {
             partner = (Partner) bundle.getParcelable(TAG);
-            isOpenFromNearby = bundle.getBoolean(KEY_OPEN_FROM_NEARBY);
+            boolean isOpenFromNearby = bundle.getBoolean(KEY_OPEN_FROM_NEARBY);
             DetailPagerAdapter adapter = new DetailPagerAdapter(getChildFragmentManager(), mTabLayout.getTabCount(), partner, isOpenFromNearby);
             mViewPager.setAdapter(adapter);
             int limit = (adapter.getCount() > 1 ? adapter.getCount() - 1 : 1);

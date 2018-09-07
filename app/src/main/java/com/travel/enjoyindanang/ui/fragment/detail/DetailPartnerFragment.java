@@ -9,6 +9,7 @@ import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.webkit.SslErrorHandler;
 import android.webkit.WebResourceRequest;
@@ -36,12 +37,16 @@ import com.travel.enjoyindanang.constant.Constant;
 import com.travel.enjoyindanang.model.DetailPartner;
 import com.travel.enjoyindanang.model.Partner;
 import com.travel.enjoyindanang.model.PartnerAlbum;
+import com.travel.enjoyindanang.model.Share;
 import com.travel.enjoyindanang.model.UserInfo;
 import com.travel.enjoyindanang.ui.fragment.detail.dialog.DetailHomeDialogFragment;
+import com.travel.enjoyindanang.ui.fragment.share.ShareDialogFragment;
 import com.travel.enjoyindanang.utils.DialogUtils;
 import com.travel.enjoyindanang.utils.ImageUtils;
 import com.travel.enjoyindanang.utils.Utils;
+import com.travel.enjoyindanang.utils.ZaloUtils;
 import com.travel.enjoyindanang.utils.event.OnItemClickListener;
+import com.travel.enjoyindanang.utils.event.OnShareZaloListener;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 import com.travel.enjoyindanang.utils.helper.LocationHelper;
 
@@ -53,6 +58,7 @@ import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 /**
  * Author: Tavv
@@ -62,7 +68,7 @@ import butterknife.ButterKnife;
  */
 
 public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> implements iDetailPartnerView,
-        OnItemClickListener {
+        OnItemClickListener, OnShareZaloListener {
     private static final String TAG = DetailPartnerFragment.class.getSimpleName();
     private static final String KEY_OPEN_FROM_NEARBY = "open_from_nearby";
 
@@ -122,6 +128,12 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
 
     private boolean isHideListPartnerAround;
 
+    private ZaloUtils zaloUtils;
+
+    private Share share;
+
+    private ShareDialogFragment bottomShareDialog;
+
     public static DetailPartnerFragment newInstance(Partner partner, boolean isOpenFromNearby) {
         DetailPartnerFragment fragment = new DetailPartnerFragment();
         Bundle bundle = new Bundle();
@@ -139,6 +151,8 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
     @Override
     protected void init(View view) {
         mBaseActivity.setTitle(Utils.getLanguageByResId(R.string.Tab_Detail));
+        zaloUtils = new ZaloUtils();
+        zaloUtils.setLoginZaLoListener(this);
         if (mMainActivity != null) {
             if (mMainActivity.getLocationService() != null) {
                 mLastLocation = mMainActivity.getLocationService().getLastLocation();
@@ -216,7 +230,6 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
             fragment.countGetResultFailed += 1;
             if (fragment.countGetResultFailed == 1) {
             	Log.e(TAG, appError.getMessage());
-                // DialogUtils.showDialog(getContext(), DialogType.WRONG, DialogUtils.getTitleDialog(3), appError.getMessage());
             }
         }
     }
@@ -245,6 +258,21 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
             DetailHomeDialogFragment dialog = DetailHomeDialogFragment.newInstance(lstPartnerAround.get(position), true);
             DialogUtils.reOpenDialogFragment(mFragmentManager, dialog);
         }
+    }
+
+    @Override
+    public void onShareSuccess() {
+        if (bottomShareDialog != null) {
+            bottomShareDialog.dismiss();
+            String title = Utils.getString(R.string.share_title_success);
+            title = String.format(title, "Zalo");
+            DialogUtils.showDialog(getContext(), DialogType.SUCCESS, title, Utils.getString(R.string.share_content));
+        }
+    }
+
+    @Override
+    public void onShareFailure(String message) {
+
     }
 
     private class WebClient extends WebViewClient {
@@ -479,5 +507,17 @@ public class DetailPartnerFragment extends MvpFragment<DetailPartnerPresenter> i
 
     private boolean checkGeoPartnerEmpty(DetailPartner partner) {
         return partner != null && (StringUtils.isEmpty(partner.getGeoLat()) || StringUtils.isEmpty(partner.getGeoLng()));
+    }
+
+    @OnClick(R.id.btnShare)
+    public void onButtonClick(View view) {
+        if (partner != null) {
+            String urlShare = Constant.URL_HOST_IMAGE + partner.getShareUrl();
+            if (StringUtils.isNotBlank(urlShare)) {
+                share = new Share(partner.getName(), urlShare, "");
+                bottomShareDialog = DialogUtils.showSheetShareDialog(mMainActivity, share);
+
+            }
+        }
     }
 }

@@ -42,6 +42,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.CallbackManager;
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.google.android.gms.common.ConnectionResult;
 
@@ -99,6 +100,7 @@ import com.travel.enjoyindanang.utils.event.OnFindLastLocationCallback;
 import com.travel.enjoyindanang.utils.event.OnUpdateProfileSuccess;
 import com.travel.enjoyindanang.utils.helper.LanguageHelper;
 import com.travel.enjoyindanang.utils.helper.LocationHelper;
+import com.zing.zalo.zalosdk.oauth.ZaloSDK;
 
 import static com.travel.enjoyindanang.utils.Utils.getContext;
 
@@ -192,6 +194,8 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
 
     private OnBackFragmentListener onBackFragmentListener;
 
+    public CallbackManager fbCallbackManager;
+
     @Override
     public void setContentView() {
         setContentView(R.layout.activity_main);
@@ -200,6 +204,7 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
     @Override
     public void init() {
         setHeightToolbar();
+        fbCallbackManager = CallbackManager.Factory.create();
         if (mLocationReceiver == null) {
             mLocationReceiver = new LocationReceiver();
         }
@@ -1041,6 +1046,20 @@ public class MainActivity extends MvpActivity<MainPresenter> implements MainView
                         break;
                 }
                 break;
+        }
+        if (data != null) {
+            Bundle bundle = data.getExtras();
+            fbCallbackManager.onActivityResult(requestCode, resultCode, data);
+            if (bundle != null) {
+                Integer errorCode = ((Integer) bundle.get("error"));
+                if (errorCode != null) {
+                    boolean isLoginSuccess = errorCode == 0;
+                    if (isLoginSuccess) {
+                        ZaloSDK.Instance.onActivityResult(this, requestCode, resultCode, data);
+                    }
+                    EventBus.getDefault().post(isLoginSuccess);
+                }
+            }
         }
     }
 

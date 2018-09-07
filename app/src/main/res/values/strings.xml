@@ -235,6 +235,15 @@
     <string name="sd_card">SD Card</string>
 
     <string name="home">Home</string>
+
+    <string name="kakaotalk_title">Kakao</string>
+    <string name="zalo_title">Zalo</string>
+    <string name="fb_title">Facebook</string>
+    <string name="share_action">Share</string>
+
+    <string name="share_content">Share successfully</string>
+    <string name="share_title_success">Share %s</string>4
+    <string name="zalo_login">Zalo Login</string>
 </resources>
 
 

@@ -16,6 +16,8 @@ public class Constant {
     public static String URL_HOST_IMAGE = "https://enjoyindanang.vn";
     public static String URL_FORGOT_PWD = "https://enjoyindanang.vn/Account/ForgotPassword";
 
+    public static String URL_PARTNER_WEB = URL_HOST_IMAGE + "%s?uid=%d&location=%s,%s";
+
     public static final String URL_DIRECTION_MAPS = "http://maps.google.com/maps?f=d&hl=en&saddr=%1$,.2f,%1$,.2f&daddr=%1$,.2f,%1$,.2f";
 
     public static String EXCHANGE_RATE_FORMAT = "1$ = %s VND";

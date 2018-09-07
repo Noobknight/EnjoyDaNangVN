@@ -4,4 +4,8 @@
     <string name="facebook_app_id">190485684845727</string>
     <string name="fb_login_protocol_scheme">fb190485684845727</string>
     <string name="google_map_key">AIzaSyAX0STBVVIx-99Ei6fzcnr5aMhOyQLzuGw</string>
+    <string name="zalo_app_id">2015115298669356820</string>
+    <string name="zalo_app_key">cWsDW1QiOwE66SSGITrV</string>
+    <string name="kakao_scheme">kakao7baf13f9a492f478b77cfbfff572cc12</string>
+    <string name="kakaostory_host">kakaostory</string>
 </resources>
